@@ -39,10 +39,10 @@ function webGlAvailable() {
 async function open(node) {
 	const { showError } = await import('@nextcloud/dialogs')
 	if (!webGlAvailable()) {
-		showError(t(APP, 'Your browser does not support WebGL 2, which the 360° viewer needs.'))
+		showError(t(APP, 'The 360° viewer needs WebGL 2. Use a current browser or enable WebGL in its settings.'))
 		return
 	}
-	const { openTour } = await import(/* webpackChunkName: "viewer" */ './viewer.js')
+	const { openTour } = await import(/* webpackChunkName: "viewer" */ './app.js')
 	await openTour(node)
 }
 
@@ -70,13 +70,13 @@ addNewFileMenuEntry({
 	handler: async (folder, content) => {
 		const { FilePickerType, getFilePickerBuilder, showError } = await import('@nextcloud/dialogs')
 		if (content.some(node => node.basename === TOUR_FILENAME)) {
-			showError(t(APP, 'This folder already has a {file}.', { file: TOUR_FILENAME }, undefined, { escape: false }))
+			showError(t(APP, 'This folder already has a walkthrough ({file}).', { file: TOUR_FILENAME }, undefined, { escape: false }))
 			return
 		}
 
 		let planPath
 		try {
-			planPath = await getFilePickerBuilder(t(APP, 'Choose the floor plan for this folder'))
+			planPath = await getFilePickerBuilder(t(APP, 'Choose the floor plan for this walkthrough'))
 				.setMimeTypeFilter(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'])
 				.setType(FilePickerType.Choose)
 				.startAt(folder.dirname)
@@ -99,7 +99,7 @@ addNewFileMenuEntry({
 			const tour = emptyTour(folder.basename, relativePath(folder.path, planPath))
 			await writeText(node.encodedSource, serializeTour(tour), null)
 		} catch (e) {
-			showError(t(APP, 'The walkthrough cannot be created: {error}', { error: e.message }, undefined, { escape: false }))
+			showError(t(APP, 'The walkthrough could not be created: {error}', { error: e.message }, undefined, { escape: false }))
 			return
 		}
 

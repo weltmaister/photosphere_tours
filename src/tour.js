@@ -215,11 +215,17 @@ export function rawYaw(capture, viewYaw) {
  * @return {number} yaw in degrees
  */
 export function alignYaw(capture, viewYaw, spot, target, planSize) {
-	const dx = (target.x - spot.x) * planSize.w
-	const dy = (target.y - spot.y) * planSize.h
-	// clockwise from plan-up; image y grows downwards
-	const bearing = toDeg(Math.atan2(dx, -dy))
-	return normDeg(rawYaw(capture, viewYaw) - bearing)
+	return normDeg(rawYaw(capture, viewYaw) - bearing(spot, target, planSize))
+}
+
+/**
+ * Direction from one plan point to another in degrees, clockwise from
+ * plan-up (image y grows downwards).
+ */
+export function bearing(from, to, planSize) {
+	const dx = (to.x - from.x) * planSize.w
+	const dy = (to.y - from.y) * planSize.h
+	return normDeg(toDeg(Math.atan2(dx, -dy)))
 }
 
 /**

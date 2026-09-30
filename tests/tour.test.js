@@ -4,6 +4,7 @@ import {
 	addCapture,
 	addSpot,
 	alignYaw,
+	bearing,
 	captureAt,
 	captureDays,
 	capturesNewestFirst,
@@ -182,6 +183,15 @@ describe('orientation', () => {
 		const yaw = alignYaw({ yaw: 0 }, deg(30), spot, right, planSize)
 		const viewYaw = psvViewYaw(deg(30), sphereCorrection({ yaw }))
 		expect(normRad(viewYaw)).toBeCloseTo(deg(90))
+	})
+
+	it('computes the bearing between two plan points clockwise from plan-up', () => {
+		const size = { w: 1000, h: 1000 }
+		const c = { x: 0.5, y: 0.5 }
+		expect(bearing(c, { x: 0.5, y: 0.2 }, size)).toBeCloseTo(0)
+		expect(bearing(c, { x: 0.8, y: 0.5 }, size)).toBeCloseTo(90)
+		expect(bearing(c, { x: 0.5, y: 0.8 }, size)).toBeCloseTo(180)
+		expect(bearing(c, { x: 0.2, y: 0.5 }, size)).toBeCloseTo(270)
 	})
 
 	it('respects the plan aspect ratio when computing the bearing', () => {
