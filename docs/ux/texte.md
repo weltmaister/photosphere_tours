@@ -58,10 +58,25 @@ Regeln:
 | Standardwahl | Neueste | = | Latest |
 | Tooltip Datum | Jeden Standort so zeigen, wie er am {date} war | = | Show every spot as it was on {date} |
 | Tooltip Neueste | Jeden Standort mit seiner neuesten Aufnahme zeigen | = | Show every spot with its latest capture |
-| Auswahl Aufnahme | Aufnahme | = | Capture |
-| Eintrag Aufnahme | {date} | = | {date} |
-| Eintrag neueste | {date} (neueste) | = | {date} (latest) |
 | Hinweis abweichend | Am {day} gibt es hier keine Aufnahme – gezeigt wird die vom {date}. | = | No capture here on {day} – showing the one from {date}. |
+
+### Seitenleiste „Grundriss und Standorte“ (neu)
+
+Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie steckt in der Standortliste: Einträge mit mehreren Aufnahmen tragen eine Markierung (Uhr + Anzahl) und lassen sich aufklappen.
+
+| Stelle | de | de_DE | en |
+|---|---|---|---|
+| Tooltip Umschalter | Grundriss und Standorte ein- oder ausblenden | = | Show or hide floor plan and spots |
+| Abschnitt 1 | Grundriss | = | Floor plan |
+| Abschnitt 2 | Standorte ({count}) | = | Spots ({count}) |
+| Listeneintrag Datum | {date} | = | {date} |
+| Listeneintrag grau | erst ab {date} | = | from {date} on |
+| Markierung (Tooltip) | {count} Aufnahmen von {name} | = | {count} captures of {name} |
+| Eintrag neueste | {date} (neueste) | = | {date} (latest) |
+| Rand ziehen | Ziehen, um die Breite zu ändern | = | Drag to change the width |
+| Handy: Blatt öffnen | Grundriss und Standorte | = | Floor plan and spots |
+| Handy: Blatt schließen | Einklappen | = | Collapse |
+| Handy: Tab „Neue Bilder“ | Neu ({count}) | = | New ({count}) |
 
 ### Grundriss im Viewer
 
