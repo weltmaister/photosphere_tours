@@ -9,7 +9,7 @@
  * file. Image files are never touched – removing only drops them from the
  * tour.
  */
-import { showConfirmation, showError, showSuccess } from '@nextcloud/dialogs'
+import { showConfirmation } from '@nextcloud/dialogs'
 import { generateUrl } from '@nextcloud/router'
 import { t } from '@nextcloud/l10n'
 
@@ -187,6 +187,11 @@ export class TourEditor {
 		header.append(el('h2', '', t(APP, 'Edit walkthrough')))
 		this.saveButton = button(t(APP, 'Save'), () => this.save(), 'pt-button--primary')
 		header.append(this.saveButton, button(t(APP, 'Done'), () => this.tv.toggleEditor()))
+		// Nextcloud's toasts are hidden behind the full-screen overlay
+		this.status = el('p', 'pt-editor__status')
+		this.status.setAttribute('role', 'status')
+		this.status.hidden = true
+		header.append(this.status)
 
 		this.plan = new PlanView({
 			imageUrl: tv.fileUrl(this.tour.plan),
@@ -295,7 +300,7 @@ export class TourEditor {
 			}
 			this.images = images
 		} catch (e) {
-			showError(t(APP, 'The images of the folder cannot be listed: {error}', { error: e.message }, undefined, { escape: false }))
+			this.setStatus(t(APP, 'The images of the folder cannot be listed: {error}', { error: e.message }, undefined, { escape: false }), 'error')
 		}
 		this.renderInbox()
 	}
@@ -452,15 +457,25 @@ export class TourEditor {
 			this.tv.etag = await writeText(url, serializeTour(this.tour), this.tv.etag ?? undefined)
 			this.dirty = false
 			this.updateSaveButton()
-			showSuccess(t(APP, 'Walkthrough saved'))
+			this.setStatus(t(APP, 'Walkthrough saved'), 'success')
 			return true
 		} catch (e) {
 			if (e instanceof ConflictError) {
-				showError(t(APP, '{file} was changed by someone else in the meantime. Close the walkthrough and open it again to see the current version – your changes will be lost.', { file: TOUR_FILENAME }, undefined, { escape: false }))
+				this.setStatus(t(APP, '{file} was changed by someone else in the meantime. Close the walkthrough and open it again to see the current version – your changes will be lost.', { file: TOUR_FILENAME }, undefined, { escape: false }), 'error')
 			} else {
-				showError(t(APP, 'The walkthrough cannot be saved: {error}', { error: e.message }, undefined, { escape: false }))
+				this.setStatus(t(APP, 'The walkthrough cannot be saved: {error}', { error: e.message }, undefined, { escape: false }), 'error')
 			}
 			return false
+		}
+	}
+
+	setStatus(text, type) {
+		clearTimeout(this.statusTimer)
+		this.status.textContent = text
+		this.status.dataset.type = type
+		this.status.hidden = false
+		if (type === 'success') {
+			this.statusTimer = setTimeout(() => { this.status.hidden = true }, 4000)
 		}
 	}
 

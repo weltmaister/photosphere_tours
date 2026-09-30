@@ -9,6 +9,7 @@ import {
 	capturesNewestFirst,
 	dateFromFilename,
 	emptyTour,
+	mapZoom,
 	parseTour,
 	rawYaw,
 	relativePath,
@@ -149,15 +150,25 @@ describe('timeline', () => {
 })
 
 describe('orientation', () => {
+	// Photo Sphere Viewer rotates the sphere about its vertical axis by `pan`:
+	// the raw panorama direction r then shows at view yaw r - pan
+	// (Renderer.setSphereCorrection, DataHelper.sphericalCoordsToVector3).
+	const psvViewYaw = (raw, correction) => raw - correction.pan
+	const normRad = (r) => ((r % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)
+
 	it('turns the panorama so that plan-up is at view yaw 0', () => {
-		expect(sphereCorrection({ yaw: 90 }).pan).toBeCloseTo(-deg(90))
+		expect(normRad(psvViewYaw(deg(90), sphereCorrection({ yaw: 90 })))).toBeCloseTo(0)
+		expect(normRad(psvViewYaw(deg(250), sphereCorrection({ yaw: 250 })))).toBeCloseTo(0)
 		expect(sphereCorrection({ yaw: 0 }).pan).toBeCloseTo(0)
 	})
 
 	it('maps a view yaw back to the raw panorama yaw', () => {
-		// with correction pan = -90°, view yaw 0 shows raw yaw 90
+		// view yaw 0 shows raw yaw 90
 		expect(rawYaw({ yaw: 90 }, 0)).toBeCloseTo(90)
 		expect(rawYaw({ yaw: 90 }, deg(300))).toBeCloseTo(30)
+		// and it is the inverse of what PSV does
+		const view = psvViewYaw(deg(123), sphereCorrection({ yaw: 40 }))
+		expect(rawYaw({ yaw: 40 }, view)).toBeCloseTo(123)
 	})
 
 	it('aligns from a plan point the user is looking at', () => {
@@ -169,8 +180,8 @@ describe('orientation', () => {
 		expect(alignYaw({ yaw: 0 }, deg(30), spot, right, planSize)).toBeCloseTo(300)
 		// afterwards, raw 30° must display at view yaw 90° (the bearing)
 		const yaw = alignYaw({ yaw: 0 }, deg(30), spot, right, planSize)
-		const viewYaw = deg(30) + sphereCorrection({ yaw }).pan
-		expect(((viewYaw * 180 / Math.PI) % 360 + 360) % 360).toBeCloseTo(90)
+		const viewYaw = psvViewYaw(deg(30), sphereCorrection({ yaw }))
+		expect(normRad(viewYaw)).toBeCloseTo(deg(90))
 	})
 
 	it('respects the plan aspect ratio when computing the bearing', () => {
@@ -178,6 +189,22 @@ describe('orientation', () => {
 		const yaw = alignYaw({ yaw: 0 }, 0, { x: 0.5, y: 0.5 }, { x: 0.6, y: 0.4 }, { w: 2000, h: 1000 })
 		const bearing = Math.atan2(200, 100) * 180 / Math.PI
 		expect(yaw).toBeCloseTo((360 - bearing) % 360)
+	})
+})
+
+describe('mapZoom', () => {
+	it('lets the whole plan fit and starts on about a third of it', () => {
+		// 8000 px plan in a 280 px map: the whole plan is 3.5 %
+		const zoom = mapZoom({ w: 5656, h: 7999 }, 280)
+		expect(zoom.min).toBeCloseTo(280 / 7999 * 100 * 0.8)
+		expect(zoom.initial).toBeCloseTo(280 / 7999 * 100 * 3)
+		expect(zoom.max).toBe(200)
+	})
+
+	it('never starts beyond 1:1 for small plans', () => {
+		const zoom = mapZoom({ w: 400, h: 300 }, 280)
+		expect(zoom.initial).toBe(100)
+		expect(zoom.min).toBeLessThan(zoom.initial)
 	})
 })
 

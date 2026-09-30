@@ -190,9 +190,12 @@ export function captureAt(spot, day) {
 	return sorted.find(c => c.date.slice(0, 10) <= day) ?? null
 }
 
-/** Photo Sphere Viewer sphere correction that puts plan-up at view yaw 0. */
+/**
+ * Photo Sphere Viewer sphere correction that puts plan-up at view yaw 0.
+ * PSV shows the raw direction r at view yaw r - pan, so pan = yaw.
+ */
 export function sphereCorrection(capture) {
-	return { pan: -toRad(capture.yaw), tilt: 0, roll: 0 }
+	return { pan: toRad(capture.yaw), tilt: 0, roll: 0 }
 }
 
 /** Raw panorama yaw (degrees) shown at a given view yaw (radians). */
@@ -217,6 +220,21 @@ export function alignYaw(capture, viewYaw, spot, target, planSize) {
 	// clockwise from plan-up; image y grows downwards
 	const bearing = toDeg(Math.atan2(dx, -dy))
 	return normDeg(rawYaw(capture, viewYaw) - bearing)
+}
+
+/**
+ * Zoom levels (percent) for Photo Sphere Viewer's MapPlugin, where 100 %
+ * means one screen pixel per plan pixel. Floor plans are often 8000 px tall,
+ * so fixed levels do not work: start on about a third of the plan and allow
+ * zooming out until the whole plan fits.
+ *
+ * @param {{w:number,h:number}} planSize plan size in pixels
+ * @param {number} mapSize size of the map in screen pixels
+ * @return {{min:number, initial:number, max:number}}
+ */
+export function mapZoom(planSize, mapSize) {
+	const fit = mapSize / Math.max(planSize.w, planSize.h) * 100
+	return { min: fit * 0.8, initial: Math.min(100, fit * 3), max: 200 }
 }
 
 /**

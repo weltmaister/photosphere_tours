@@ -12,7 +12,8 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   share pages (`src/dav.js`). Do not add controllers or DB tables without a reason.
 - **The file format is the contract** (`src/tour.js` header, README). Paths are relative
   to the JSON file; `x`/`y` normalised 0–1; `yaw` is the raw panorama yaw (deg) that
-  looks at plan-up, applied as `sphereCorrection.pan = -yaw`, so view yaw 0 = plan-up.
+  looks at plan-up, applied as `sphereCorrection.pan = +yaw` (PSV shows raw r at view r − pan),
+  so view yaw 0 = plan-up.
 - **Keep it simple** (explicit wish of the owner): one folder = one walkthrough, no floor
   switching, no arrows inside the panorama, no compare view — until asked for.
 - `js/` is build output and gitignored; `make appstore` builds the tarball.

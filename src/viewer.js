@@ -25,12 +25,14 @@ import {
 	captureAt,
 	captureDays,
 	capturesNewestFirst,
+	mapZoom,
 	parseTour,
 	resolvePath,
 	sphereCorrection,
 } from './tour.js'
 
 const APP = 'photosphere_tours'
+const MAP_SIZE = 280
 
 export function formatDate(date, withTime = true) {
 	const options = withTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' }
@@ -131,6 +133,7 @@ export class TourViewer {
 			onClick: () => this.close(),
 		})
 
+		const zoom = mapZoom(this.planSize, MAP_SIZE)
 		this.viewer = new Viewer({
 			container: this.stage,
 			panorama: this.capture ? this.fileUrl(this.capture.file) : undefined,
@@ -160,11 +163,11 @@ export class TourViewer {
 					imageUrl: this.fileUrl(this.tour.plan),
 					center: this.spotCenter(),
 					hotspots: this.hotspots(),
-					size: '280px',
+					size: `${MAP_SIZE}px`,
 					position: 'top left',
-					defaultZoom: 60,
-					minZoom: 10,
-					maxZoom: 400,
+					defaultZoom: zoom.initial,
+					minZoom: zoom.min,
+					maxZoom: zoom.max,
 					minimizeOnHotspotClick: false,
 					coneColor: '#0082c9',
 					spotStyle: { size: 16, color: '#ffffff', borderSize: 2, borderColor: '#0082c9', hoverSize: 20 },

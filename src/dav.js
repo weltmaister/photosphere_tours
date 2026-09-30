@@ -38,14 +38,34 @@ export function urlFor(rootUrl, path) {
 	return rootUrl + encodePath(path)
 }
 
+/**
+ * The file's ETag as WebDAV knows it. The ETag header of a GET cannot be used
+ * for If-Match: servers that compress responses append a suffix to it
+ * (e.g. `"…-zstd"`), and the conditional PUT then always fails with 412.
+ */
+async function getEtag(url) {
+	const response = await axios.request({
+		method: 'PROPFIND',
+		url,
+		data: '<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:prop><d:getetag/></d:prop></d:propfind>',
+		headers: { Depth: '0', 'Content-Type': 'application/xml; charset=utf-8' },
+		responseType: 'text',
+	})
+	const xml = new DOMParser().parseFromString(response.data, 'application/xml')
+	return xml.getElementsByTagNameNS('DAV:', 'getetag')[0]?.textContent || null
+}
+
 /** @return {Promise<{ text: string, etag: string|null }>} */
 export async function readText(url) {
+	// ETag first: if the file changes in between, the older ETag makes the
+	// next save fail instead of silently overwriting the newer content
+	const etag = await getEtag(url)
 	const response = await axios.get(url, {
 		responseType: 'text',
 		transformResponse: [(data) => data],
 		headers: { 'Cache-Control': 'no-cache' },
 	})
-	return { text: response.data, etag: response.headers.etag ?? null }
+	return { text: response.data, etag }
 }
 
 /**
@@ -63,7 +83,7 @@ export async function writeText(url, text, etag) {
 	}
 	try {
 		const response = await axios.put(url, text, { headers })
-		return response.headers.etag ?? response.headers['oc-etag'] ?? null
+		return response.headers['oc-etag'] ?? response.headers.etag ?? await getEtag(url)
 	} catch (e) {
 		if (e.response?.status === 412) {
 			throw new ConflictError()
