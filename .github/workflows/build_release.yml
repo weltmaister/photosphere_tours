@@ -5,7 +5,7 @@ on:
       types: [published]
 
 env:
-  APP_NAME: files_photospheres
+  APP_NAME: photosphere_tours
 
 jobs:
   build_and_publish:

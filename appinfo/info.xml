@@ -1,32 +1,31 @@
 <?xml version="1.0"?>
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-    <id>files_photospheres</id>
-    <name>Photo Sphere Viewer</name>
-    <summary>Enables viewing of google photosphere images</summary>
+    <id>photosphere_tours</id>
+    <name>Photosphere Tours</name>
+    <summary>360° walkthroughs on a floor plan, with a timeline</summary>
     <description><![CDATA[
-        Enables viewing of google photosphere images by
-        integrating the photo-sphere-viewer.js component
-        into your nextcloud instance.
+Turns a folder of 360° panoramas into a walkthrough: click the file `360-Rundgang.json`
+and the panorama opens together with the floor plan and all capture points on it.
+A timeline shows earlier captures of the same spot.
+
+Everything is stored in that one JSON file next to the images – no database, it syncs
+with the desktop client and works through public share links (read-only).
+
+Based on [Photo Sphere Viewer for Nextcloud](https://github.com/nextcloud/files_photospheres)
+by Robin Windey. Works alongside that app: single images keep opening in its viewer.
     ]]></description>
-    <version>1.36.0</version>
+    <version>0.1.0</version>
     <licence>agpl</licence>
-    <author mail="ro.windey@gmail.com" >Robin Windey</author>
-    <namespace>Files_PhotoSpheres</namespace>
+    <author>weltmaister</author>
+    <author>Robin Windey (files_photospheres)</author>
+    <namespace>PhotosphereTours</namespace>
     <category>multimedia</category>
-    <bugs>https://github.com/nextcloud/files_photospheres/issues</bugs>
-    <repository>https://github.com/nextcloud/files_photospheres.git</repository>
-    <screenshot>https://user-images.githubusercontent.com/19730957/53694835-62a68a80-3db4-11e9-8c60-4ebdc02566d6.jpg</screenshot>
+    <category>files</category>
+    <bugs>https://github.com/weltmaister/photosphere_tours/issues</bugs>
+    <repository>https://github.com/weltmaister/photosphere_tours.git</repository>
     <dependencies>
-        <nextcloud min-version="36" max-version="36"/>
+        <nextcloud min-version="33" max-version="33"/>
         <php min-version="8.2" max-version="8.5"/>
     </dependencies>
-    <types>
-		  <dav/>
-	  </types>
-    <sabre>
-      <plugins>
-        <plugin>OCA\Files_PhotoSpheres\Sabre\PhotosphereViewerPlugin</plugin>
-      </plugins>
-	  </sabre>
 </info>

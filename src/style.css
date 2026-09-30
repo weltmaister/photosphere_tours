@@ -1,0 +1,313 @@
+/*
+ * Photosphere Tours
+ *
+ * This file is licensed under the Affero General Public License version 3 or
+ * later. See the COPYING file.
+ */
+
+.pt-overlay {
+	position: fixed;
+	inset: 0;
+	/* above the Nextcloud header, below its modals and toasts */
+	z-index: 2500;
+	display: flex;
+	background: #111;
+	color: #fff;
+}
+
+.pt-stage {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/* timeline above the navbar */
+.pt-timeline {
+	position: absolute;
+	left: 50%;
+	bottom: 56px;
+	transform: translateX(-50%);
+	z-index: 100;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 6px;
+	max-width: calc(100% - 32px);
+	padding: 6px 10px;
+	border-radius: 20px;
+	background: rgba(0, 0, 0, 0.55);
+	font-size: 13px;
+}
+
+.pt-timeline[hidden] {
+	display: none;
+}
+
+.pt-timeline__label {
+	opacity: 0.75;
+	margin-inline-end: 4px;
+}
+
+.pt-chip {
+	min-height: 28px;
+	padding: 2px 12px;
+	border: 1px solid rgba(255, 255, 255, 0.4);
+	border-radius: 14px;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.pt-chip:hover,
+.pt-chip:focus-visible {
+	background: rgba(255, 255, 255, 0.15);
+}
+
+.pt-chip--active {
+	border-color: #0082c9;
+	background: #0082c9;
+}
+
+/* editor: plan on the left, panorama on the right */
+.pt-overlay--editing .pt-stage {
+	flex-basis: 50%;
+}
+
+.pt-editor {
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	flex: 0 0 50%;
+	min-width: 0;
+	max-height: 100%;
+	background: var(--color-main-background, #fff);
+	color: var(--color-main-text, #222);
+	border-inline-end: 1px solid var(--color-border, #ccc);
+}
+
+.pt-editor__header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--color-border, #ccc);
+}
+
+.pt-editor__header h2 {
+	flex: 1;
+	margin: 0;
+	font-size: 18px;
+}
+
+.pt-editor__side {
+	max-height: 40vh;
+	overflow: auto;
+	padding: 8px 12px 12px;
+	border-top: 1px solid var(--color-border, #ccc);
+}
+
+.pt-editor__hint {
+	margin: 0 0 8px;
+	color: var(--color-text-maxcontrast, #666);
+}
+
+.pt-editor--aligning .pt-editor__hint {
+	color: var(--color-primary-element, #0082c9);
+	font-weight: bold;
+}
+
+.pt-editor__spot {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.pt-editor__file,
+.pt-editor__actions {
+	grid-column: 1 / -1;
+	margin: 0;
+}
+
+.pt-editor__file {
+	color: var(--color-text-maxcontrast, #666);
+	font-size: 12px;
+	word-break: break-all;
+}
+
+.pt-editor__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.pt-editor__inbox h3 {
+	margin: 0 0 6px;
+	font-size: 15px;
+}
+
+.pt-editor__empty {
+	color: var(--color-text-maxcontrast, #666);
+}
+
+.pt-field {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: 12px;
+	color: var(--color-text-maxcontrast, #666);
+}
+
+.pt-input {
+	min-height: 34px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.pt-button {
+	min-height: 34px;
+	padding: 0 14px;
+	border: 1px solid var(--color-border-dark, #999);
+	border-radius: var(--border-radius-element, 8px);
+	background: var(--color-main-background, #fff);
+	color: var(--color-main-text, #222);
+	cursor: pointer;
+}
+
+.pt-button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.pt-button--primary {
+	border-color: var(--color-primary-element, #0082c9);
+	background: var(--color-primary-element, #0082c9);
+	color: var(--color-primary-element-text, #fff);
+}
+
+.pt-button--danger {
+	color: var(--color-error-text, #c9302c);
+}
+
+.pt-inbox {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pt-inbox__item {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 4px;
+	border: 2px solid transparent;
+	border-radius: var(--border-radius-element, 8px);
+	cursor: pointer;
+}
+
+.pt-inbox__item:hover,
+.pt-inbox__item:focus-visible {
+	background: var(--color-background-hover, #f0f0f0);
+}
+
+.pt-inbox__item--selected {
+	border-color: var(--color-primary-element, #0082c9);
+}
+
+.pt-inbox__thumb {
+	width: 100%;
+	aspect-ratio: 2 / 1;
+	object-fit: cover;
+	border-radius: 4px;
+	background: #ddd;
+}
+
+.pt-inbox__name {
+	font-size: 12px;
+	word-break: break-all;
+}
+
+/* zoomable plan */
+.pt-plan {
+	position: relative;
+	overflow: hidden;
+	min-height: 200px;
+	background: #f4f4f4;
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+}
+
+.pt-editor--aligning .pt-plan {
+	cursor: crosshair;
+}
+
+.pt-plan__content {
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: 0 0;
+}
+
+.pt-plan__image {
+	display: block;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.pt-plan__pins {
+	position: absolute;
+	inset: 0;
+}
+
+.pt-pin {
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	margin: -9px 0 0 -9px;
+	border: 2px solid #0082c9;
+	border-radius: 50%;
+	background: #fff;
+	box-sizing: border-box;
+	transform: scale(var(--pt-pin-scale, 1));
+	cursor: move;
+}
+
+.pt-pin--current {
+	z-index: 1;
+	background: #0082c9;
+}
+
+.pt-pin__cone {
+	position: absolute;
+	left: 50%;
+	bottom: 50%;
+	width: 0;
+	height: 0;
+	margin-left: -18px;
+	border-left: 18px solid transparent;
+	border-right: 18px solid transparent;
+	border-bottom: 40px solid rgba(0, 130, 201, 0.45);
+	transform-origin: 50% 100%;
+	pointer-events: none;
+}
+
+@media (max-width: 800px) {
+	.pt-overlay--editing {
+		flex-direction: column;
+	}
+
+	.pt-editor {
+		flex-basis: 55%;
+	}
+
+	.pt-timeline {
+		bottom: 52px;
+		font-size: 12px;
+	}
+}

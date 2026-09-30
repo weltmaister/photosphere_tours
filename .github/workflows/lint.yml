@@ -5,10 +5,10 @@ on:
   push:
     branches:
       - master
-      - stable*
+      - main
 
 env:
-  APP_NAME: files_photospheres
+  APP_NAME: photosphere_tours
 
 jobs:
   php:
@@ -29,4 +29,4 @@ jobs:
           coverage: none
 
       - name: Lint
-        run: composer run lint
+        run: make lint

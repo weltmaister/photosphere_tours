@@ -1,42 +1,39 @@
 {
-  "name": "files_photospheres",
-  "version": "1.0.0",
-  "description": "Enables viewing of google photosphere images by integrating the photo-sphere-viewer.js component into your nextcloud instance.",
-  "main": "js/fileAction.js",
+  "name": "photosphere_tours",
+  "version": "0.1.0",
+  "description": "360° walkthroughs on a floor plan with a timeline, stored as a plain JSON file next to the panoramas.",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "copy-viewer-css": "cp node_modules/@photo-sphere-viewer/core/index.css css/photo-sphere-viewer.css",
-    "prebuild": "npm run copy-viewer-css",
-    "predev": "npm run copy-viewer-css",
-    "prewatch": "npm run copy-viewer-css",
-    "build": "NODE_ENV=production ./node_modules/.bin/webpack --progress --config webpack.js",
-    "dev": "NODE_ENV=development ./node_modules/.bin/webpack --progress --config webpack.js",
-    "watch": "NODE_ENV=development ./node_modules/.bin/webpack --progress --config webpack.js --watch"
+    "build": "webpack --mode production --config webpack.config.cjs",
+    "dev": "webpack --mode development --config webpack.config.cjs",
+    "watch": "webpack --mode development --config webpack.config.cjs --watch",
+    "test": "vitest run",
+    "import-holobuilder": "node tools/holobuilder-import.mjs"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nextcloud/files_photospheres.git"
+    "url": "git+https://github.com/weltmaister/photosphere_tours.git"
   },
-  "author": "Robin Windey",
-  "license": "AGPL-3.0",
-  "bugs": {
-    "url": "https://github.com/nextcloud/files_photospheres/issues"
-  },
-  "homepage": "https://github.com/nextcloud/files_photospheres/blob/master/README.md",
+  "author": "weltmaister",
+  "license": "AGPL-3.0-or-later",
   "dependencies": {
+    "@nextcloud/axios": "^2.6.0",
     "@nextcloud/dialogs": "^7.3.0",
+    "@nextcloud/event-bus": "^3.3.3",
     "@nextcloud/files": "4.0.0",
-    "@photo-sphere-viewer/autorotate-plugin": "^5.14.1",
-    "@photo-sphere-viewer/core": "^5.14.1",
-    "@photo-sphere-viewer/gyroscope-plugin": "^5.14.1",
-    "@photo-sphere-viewer/stereo-plugin": "^5.14.1"
+    "@nextcloud/l10n": "^3.4.1",
+    "@nextcloud/router": "^3.2.0",
+    "@photo-sphere-viewer/core": "^5.15.1",
+    "@photo-sphere-viewer/map-plugin": "^5.15.1",
+    "@photo-sphere-viewer/settings-plugin": "^5.15.1"
   },
   "devDependencies": {
-    "css-loader": "^7.1.4",
-    "node-polyfill-webpack-plugin": "3.0.0",
-    "process": "^0.11.10",
+    "css-loader": "^7.1.5",
     "style-loader": "^4.0.0",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
+    "vitest": "^5.0.3",
+    "webpack": "^5.111.1",
+    "webpack-cli": "^7.2.3"
   },
   "engines": {
     "node": "^24.0.0",

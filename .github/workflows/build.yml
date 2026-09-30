@@ -1,34 +1,36 @@
-name: Build artifact
+name: Build and test
 
 on:
-  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
 
 jobs:
-  build:
+  node:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@61b9e3751b92087fd0b06925ba6dd6314e06f089 # master
-      
-      - name: Read package.json node and npm engines version
-        uses: skjnldsv/read-package-engines-version-actions@06d6baf7d8f41934ab630e97d9e6c0bc9c9ac5e4 # v3
-        id: versions
-        continue-on-error: false
-        with:
-          path: ${{ env.APP_NAME }}
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Set up node ${{ steps.versions.outputs.nodeVersion }}
+      - name: Set up node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: ${{ steps.versions.outputs.nodeVersion }}
+          node-version: 24
 
-      - name: Set up npm ${{ steps.versions.outputs.npmVersion }}
-        run: npm i -g npm@"${{ steps.versions.outputs.npmVersion }}"
-      
-      - name: Run Makefile
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Package
         run: make appstore
-      
-      - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: files_photospheres.tar.gz
-          path: build/artifacts/appstore/files_photospheres.tar.gz
+          name: photosphere_tours
+          path: build/artifacts/appstore/photosphere_tours.tar.gz

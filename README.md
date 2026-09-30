@@ -1,69 +1,80 @@
-# Nextcloud - Files_PhotoSpheres
+# Photosphere Tours
 
-![PHPUnit](https://github.com/nextcloud/files_photospheres/workflows/PHPUnit/badge.svg)
-[![codecov](https://codecov.io/gh/nextcloud/files_photospheres/branch/master/graph/badge.svg)](https://codecov.io/gh/nextcloud/files_photospheres)
-![Lint](https://github.com/nextcloud/files_photospheres/workflows/Lint/badge.svg)
-[![Generic badge](https://img.shields.io/github/v/release/nextcloud/files_photospheres)](https://github.com/nextcloud/files_photospheres/releases)
-[![Generic badge](https://img.shields.io/badge/Nextcloud-36-orange)](https://github.com/nextcloud/server)
+Nextcloud app for 360° walkthroughs: panoramas on a floor plan, with a timeline.
+A lean replacement for site documentation tools like HoloBuilder, built on
+[Photo Sphere Viewer](https://photo-sphere-viewer.js.org/).
 
+Fork of [files_photospheres](https://github.com/nextcloud/files_photospheres) by
+Robin Windey, reduced to walkthroughs. Both apps can run side by side: single
+panoramas keep opening in files_photospheres (or the Viewer app), this app only
+reacts to walkthrough files.
 
-Nextcloud app for viewing Google PhotoSphere 360° images (panorama-images). This app is based on 
-the [photo-sphere-viewer.js](https://photo-sphere-viewer.js.org/) library. For 
-360° videos the library [marzipano](https://www.marzipano.net/) is used.
+## How it works
 
-## Table of contents
+A walkthrough is one file, `360-Rundgang.json`, in a folder of panoramas.
+Clicking it opens the panorama together with the floor plan and all capture
+points. Clicking a point on the plan goes there, the view direction is kept.
+The timeline switches between site visits; the settings menu lists all captures
+of the current point.
 
-- [Nextcloud - Files\_PhotoSpheres](#nextcloud---files_photospheres)
-  - [Table of contents](#table-of-contents)
-  - [Features](#features)
-  - [Setup](#setup)
-    - [Install through the app store](#install-through-the-app-store)
-    - [Install manually](#install-manually)
-    - [Usage](#usage)
-    - [Caching](#caching)
-  - [Caveats](#caveats)
-  - [Report an issue](#report-an-issue)
+```json
+{
+  "version": 1,
+  "title": "Ground floor",
+  "plan": "../Floor plans/Ground floor.png",
+  "spots": [
+    { "name": "Hall", "x": 0.41, "y": 0.29,
+      "captures": [
+        { "file": "001_2024-08-14_1602_Hall.jpg", "date": "2024-08-14T16:02", "yaw": 0 },
+        { "file": "later/2025-09-24_1031_Hall.jpg", "date": "2025-09-24T10:31", "yaw": 12.5 } ] }
+  ]
+}
+```
 
-## Features
-* Interactive viewer to view PhotoSphere images in your Nextcloud instance
-* When clicking on an image it automaticlly detects the presence of XMP-data tags (which are used in photospheres).
-* Compatible with the "normal" user-view, single-file share and directory share.
-* Seamless integration with other file-viewer apps.
-* Supports viewing of 360° videos in "normal" user-view via context menu. 
+- `plan` and `file` are relative to the folder of the JSON file.
+- `x`/`y` are normalised plan coordinates (0–1, origin top left).
+- `yaw` (degrees) is the raw panorama direction that looks towards the top of the
+  plan. It is set with *Align direction* in the editor.
 
-## Setup
-### Install through the app store
-The recommended way to install this app, is through the [Nextcloud app store](https://apps.nextcloud.com/apps/files_photospheres).
+There is no database and no server-side code beyond loading the script: the file
+syncs with the desktop client, moves with its folder and works through public
+share links.
 
-Open your Nextcloud instance -> Settings -> Apps -> Multimedia -> Photo Sphere Viewer -> Download and Enable.
+## Usage
 
-### Install manually
-You can manually install this app, by cloning the repository into your nextcloud installation:
+- **Create:** *New → 360° walkthrough* in a folder with panoramas, then choose the
+  floor plan image.
+- **Edit** (needs write permission): the pencil in the viewer opens the editor.
+  Images of the folder and its subfolders that are not placed yet are listed;
+  select one and click on the plan for a new point, or on an existing point to add
+  it as a new capture. Drag points to move them. *Align direction*: turn the
+  panorama towards something you can find on the plan and click it there.
+  Removing only drops images from the walkthrough, files are never deleted.
+- **Share:** share the folder by link. Guests see the walkthrough read-only.
 
-    cd <your-nextcloud-installation>/apps/
-    git clone https://github.com/nextcloud/files_photospheres.git
-    chown www-data:www-data -R ./files_photospheres
+## Importing a HoloBuilder backup
 
-### Usage
-After installing the app you can view your PhotoSphere 360° images by clicking on the file in the Nextcloud file browser. Note that opening PhotoSpheres from the gallery is currently not supported.
+`tools/holobuilder-import.mjs` creates a walkthrough per floor folder from a backup
+with `_meta/index.csv`, `_meta/index.json`, `_meta/slideNodes_<floor>.json` and
+`Grundrisse/<floor>.png`:
 
-### Caching
-This app uses the caching mechanism of Nextcloud to cache the XMP Metadata of the images. The cache is filled on demand when opening a directory for the first time and it will be valid for 24 hours. To get the full performance it's highly recommended to install a local caching backend like **APCu** or **Redis** like described [here](https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/caching_configuration.html).
+```bash
+node tools/holobuilder-import.mjs "<backup folder>"            # dry run with report
+node tools/holobuilder-import.mjs "<backup folder>" --write    # write the files
+node tools/holobuilder-import.mjs "<backup folder>" --write --out=<dir>   # write elsewhere
+```
 
-## Caveats
-* It is not possible to open the photosphere viewer from the Gallery. You must use the file browser.
-* `WebGL`-support must be activated in your browser.
-* 360° videos can not be shown in shared views. It is only possible to open them by context menu 
-therefore the `files_rightclick` app has to be installed (see https://github.com/nextcloud/files_rightclick).
+## Development
 
-## Report an issue
-I rely on all kind of feedback so feel free to open an issue if you encounter any problems with this app but please pay attention to the following points:
-* If there is a problem with some images which aren't opened in this app but rather in the regular image viewer, please provide them via downloadlink if possible. Otherwise debugging and error-checking becomes quite hard. Please also check if the image you provide has correct XMP-metadata for being detected as photosphere image (like specified [here](https://developers.google.com/streetview/spherical-metadata#gpano_parameter_reference)). The image is only detected as photosphere if the XMP-metadata contains the following data:
-    * `GPano:UsePanoramaViewer` is set explicitly to `true` *or*
-    * `GPano:ProjectionType` is set to `equirectangular` *or*
-    * `GImage:Mime` is set to `image/jpeg` (this is currently the only reliable way to detect Google VR180 images, see https://github.com/nextcloud/files_photospheres/issues/1)
-    
-   You can check these metadata information either with tools like [`exiftool`](https://exiftool.org/) or manually by opening the image with your favorite texteditor and scrolling throw the first few bytes. 
-* In the frontend this app is only an integration of different external components like [photo-sphere-viewer.js](https://photo-sphere-viewer.js.org/) and [marzipano](https://www.marzipano.net/). Therefore problems regarding these libraries cannot be fixed in this app.
+```bash
+npm ci
+npm test          # vitest
+npm run build     # webpack → js/
+make appstore     # build/artifacts/appstore/photosphere_tours.tar.gz
+```
 
-Thanks for your support :smiley:
+Supported: Nextcloud 33. Needs a browser with WebGL 2.
+
+## License
+
+AGPL-3.0-or-later, see [COPYING](COPYING).

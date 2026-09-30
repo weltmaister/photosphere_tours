@@ -1,33 +1,29 @@
 {
-    "name": "nextcloud/files_photospheres",
-    "description": "Enables viewing of google photosphere images",
+    "name": "weltmaister/photosphere_tours",
+    "description": "360° walkthroughs on a floor plan, with a timeline",
     "type": "project",
     "license": "AGPL",
     "authors": [
         {
-            "name": "Robin Windey"
+            "name": "weltmaister"
         }
     ],
     "require": {
         "php": ">=8.2 <=8.5"
     },
     "require-dev": {
-        "phpunit/phpunit": "^11.0",
-        "phpunit/php-code-coverage": "^11.0",
-        "phpunit/phpcov": "^10.0",
-        "nextcloud/coding-standard": "^1.3",
-        "netresearch/jsonmapper": "^4.0"
+        "nextcloud/coding-standard": "^1.3"
     },
     "config": {
         "optimize-autoloader": true,
         "platform": {
 			"php": "8.4"
 		},
-        "autoloader-suffix": "Files_PhotoSpheres"
+        "autoloader-suffix": "PhotosphereTours"
     },
     "autoload": {
 		"psr-4": {
-			"OCA\\Files_PhotoSpheres\\": "lib/"
+			"OCA\\PhotosphereTours\\": "lib/"
 		}
 	},
     "scripts": {
