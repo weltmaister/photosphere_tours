@@ -153,6 +153,12 @@ export class TourViewer {
 				moveRight: t(APP, 'Move right'),
 				fullscreen: t(APP, 'Fullscreen'),
 				menu: t(APP, 'Menu'),
+				settings: t(APP, 'Settings'),
+				map: t(APP, 'Floor plan'),
+				mapMaximize: t(APP, 'Enlarge floor plan'),
+				mapMinimize: t(APP, 'Shrink floor plan'),
+				mapNorth: t(APP, 'Go to north'),
+				mapReset: t(APP, 'Reset floor plan'),
 				close: t(APP, 'Close'),
 				twoFingers: t(APP, 'Use two fingers to navigate'),
 				ctrlZoom: t(APP, 'Use ctrl + scroll to zoom the image'),
@@ -194,6 +200,8 @@ export class TourViewer {
 		this.timeline = el('div', 'pt-timeline')
 		this.stage.append(this.timeline)
 		this.renderTimeline()
+		this.resizeObserver = new ResizeObserver(() => this.placeTimeline())
+		this.resizeObserver.observe(this.stage)
 	}
 
 	currentSpot() {
@@ -312,6 +320,19 @@ export class TourViewer {
 			this.timeline.append(chip(formatDate(day, false), day))
 		}
 		this.timeline.append(chip(t(APP, 'Latest'), null))
+		this.placeTimeline()
+	}
+
+	/**
+	 * Keep the timeline just above the navbar, whose height depends on the
+	 * theme and screen size – otherwise the wrapped chips cover its buttons.
+	 * Uses the height, not the position: the navbar slides in on load.
+	 */
+	placeTimeline() {
+		const navbar = this.stage.querySelector('.psv-navbar')
+		if (navbar) {
+			this.timeline.style.bottom = `${navbar.offsetHeight + 8}px`
+		}
 	}
 
 	/** Re-read the tour file, e.g. after the editor discarded its changes. */
@@ -368,6 +389,7 @@ export class TourViewer {
 			return
 		}
 		document.removeEventListener('keydown', this.onKeyDown)
+		this.resizeObserver?.disconnect()
 		this.viewer?.destroy()
 		this.overlay?.remove()
 	}

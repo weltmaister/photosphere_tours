@@ -27,7 +27,8 @@
 	left: 50%;
 	bottom: 56px;
 	transform: translateX(-50%);
-	z-index: 100;
+	/* above the map (40), below navbar, settings and panels (90) */
+	z-index: 85;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
@@ -328,7 +329,6 @@
 	}
 
 	.pt-timeline {
-		bottom: 52px;
 		font-size: 12px;
 	}
 }
