@@ -12,10 +12,11 @@ reacts to walkthrough files.
 ## How it works
 
 A walkthrough is one file, `360-Rundgang.json`, in a folder of panoramas.
-Clicking it opens the panorama together with the floor plan and all capture
-points. Clicking a point on the plan goes there, the view direction is kept.
-The timeline switches between site visits; the settings menu lists all captures
-of the current point.
+Clicking it opens the panorama together with a side bar: the floor plan with all
+spots and a list of the spots. Clicking a spot goes there, the view direction is
+kept. *Site visit* at the bottom shows every spot as it was on one day; spots with
+several captures carry a clock badge in the list and unfold to pick one. The side
+bar can be resized or hidden; on phones it is a bottom sheet.
 
 ```json
 {
@@ -34,7 +35,7 @@ of the current point.
 - `plan` and `file` are relative to the folder of the JSON file.
 - `x`/`y` are normalised plan coordinates (0–1, origin top left).
 - `yaw` (degrees) is the raw panorama direction that looks towards the top of the
-  plan. It is set with *Align direction* in the editor.
+  plan. It is set with *Set view direction* in the editor.
 
 There is no database and no server-side code beyond loading the script: the file
 syncs with the desktop client, moves with its folder and works through public
@@ -44,12 +45,14 @@ share links.
 
 - **Create:** *New → 360° walkthrough* in a folder with panoramas, then choose the
   floor plan image.
-- **Edit** (needs write permission): the pencil in the viewer opens the editor.
-  Images of the folder and its subfolders that are not placed yet are listed;
-  select one and click on the plan for a new point, or on an existing point to add
-  it as a new capture. Drag points to move them. *Align direction*: turn the
-  panorama towards something you can find on the plan and click it there.
-  Removing only drops images from the walkthrough, files are never deleted.
+- **Edit** (needs write permission): *Edit* opens the editor – floor plan on the
+  left, panorama and the tabs *Spot* and *New images* on the right.
+  *New images* lists images of the folder and its subfolders that belong to no
+  spot yet; pick one and click on the plan for a new spot, or on a spot to add it
+  as another capture. Drag spots to move them (or use the arrow keys).
+  *Set view direction*: turn the panorama towards something you can find on the
+  plan and click it there. Removing only drops images from the walkthrough, files
+  are never deleted.
 - **Share:** share the folder by link. Guests see the walkthrough read-only.
 
 ## Importing a HoloBuilder backup
