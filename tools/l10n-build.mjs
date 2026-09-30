@@ -25,6 +25,7 @@ const informal = {
 	'Someone else changed the walkthrough in the meantime, so it cannot be saved. Reload it – your changes will be lost.': 'Jemand anderes hat den Rundgang inzwischen geändert, deshalb kann nicht gespeichert werden. Lade ihn neu – deine Änderungen gehen dabei verloren.',
 	'Saving failed: {error}. Check your connection and try again.': 'Speichern fehlgeschlagen: {error}. Prüf die Verbindung und versuch es noch einmal.',
 	'You changed the walkthrough but have not saved it yet.': 'Du hast den Rundgang geändert, aber noch nicht gespeichert.',
+	'Pick an image under "New images" and click on the floor plan.': 'Wähl unter „Neue Bilder“ ein Bild und klick in den Grundriss.',
 }
 for (const key of Object.keys(informal)) {
 	if (!(key in formal.translations)) {

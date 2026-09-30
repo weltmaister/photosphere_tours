@@ -26,6 +26,13 @@ module.exports = (env, argv) => ({
 				test: /\.css$/,
 				use: ['style-loader', 'css-loader'],
 			},
+			{
+				// pdf.js worker (new URL(…, import.meta.url)): ship it as .js so
+				// every web server sends it with a JavaScript content type
+				test: /pdf\.worker\.min\.mjs$/,
+				type: 'asset/resource',
+				generator: { filename: `${appId}-pdf-worker-[contenthash:8].js` },
+			},
 		],
 	},
 	resolve: {

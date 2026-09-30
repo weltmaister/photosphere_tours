@@ -1,6 +1,6 @@
 {
   "name": "photosphere_tours",
-  "version": "0.2.1",
+  "version": "0.3.5",
   "description": "360° walkthroughs on a floor plan with a timeline, stored as a plain JSON file next to the panoramas.",
   "private": true,
   "type": "module",
@@ -28,6 +28,7 @@
     "@nextcloud/router": "^3.2.0",
     "@nextcloud/vue": "^9.13.1",
     "@photo-sphere-viewer/core": "^5.15.1",
+    "pdfjs-dist": "^5.7.284",
     "vue": "^3.5.43"
   },
   "devDependencies": {

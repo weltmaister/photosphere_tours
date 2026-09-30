@@ -29,7 +29,10 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
 ## Layout
 
 - `src/main.js` – file action for `360-Rundgang.json`, "New → 360° walkthrough"
-- `src/app.js` – mounts `TourApp.vue` as full-screen overlay
+- `src/app.js` – mounts `TourApp.vue` as full-screen modal dialog (page behind inert)
+- `src/folder.js` (what a folder holds; only the folder itself), `src/create.js` (create
+  a walkthrough, choose/convert the plan), `src/pdf.js` (PDF → PNG, pdf.js), `src/exif.js`,
+  `src/bar.js` + `FolderBar.vue` (hint bar above the file list)
 - `src/components/TourApp.vue` – state and layout: header, side bar (plan + spot list,
   resizable), panorama, site visits; editor (plan large, 520 px column with panorama and
   tabs); phone: bottom sheet / tabs. One `PanoramaView` for all layouts (CSS grid areas).

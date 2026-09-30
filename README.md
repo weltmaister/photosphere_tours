@@ -43,8 +43,14 @@ share links.
 
 ## Usage
 
-- **Create:** *New → 360° walkthrough* in a folder with panoramas, then choose the
-  floor plan image.
+- **Create:** put the 360° images and a floor plan (PDF, PNG, JPG, WebP or SVG) into
+  one folder. A bar above the file list offers *Create 360° walkthrough* (also in the
+  folder's menu: *Open as 360° walkthrough*, and under *New*). With one floor plan
+  in the folder it is taken right away, otherwise you pick it. A PDF plan is turned
+  into a PNG next to it. Only the folder itself counts – subfolders (for example
+  compressed copies) are ignored.
+- **Open:** the bar above the file list (*Open walkthrough*), the folder's menu, or a
+  click on `360-Rundgang.json`.
 - **Edit** (needs write permission): *Edit* opens the editor – floor plan on the
   left, panorama and the tabs *Spot* and *New images* on the right.
   *New images* lists images of the folder and its subfolders that belong to no
@@ -52,7 +58,12 @@ share links.
   as another capture. Drag spots to move them (or use the arrow keys).
   *Set view direction*: turn the panorama towards something you can find on the
   plan and click it there. Removing only drops images from the walkthrough, files
-  are never deleted.
+  are never deleted. The capture date comes from the file name, else from the
+  camera's EXIF data. When a newer floor plan appears in the folder the editor
+  offers to switch; *Change floor plan* does it by hand.
+- **Keyboard:** Tab through header, plan, spot list and site visits; arrow keys turn
+  the focused panorama (+/− zoom) and move the focused spot in the editor; Escape
+  leaves modes, then the editor, then the walkthrough.
 - **Share:** share the folder by link. Guests see the walkthrough read-only.
 
 ## Importing a HoloBuilder backup

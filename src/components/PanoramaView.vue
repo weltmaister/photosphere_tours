@@ -9,7 +9,12 @@
   position when the image changes therefore keeps the direction on the plan.
 -->
 <template>
-	<div ref="el" class="pt-pano" />
+	<div ref="el"
+		class="pt-pano"
+		role="img"
+		tabindex="0"
+		:aria-label="label"
+		@keydown="onKey" />
 </template>
 
 <script setup>
@@ -22,6 +27,8 @@ const props = defineProps({
 	url: { type: String, default: null },
 	/** { pan, tilt, roll } from tour.js sphereCorrection() */
 	correction: { type: Object, default: null },
+	/** accessible name: what is shown */
+	label: { type: String, default: '' },
 })
 const emit = defineEmits(['heading'])
 
@@ -37,6 +44,9 @@ onMounted(() => {
 		panorama: props.url ?? undefined,
 		sphereCorrection: props.correction ?? undefined,
 		navbar: false,
+		// own handler below: only while the panorama has focus, so arrow
+		// keys keep working in fields and on the floor plan
+		keyboard: false,
 		defaultZoomLvl: 0,
 		withCredentials: true,
 		loadingTxt: t('Loading …'),
@@ -51,6 +61,32 @@ onMounted(() => {
 	observer = new ResizeObserver(() => viewer?.autoSize())
 	observer.observe(el.value)
 })
+
+const STEP = Math.PI / 18 // 10°
+
+function onKey(e) {
+	if (!viewer) {
+		return
+	}
+	const { yaw, pitch } = viewer.getPosition()
+	const turn = {
+		ArrowLeft: [-STEP, 0],
+		ArrowRight: [STEP, 0],
+		ArrowUp: [0, STEP],
+		ArrowDown: [0, -STEP],
+	}[e.key]
+	if (turn) {
+		e.preventDefault()
+		const nextPitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch + turn[1]))
+		viewer.rotate({ yaw: yaw + turn[0], pitch: nextPitch })
+	} else if (e.key === '+' || e.key === '=') {
+		e.preventDefault()
+		viewer.zoomIn()
+	} else if (e.key === '-') {
+		e.preventDefault()
+		viewer.zoomOut()
+	}
+}
 
 onBeforeUnmount(() => {
 	observer?.disconnect()
@@ -95,6 +131,11 @@ defineExpose({
 	min-height: 0;
 	background: #000000;
 	font-family: var(--font-face);
+}
+
+.pt-pano:focus-visible {
+	outline: 2px solid var(--color-main-text);
+	outline-offset: -4px;
 }
 
 .pt-pano :deep(.psv-loader) {

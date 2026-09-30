@@ -212,4 +212,10 @@ const expanded = ref(null)
 		min-height: var(--clickable-area-large);
 	}
 }
+
+/* keyboard focus, visible on every background */
+button:focus-visible {
+	outline: 2px solid var(--color-main-text);
+	outline-offset: -2px;
+}
 </style>

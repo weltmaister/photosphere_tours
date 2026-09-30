@@ -92,15 +92,29 @@ export async function writeText(url, text, etag) {
 	}
 }
 
+// files-photospheres-xmp-metadata comes from the files_photospheres app when it
+// is installed; it tells whether a JPEG is a 360° image without downloading it
 const PROPFIND_BODY = `<?xml version="1.0"?>
-<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
-	<d:prop><d:resourcetype/><d:getlastmodified/><d:getcontenttype/><oc:fileid/></d:prop>
+<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
+	<d:prop><d:resourcetype/><d:getlastmodified/><d:getcontenttype/><oc:fileid/><nc:files-photospheres-xmp-metadata/></d:prop>
 </d:propfind>`
+
+function panoramaFlag(xmp) {
+	if (!xmp) {
+		return null
+	}
+	try {
+		const data = JSON.parse(xmp)
+		return data.usePanoramaViewer === true || data.usePanoramaViewer === 1
+	} catch {
+		return null
+	}
+}
 
 /**
  * Direct children of a folder. A missing folder yields an empty list.
  *
- * @return {Promise<Array<{ name: string, isFolder: boolean, mtime: Date|null, mime: string, fileid: string|null }>>}
+ * @return {Promise<Array<{ name: string, isFolder: boolean, mtime: Date|null, mime: string, fileid: string|null, panorama: boolean|null }>>}
  */
 export async function listFolder(url) {
 	let response
@@ -122,6 +136,7 @@ export async function listFolder(url) {
 	const xml = new DOMParser().parseFromString(response.data, 'application/xml')
 	const DAV = 'DAV:'
 	const OC = 'http://owncloud.org/ns'
+	const NC = 'http://nextcloud.org/ns'
 	const self = new URL(url, window.location.href).pathname.replace(/\/$/, '')
 	const text = (el, ns, name) => el.getElementsByTagNameNS(ns, name)[0]?.textContent ?? ''
 
@@ -136,7 +151,22 @@ export async function listFolder(url) {
 				mtime: modified ? new Date(modified) : null,
 				mime: text(el, DAV, 'getcontenttype'),
 				fileid: text(el, OC, 'fileid') || null,
+				panorama: panoramaFlag(text(el, NC, 'files-photospheres-xmp-metadata')),
 			}
 		})
 		.filter((entry) => entry.href !== decodeURIComponent(self))
+}
+
+/** The first bytes of a file, e.g. for its EXIF block. */
+export async function readStart(url, bytes = 65536) {
+	const response = await axios.get(url, {
+		responseType: 'arraybuffer',
+		headers: { Range: `bytes=0-${bytes - 1}` },
+	})
+	return response.data
+}
+
+/** Upload binary data, e.g. a floor plan converted from PDF. */
+export async function writeBlob(url, blob) {
+	await axios.put(url, blob, { headers: { 'Content-Type': blob.type || 'application/octet-stream' } })
 }

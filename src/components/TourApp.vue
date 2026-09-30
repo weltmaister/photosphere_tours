@@ -22,7 +22,7 @@
 				</template>
 			</NcButton>
 			<div class="pt-header__titles">
-				<h2 class="pt-header__title">
+				<h2 id="photosphere-tours-title" class="pt-header__title">
 					{{ editing ? t('Edit walkthrough') : title }}
 				</h2>
 				<p class="pt-header__subline">
@@ -90,14 +90,10 @@
 			<!-- viewer, desktop: side bar with floor plan and spot list -->
 			<aside v-if="!editing && !mobile && sidebarOpen" class="pt-side" :aria-label="t('Floor plan and spots')">
 				<div class="pt-side__scroll">
-					<button type="button"
-						class="pt-section"
-						:aria-expanded="planOpen ? 'true' : 'false'"
-						@click="planOpen = !planOpen">
-						<NcIconSvgWrapper :path="planOpen ? mdiChevronDown : mdiChevronRight" />
+					<h3 class="pt-section">
 						{{ t('Floor plan') }}
-					</button>
-					<div v-if="planOpen" class="pt-side__plan">
+					</h3>
+					<div class="pt-side__plan">
 						<FloorPlan :src="planUrl"
 							:size="planSize"
 							:spots="planSpots"
@@ -105,24 +101,26 @@
 							auto-height
 							@select="selectSpot" />
 					</div>
-					<button type="button"
-						class="pt-section"
-						:aria-expanded="listOpen ? 'true' : 'false'"
-						@click="listOpen = !listOpen">
-						<NcIconSvgWrapper :path="listOpen ? mdiChevronDown : mdiChevronRight" />
+					<h3 class="pt-section">
 						{{ t('Spots ({count})', { count: tour.spots.length }) }}
-					</button>
-					<SpotList v-if="listOpen"
-						class="pt-side__list"
+					</h3>
+					<SpotList class="pt-side__list"
 						:rows="spotRows"
 						@select="selectSpot"
 						@pick-capture="pickCapture" />
 				</div>
 				<div class="pt-side__resize"
 					role="separator"
+					tabindex="0"
 					aria-orientation="vertical"
+					:aria-label="t('Width of the side bar')"
+					:aria-valuenow="sidebarWidth"
+					aria-valuemin="240"
+					aria-valuemax="560"
 					:title="t('Drag to change the width')"
-					@pointerdown="startResize" />
+					@pointerdown="startResize"
+					@keydown.left.prevent="sidebarWidth = Math.max(240, sidebarWidth - 16)"
+					@keydown.right.prevent="sidebarWidth = Math.min(560, sidebarWidth + 16)" />
 			</aside>
 
 			<!-- editor, desktop: the floor plan is the work area -->
@@ -150,7 +148,21 @@
 				class="pt-pano-area"
 				:url="panoramaUrl"
 				:correction="correction"
+				:label="panoramaLabel"
 				@heading="heading = $event" />
+			<!-- no spot yet: explain instead of an endless loading circle -->
+			<div v-if="!panoramaUrl" class="pt-pano-area pt-pano-empty">
+				<NcEmptyContent :name="t('No spots yet')" :description="emptyText">
+					<template #icon>
+						<NcIconSvgWrapper :path="mdiMapMarkerPlusOutline" />
+					</template>
+					<template v-if="!editing && canEdit" #action>
+						<NcButton variant="primary" @click="startEditing">
+							{{ t('Edit') }}
+						</NcButton>
+					</template>
+				</NcEmptyContent>
+			</div>
 
 			<!-- editor: tabs next to (desktop) or below (phone) the panorama -->
 			<section v-if="editing" class="pt-panel">
@@ -193,7 +205,9 @@
 					<NewImages v-else
 						:images="unplacedImages"
 						:selected="selectedImage"
-						@select="selectImage" />
+						:plan="tour.plan"
+						@select="selectImage"
+						@change-plan="switchPlan()" />
 				</div>
 			</section>
 
@@ -249,12 +263,12 @@
 			<div class="pt-footer__tools">
 				<NcButton variant="tertiary" :aria-label="t('Zoom out')" :title="t('Zoom out')" @click="pano?.zoomOut()">
 					<template #icon>
-						<NcIconSvgWrapper :path="mdiMagnifyMinusOutline" />
+						<NcIconSvgWrapper :path="mdiMinus" :size="24" />
 					</template>
 				</NcButton>
 				<NcButton variant="tertiary" :aria-label="t('Zoom in')" :title="t('Zoom in')" @click="pano?.zoomIn()">
 					<template #icon>
-						<NcIconSvgWrapper :path="mdiMagnifyPlusOutline" />
+						<NcIconSvgWrapper :path="mdiPlus" :size="24" />
 					</template>
 				</NcButton>
 				<NcButton variant="tertiary" :aria-label="t('Fullscreen')" :title="t('Fullscreen')" @click="pano?.toggleFullscreen()">
@@ -275,14 +289,14 @@ import {
 	mdiAlertCircleOutline,
 	mdiCheck,
 	mdiChevronDown,
-	mdiChevronRight,
 	mdiChevronUp,
 	mdiClose,
 	mdiDockLeft,
 	mdiFullscreen,
-	mdiMagnifyMinusOutline,
-	mdiMagnifyPlusOutline,
+	mdiMapMarkerPlusOutline,
+	mdiMinus,
 	mdiPencil,
+	mdiPlus,
 } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
@@ -296,7 +310,10 @@ import PanoramaView from './PanoramaView.vue'
 import SiteVisits from './SiteVisits.vue'
 import SpotForm from './SpotForm.vue'
 import SpotList from './SpotList.vue'
-import { ConflictError, listFolder, locate, readText, urlFor, writeText } from '../dav.js'
+import { Cancelled, choosePlan } from '../create.js'
+import { ConflictError, listFolder, locate, readStart, readText, urlFor, writeText } from '../dav.js'
+import { exifDate } from '../exif.js'
+import { classifyFolder, newerPlan } from '../folder.js'
 import { displayDate, t } from '../l10n.js'
 import {
 	TourError,
@@ -307,6 +324,7 @@ import {
 	captureAt,
 	captureDays,
 	capturesNewestFirst,
+	dateFromFilename,
 	formatDate,
 	parseTour,
 	resolvePath,
@@ -392,8 +410,6 @@ const store = (key, value) => {
 
 const sidebarOpen = ref(stored('sidebarOpen', true))
 const sidebarWidth = ref(stored('sidebarWidth', 320))
-const planOpen = ref(true)
-const listOpen = ref(true)
 const sheetOpen = ref(false)
 const sheetTab = ref('plan')
 watch(sidebarOpen, (v) => store('sidebarOpen', v))
@@ -450,6 +466,9 @@ const currentCapture = computed(() => {
 	return shownCapture(spot, spotIndex.value) ?? capturesNewestFirst(spot)[0]
 })
 const panoramaUrl = computed(() => currentCapture.value ? fileUrl(currentCapture.value.file) : null)
+const panoramaLabel = computed(() => currentCapture.value
+	? t('360° panorama: {name}, {date}. Use the arrow keys to look around.', { name: currentSpot.value.name, date: displayDate(currentCapture.value.date) })
+	: '')
 const correction = computed(() => currentCapture.value ? sphereCorrection(currentCapture.value) : null)
 
 const visits = computed(() => {
@@ -597,25 +616,60 @@ function changed() {
 	dirty.value = true
 }
 
+/** The tour's folder as create.js expects it. */
+const folder = {
+	source: location.rootUrl + location.dir,
+	path: location.dir,
+	root: props.node.root,
+	owner: props.node.owner,
+	permissions: props.node.permissions,
+}
+let folderEntries = []
+
+// Only the folder itself: subfolders often hold copies (compressed versions)
 async function loadImages() {
-	const folderUrl = urlFor(location.rootUrl, location.dir)
 	try {
-		const entries = await listFolder(folderUrl)
-		const found = entries.filter(e => !e.isFolder).map(e => ({ path: e.name, fileid: e.fileid, mtime: e.mtime }))
-		for (const sub of entries.filter(e => e.isFolder)) {
-			const children = await listFolder(urlFor(location.rootUrl, `${location.dir}/${sub.name}`))
-			found.push(...children.filter(e => !e.isFolder).map(e => ({ path: `${sub.name}/${e.name}`, fileid: e.fileid, mtime: e.mtime })))
+		folderEntries = await listFolder(urlFor(location.rootUrl, location.dir))
+		const panoramas = new Set(classifyFolder(folderEntries).panoramas)
+		images.value = folderEntries
+			.filter(e => panoramas.has(e.name))
+			.map(e => ({ path: e.name, fileid: e.fileid, mtime: e.mtime }))
+			.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }))
+		const newer = newerPlan(folderEntries, tour.value.plan)
+		if (newer) {
+			setStatus('info', t('There is a newer floor plan in the folder: {file}', { file: newer }), t('Use it'), () => switchPlan(newer))
 		}
-		images.value = found
 	} catch (e) {
 		setStatus('error', t('The images in this folder could not be loaded: {error}', { error: e.message }))
 	}
 }
 
+async function switchPlan(file = null) {
+	try {
+		const plan = await choosePlan(folder, folderEntries, { auto: false, file })
+		const url = fileUrl(plan)
+		const img = await loadImage(url)
+		tour.value.plan = plan
+		planUrl.value = url
+		planSize.value = { w: img.naturalWidth, h: img.naturalHeight }
+		changed()
+		setStatus('success', t('Floor plan changed – not saved yet. The spots keep their places.'))
+	} catch (e) {
+		if (!(e instanceof Cancelled)) {
+			setStatus('error', t('The floor plan could not be changed: {error}', { error: e.message }))
+		}
+	}
+}
+
+const emptyText = computed(() => editing.value
+	? t('Pick an image under "New images" and click on the floor plan.')
+	: t('No spots have been placed in this walkthrough yet.'))
+
 function startEditing() {
 	editing.value = true
 	hint.value = ''
-	editorTab.value = mobile.value ? 'plan' : 'spot'
+	// an empty walkthrough starts with its images
+	editorTab.value = tour.value.spots.length === 0 ? 'new' : (mobile.value ? 'plan' : 'spot')
 	loadImages()
 }
 
@@ -648,7 +702,22 @@ async function reload() {
 	spotIndex.value = Math.min(spotIndex.value, Math.max(0, tour.value.spots.length - 1))
 }
 
-function fallbackDate(path) {
+/**
+ * Capture date when the file name has none: the camera's EXIF date (read
+ * from the first 64 KB), else the file's modification time.
+ */
+async function fallbackDate(path) {
+	if (dateFromFilename(path)) {
+		return null
+	}
+	try {
+		const date = exifDate(await readStart(fileUrl(path)))
+		if (date) {
+			return date
+		}
+	} catch {
+		// no range support or no EXIF: use the file time
+	}
 	const image = images.value.find(i => i.path === path)
 	return formatDate(image?.mtime ?? new Date())
 }
@@ -682,26 +751,28 @@ async function alignTo(target) {
 	setStatus('success', t('View direction set – not saved yet'))
 }
 
-function onPlanPlace(point) {
+async function onPlanPlace(point) {
 	if (aligning.value) {
 		alignTo(point)
 	} else if (selectedImage.value) {
-		addSpot(tour.value, { ...point, file: selectedImage.value, fallbackDate: fallbackDate(selectedImage.value) })
+		const file = selectedImage.value
 		selectedImage.value = null
+		addSpot(tour.value, { ...point, file, fallbackDate: await fallbackDate(file) })
 		spotIndex.value = tour.value.spots.length - 1
 		changed()
 	}
 }
 
-function onPlanSelect(index) {
+async function onPlanSelect(index) {
 	const spot = tour.value.spots[index]
 	if (aligning.value) {
 		alignTo({ x: spot.x, y: spot.y })
 		return
 	}
 	if (selectedImage.value) {
-		const capture = addCapture(spot, { file: selectedImage.value, fallbackDate: fallbackDate(selectedImage.value) })
+		const file = selectedImage.value
 		selectedImage.value = null
+		const capture = addCapture(spot, { file, fallbackDate: await fallbackDate(file) })
 		picked[index] = capture.file
 		changed()
 	}
@@ -780,8 +851,12 @@ function onKeyDown(e) {
 	if (e.key !== 'Escape' || e.defaultPrevented || document.fullscreenElement) {
 		return
 	}
-	// Nextcloud dialogs handle their own Escape
-	if (document.querySelector('.modal-mask, [role="dialog"][aria-modal="true"]')) {
+	// Nextcloud dialogs handle their own Escape (the walkthrough itself is a
+	// dialog too, so only look outside of it)
+	const ownDialog = document.querySelector('.photosphere-tours-overlay')
+	const otherDialog = [...document.querySelectorAll('.modal-mask, [role="dialog"][aria-modal="true"]')]
+		.some(el => el !== ownDialog && !ownDialog?.contains(el))
+	if (otherDialog) {
 		return
 	}
 	if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
@@ -898,6 +973,14 @@ onBeforeUnmount(() => {
 	grid-area: pano;
 }
 
+.pt-pano-empty {
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--color-main-background);
+}
+
 /* ---- viewer side bar ---- */
 .pt-side {
 	position: relative;
@@ -914,21 +997,12 @@ onBeforeUnmount(() => {
 }
 
 .pt-section {
-	display: flex;
-	align-items: center;
-	gap: calc(var(--default-grid-baseline) * 2);
-	box-sizing: border-box;
-	width: 100%;
-	min-height: var(--clickable-area-large);
-	padding: 0 calc(var(--default-grid-baseline) * 2);
-	border: none;
+	margin: 0;
+	padding: calc(var(--default-grid-baseline) * 3) calc(var(--default-grid-baseline) * 3) calc(var(--default-grid-baseline) * 2);
 	border-top: 1px solid var(--color-border);
-	background: transparent;
 	color: var(--color-main-text);
-	font: inherit;
+	font-size: var(--default-font-size);
 	font-weight: 600;
-	text-align: start;
-	cursor: pointer;
 }
 
 .pt-section:first-child {
@@ -1032,6 +1106,14 @@ onBeforeUnmount(() => {
 
 .pt-tab[aria-selected='true'] {
 	border-bottom-color: var(--color-primary-element);
+}
+
+/* keyboard focus, visible on every background */
+.pt-tab:focus-visible,
+.pt-sheet__toggle:focus-visible,
+.pt-side__resize:focus-visible {
+	outline: 2px solid var(--color-main-text);
+	outline-offset: -2px;
 }
 
 /* ---- phone: bottom sheet ---- */

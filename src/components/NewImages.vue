@@ -42,13 +42,29 @@
 				</li>
 			</ul>
 		</template>
+
+		<section class="pt-new__plan">
+			<h3 class="pt-new__heading">
+				{{ t('Floor plan') }}
+			</h3>
+			<p class="pt-new__hint">
+				{{ t('File: {file}', { file: plan }) }}
+			</p>
+			<NcButton variant="secondary" @click="$emit('change-plan')">
+				<template #icon>
+					<NcIconSvgWrapper :path="mdiFloorPlan" />
+				</template>
+				{{ t('Change floor plan') }}
+			</NcButton>
+		</section>
 	</div>
 </template>
 
 <script setup>
 import { t } from '../l10n.js'
 import { generateUrl } from '@nextcloud/router'
-import { mdiImagePlusOutline } from '@mdi/js'
+import { mdiFloorPlan, mdiImagePlusOutline } from '@mdi/js'
+import NcButton from '@nextcloud/vue/components/NcButton'
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
@@ -56,8 +72,9 @@ defineProps({
 	/** [{ path, fileid }] */
 	images: { type: Array, required: true },
 	selected: { type: String, default: null },
+	plan: { type: String, required: true },
 })
-defineEmits(['select'])
+defineEmits(['select', 'change-plan'])
 
 const thumbnail = (fileid) => generateUrl('/core/preview?fileId={id}&x=320&y=160&a=1', { id: fileid })
 </script>
@@ -67,6 +84,22 @@ const thumbnail = (fileid) => generateUrl('/core/preview?fileId={id}&x=320&y=160
 	display: flex;
 	flex-direction: column;
 	gap: calc(var(--default-grid-baseline) * 3);
+}
+
+.pt-new__plan {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: calc(var(--default-grid-baseline) * 2);
+	margin-top: calc(var(--default-grid-baseline) * 2);
+	padding-top: calc(var(--default-grid-baseline) * 4);
+	border-top: 1px solid var(--color-border);
+}
+
+.pt-new__heading {
+	margin: 0;
+	font-size: var(--default-font-size);
+	font-weight: 600;
 }
 
 .pt-new__hint {
@@ -113,6 +146,11 @@ const thumbnail = (fileid) => generateUrl('/core/preview?fileId={id}&x=320&y=160
 
 .pt-new__item--selected {
 	border-color: var(--color-primary-element);
+}
+
+.pt-new__item:focus-visible {
+	outline: 2px solid var(--color-main-text);
+	outline-offset: 2px;
 }
 
 .pt-new__thumb {

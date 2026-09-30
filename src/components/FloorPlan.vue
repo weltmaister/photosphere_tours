@@ -191,11 +191,32 @@ function onPointerUp(e) {
 	if (!g || g.type !== 'press' || g.moved || e.type === 'pointercancel') {
 		return
 	}
-	if (g.index !== null) {
-		emit('select', g.index)
+	const index = g.index ?? nearestSpot(e.clientX, e.clientY)
+	if (index !== null) {
+		emit('select', index)
 	} else {
 		emit('place', toPlan(e.clientX, e.clientY))
 	}
+}
+
+// A click just beside a spot means that spot – otherwise a near miss would
+// silently create a second spot on top of it.
+const SNAP_DISTANCE = 24
+
+function nearestSpot(clientX, clientY) {
+	const box = root.value.getBoundingClientRect()
+	let best = null
+	let bestDistance = SNAP_DISTANCE
+	props.spots.forEach((spot, index) => {
+		const x = box.left + offset.value.x + spot.x * props.size.w * scale.value
+		const y = box.top + offset.value.y + spot.y * props.size.h * scale.value
+		const distance = Math.hypot(clientX - x, clientY - y)
+		if (distance <= bestDistance) {
+			best = index
+			bestDistance = distance
+		}
+	})
+	return best
 }
 
 // keyboard: Enter/Space come in as a click with detail 0, arrows move a pin
@@ -306,7 +327,8 @@ defineExpose({ fit })
 	height: 16px;
 	margin: auto;
 	box-sizing: border-box;
-	border: 3px solid var(--color-primary-element-text, #000);
+	/* the plan is always drawn on white, whatever the theme */
+	border: 3px solid #222222;
 	border-radius: 50%;
 	background: #ffffff;
 	transition: width var(--animation-quick), height var(--animation-quick);

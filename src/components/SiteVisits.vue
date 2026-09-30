@@ -45,10 +45,12 @@ defineEmits(['update:modelValue'])
 	min-width: 0;
 }
 
+/* same size and weight as the date buttons next to it */
 .pt-visits__label {
 	flex-shrink: 0;
 	color: var(--color-text-maxcontrast);
-	font-size: var(--font-size-small);
+	font-size: var(--default-font-size);
+	font-weight: 500;
 }
 
 .pt-visits__scroll {
