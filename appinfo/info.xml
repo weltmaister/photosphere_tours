@@ -15,7 +15,7 @@ with the desktop client and works through public share links (read-only).
 Based on [Photo Sphere Viewer for Nextcloud](https://github.com/nextcloud/files_photospheres)
 by Robin Windey. Works alongside that app: single images keep opening in its viewer.
     ]]></description>
-    <version>0.3.5</version>
+    <version>0.4.3</version>
     <licence>agpl</licence>
     <author>weltmaister</author>
     <author>Robin Windey (files_photospheres)</author>

@@ -4,14 +4,24 @@
   This file is licensed under the Affero General Public License version 3 or
   later. See the COPYING file.
 
-  List of spots. Spots with several captures carry a clock badge and unfold
-  to pick one capture – the per-spot choice, independent of the site visit.
+  List of spots. Spots with several captures show "2 captures" and unfold to
+  pick one – the per-spot choice, independent of the site visit. With write
+  permission the name can be changed right here.
 -->
 <template>
 	<ul class="pt-spots">
 		<li v-for="(row, index) in rows" :key="index" class="pt-spots__item">
 			<div class="pt-spots__row" :class="{ 'pt-spots__row--current': row.state === 'current' }">
-				<button type="button"
+				<form v-if="renaming === index" class="pt-spots__rename" @submit.prevent="commit(index)">
+					<input ref="field"
+						v-model="draft"
+						class="pt-spots__input"
+						:aria-label="t('Name of the spot')"
+						@keydown.esc.stop.prevent="renaming = null"
+						@blur="commit(index)">
+				</form>
+				<button v-else
+					type="button"
 					class="pt-spots__main"
 					:class="{ 'pt-spots__main--missing': row.state === 'missing' }"
 					:aria-current="row.state === 'current' ? 'true' : undefined"
@@ -22,15 +32,22 @@
 						<span class="pt-spots__date">{{ row.date }}</span>
 					</span>
 				</button>
+				<button v-if="editable && renaming !== index"
+					type="button"
+					class="pt-spots__icon"
+					:aria-label="t('Rename {name}', { name: row.name })"
+					:title="t('Rename {name}', { name: row.name })"
+					@click="startRename(index, row.name)">
+					<NcIconSvgWrapper :path="mdiPencilOutline" :size="18" />
+				</button>
 				<button v-if="row.captures.length > 1"
 					type="button"
-					class="pt-spots__badge"
+					class="pt-spots__captures-toggle"
 					:aria-expanded="expanded === index ? 'true' : 'false'"
-					:aria-label="row.badgeLabel"
 					:title="row.badgeLabel"
 					@click="expanded = expanded === index ? null : index">
-					<NcIconSvgWrapper :path="mdiClockOutline" :size="16" />
-					{{ row.captures.length }}
+					{{ t('{count} captures', { count: row.captures.length }) }}
+					<NcIconSvgWrapper :path="expanded === index ? mdiChevronUp : mdiChevronDown" :size="18" />
 				</button>
 			</div>
 			<div v-if="expanded === index"
@@ -53,17 +70,41 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { mdiClockOutline } from '@mdi/js'
+import { nextTick, ref } from 'vue'
+import { mdiChevronDown, mdiChevronUp, mdiPencilOutline } from '@mdi/js'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
+
+import { t } from '../l10n.js'
 
 defineProps({
 	/** [{ name, date, state, badgeLabel, captures: [{ label, value, checked }] }] */
 	rows: { type: Array, required: true },
+	/** show the rename button (write permission) */
+	editable: { type: Boolean, default: false },
 })
-defineEmits(['select', 'pick-capture'])
+const emit = defineEmits(['select', 'pick-capture', 'rename'])
 
 const expanded = ref(null)
+const renaming = ref(null)
+const draft = ref('')
+const field = ref(null)
+
+async function startRename(index, name) {
+	renaming.value = index
+	draft.value = name
+	await nextTick()
+	const input = Array.isArray(field.value) ? field.value[0] : field.value
+	input?.focus()
+	input?.select()
+}
+
+function commit(index) {
+	if (renaming.value !== index) {
+		return
+	}
+	renaming.value = null
+	emit('rename', index, draft.value)
+}
 </script>
 
 <style scoped>
@@ -146,25 +187,76 @@ const expanded = ref(null)
 }
 
 .pt-spots__date {
+	overflow: hidden;
 	color: var(--color-text-maxcontrast);
 	font-size: var(--font-size-small);
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
-.pt-spots__badge {
-	display: flex;
+/* "2 captures ⌄": says what it is, no guessing at a small icon */
+.pt-spots__captures-toggle {
+	display: inline-flex;
 	flex-shrink: 0;
 	align-items: center;
-	gap: 4px;
+	gap: 2px;
 	height: var(--default-clickable-area);
 	margin-inline-end: 4px;
-	padding: 0 calc(var(--default-grid-baseline) * 2);
-	border: 1px solid var(--color-border-maxcontrast);
-	border-radius: var(--default-clickable-area);
-	background: transparent;
+	padding: 0 4px 0 calc(var(--default-grid-baseline) * 3);
+	border: none;
+	border-radius: var(--border-radius-element);
+	background: var(--color-background-dark);
 	color: var(--color-main-text);
 	font: inherit;
 	font-size: var(--font-size-small);
+	line-height: 1;
+	white-space: nowrap;
 	cursor: pointer;
+}
+
+.pt-spots__captures-toggle:hover {
+	background: var(--color-background-hover);
+}
+
+.pt-spots__icon {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: var(--default-clickable-area);
+	height: var(--default-clickable-area);
+	padding: 0;
+	border: none;
+	border-radius: var(--border-radius-element);
+	background: transparent;
+	color: var(--color-text-maxcontrast);
+	cursor: pointer;
+	opacity: 0;
+}
+
+.pt-spots__row:hover .pt-spots__icon,
+.pt-spots__row:focus-within .pt-spots__icon,
+.pt-spots__icon:focus-visible {
+	opacity: 1;
+}
+
+@media (hover: none) {
+	.pt-spots__icon {
+		opacity: 1;
+	}
+}
+
+.pt-spots__rename {
+	flex-grow: 1;
+	min-width: 0;
+	padding: 4px;
+}
+
+.pt-spots__input {
+	width: 100%;
+	box-sizing: border-box;
+	min-height: var(--default-clickable-area);
+	margin: 0;
 }
 
 .pt-spots__captures {
@@ -207,7 +299,8 @@ const expanded = ref(null)
 }
 
 @media (pointer: coarse) {
-	.pt-spots__badge,
+	.pt-spots__captures-toggle,
+	.pt-spots__icon,
 	.pt-spots__capture {
 		min-height: var(--clickable-area-large);
 	}

@@ -25,6 +25,11 @@
 			<p class="pt-form__hint">
 				{{ t('File: {file}', { file: capture.file }) }}
 			</p>
+			<NcCheckboxRadioSwitch type="switch"
+				:model-value="renameFiles"
+				@update:model-value="$emit('update:renameFiles', $event)">
+				{{ t('Name the image files after the spot when saving') }}
+			</NcCheckboxRadioSwitch>
 
 			<section class="pt-form__section">
 				<h3 class="pt-form__heading">
@@ -58,6 +63,7 @@ import { computed } from 'vue'
 import { t } from '../l10n.js'
 import { mdiCompassOutline, mdiTrashCanOutline } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
+import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
 import NcDateTimePickerNative from '@nextcloud/vue/components/NcDateTimePickerNative'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 import NcTextField from '@nextcloud/vue/components/NcTextField'
@@ -68,8 +74,9 @@ const props = defineProps({
 	spot: { type: Object, default: null },
 	capture: { type: Object, default: null },
 	aligning: { type: Boolean, default: false },
+	renameFiles: { type: Boolean, default: true },
 })
-const emit = defineEmits(['rename', 'set-date', 'align', 'remove'])
+const emit = defineEmits(['rename', 'set-date', 'align', 'remove', 'update:renameFiles'])
 
 const date = computed(() => props.capture ? new Date(props.capture.date) : null)
 

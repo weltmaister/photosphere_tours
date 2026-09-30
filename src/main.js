@@ -83,6 +83,37 @@ registerFileAction({
 	},
 })
 
+// Label next to 360-Rundgang.json, so nobody deletes it by accident
+const FILE_HINT = () => t(APP, 'This file holds the walkthrough: spots, view directions and site visits. Deleting or renaming it removes the walkthrough – the images stay.')
+
+registerFileAction({
+	id: 'photosphere-tours-label',
+	displayName: () => t(APP, 'What is this file?'),
+	iconSvgInline: () => ICON,
+	order: 100,
+	enabled: ({ nodes }) => nodes.length === 1 && isTourFile(nodes[0]),
+	// the label is rendered inline; the action itself stays in the ⋯ menu
+	renderInline: async () => {
+		const label = document.createElement('span')
+		label.textContent = t(APP, '360° walkthrough – do not delete')
+		label.title = FILE_HINT()
+		Object.assign(label.style, {
+			padding: '2px 8px',
+			borderRadius: 'var(--border-radius-element)',
+			background: 'var(--color-primary-element-light)',
+			color: 'var(--color-main-text)',
+			fontSize: 'var(--font-size-small)',
+			whiteSpace: 'nowrap',
+		})
+		return label
+	},
+	exec: async () => {
+		const { showInfo } = await import('@nextcloud/dialogs')
+		showInfo(FILE_HINT())
+		return null
+	},
+})
+
 registerFileAction({
 	id: 'photosphere-tours-folder',
 	displayName: () => t(APP, 'Open as 360° walkthrough'),

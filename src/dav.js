@@ -43,7 +43,7 @@ export function urlFor(rootUrl, path) {
  * for If-Match: servers that compress responses append a suffix to it
  * (e.g. `"…-zstd"`), and the conditional PUT then always fails with 412.
  */
-async function getEtag(url) {
+export async function getEtag(url) {
 	const response = await axios.request({
 		method: 'PROPFIND',
 		url,
@@ -169,4 +169,25 @@ export async function readStart(url, bytes = 65536) {
 /** Upload binary data, e.g. a floor plan converted from PDF. */
 export async function writeBlob(url, blob) {
 	await axios.put(url, blob, { headers: { 'Content-Type': blob.type || 'application/octet-stream' } })
+}
+
+/**
+ * Rename or move a file without overwriting anything.
+ *
+ * @return {Promise<boolean>} false if the target already exists
+ */
+export async function moveFile(fromUrl, toUrl) {
+	try {
+		await axios.request({
+			method: 'MOVE',
+			url: fromUrl,
+			headers: { Destination: new URL(toUrl, window.location.href).href, Overwrite: 'F' },
+		})
+		return true
+	} catch (e) {
+		if (e.response?.status === 412) {
+			return false
+		}
+		throw e
+	}
 }

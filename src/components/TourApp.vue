@@ -106,7 +106,9 @@
 					</h3>
 					<SpotList class="pt-side__list"
 						:rows="spotRows"
+						:editable="canEdit"
 						@select="selectSpot"
+						@rename="renameFromList"
 						@pick-capture="pickCapture" />
 				</div>
 				<div class="pt-side__resize"
@@ -198,6 +200,8 @@
 						:spot="currentSpot"
 						:capture="currentCapture"
 						:aligning="aligning"
+						:rename-files="renameFilesOnSave"
+						@update:rename-files="renameFilesOnSave = $event"
 						@rename="rename"
 						@set-date="setDate"
 						@align="toggleAlign"
@@ -247,7 +251,9 @@
 							@select="selectSpot" />
 						<SpotList v-else
 							:rows="spotRows"
+							:editable="canEdit"
 							@select="selectSpot"
+							@rename="renameFromList"
 							@pick-capture="pickCapture" />
 					</div>
 				</template>
@@ -311,9 +317,10 @@ import SiteVisits from './SiteVisits.vue'
 import SpotForm from './SpotForm.vue'
 import SpotList from './SpotList.vue'
 import { Cancelled, choosePlan } from '../create.js'
-import { ConflictError, listFolder, locate, readStart, readText, urlFor, writeText } from '../dav.js'
+import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readText, urlFor, writeText } from '../dav.js'
 import { exifDate } from '../exif.js'
-import { classifyFolder, newerPlan } from '../folder.js'
+import { classifyFolder, newerPlan, pngNameFor } from '../folder.js'
+import { roomLabels, suggestName } from '../rooms.js'
 import { displayDate, t } from '../l10n.js'
 import {
 	TourError,
@@ -327,6 +334,7 @@ import {
 	dateFromFilename,
 	formatDate,
 	parseTour,
+	renamedFile,
 	resolvePath,
 	serializeTour,
 	sphereCorrection,
@@ -639,6 +647,7 @@ async function loadImages() {
 		if (newer) {
 			setStatus('info', t('There is a newer floor plan in the folder: {file}', { file: newer }), t('Use it'), () => switchPlan(newer))
 		}
+		loadRooms()
 	} catch (e) {
 		setStatus('error', t('The images in this folder could not be loaded: {error}', { error: e.message }))
 	}
@@ -652,6 +661,8 @@ async function switchPlan(file = null) {
 		tour.value.plan = plan
 		planUrl.value = url
 		planSize.value = { w: img.naturalWidth, h: img.naturalHeight }
+		folderEntries = await listFolder(urlFor(location.rootUrl, location.dir))
+		loadRooms()
 		changed()
 		setStatus('success', t('Floor plan changed – not saved yet. The spots keep their places.'))
 	} catch (e) {
@@ -751,14 +762,48 @@ async function alignTo(target) {
 	setStatus('success', t('View direction set – not saved yet'))
 }
 
+/**
+ * Room names of the floor plan, when it was made from a PDF in the folder
+ * (the PNG next to it has the same name). Read once, in the background.
+ */
+let planRooms = []
+
+async function loadRooms() {
+	planRooms = []
+	const source = pdfSourceOf(tour.value.plan)
+	if (!source) {
+		return
+	}
+	try {
+		const { pdfText } = await import(/* webpackChunkName: "pdf" */ '../pdf.js')
+		planRooms = roomLabels(await pdfText(fileUrl(source)))
+	} catch {
+		// no suggestions then
+	}
+}
+
+function pdfSourceOf(plan) {
+	if (plan.includes('/') || !/\.png$/i.test(plan)) {
+		return null
+	}
+	const pdf = folderEntries.find(e => /\.pdf$/i.test(e.name) && pngNameFor(e.name) === plan)
+	return pdf?.name ?? null
+}
+
 async function onPlanPlace(point) {
 	if (aligning.value) {
 		alignTo(point)
 	} else if (selectedImage.value) {
 		const file = selectedImage.value
 		selectedImage.value = null
-		addSpot(tour.value, { ...point, file, fallbackDate: await fallbackDate(file) })
+		const spot = addSpot(tour.value, { ...point, file, fallbackDate: await fallbackDate(file) })
 		spotIndex.value = tour.value.spots.length - 1
+		const room = suggestName(planRooms, point, planSize.value)
+		if (room) {
+			spot.name = room
+			renamedSpots.add(spot)
+			setStatus('info', t('Name taken from the floor plan: {name}. You can change it under "Spot".', { name: room }))
+		}
 		changed()
 	}
 }
@@ -784,9 +829,31 @@ function onPlanMove(index, point) {
 	changed()
 }
 
+/** spots whose files should follow a new name on the next save */
+const renamedSpots = new Set()
+const renameFilesOnSave = ref(stored('renameFiles', true))
+watch(renameFilesOnSave, (v) => store('renameFiles', v))
+
 function rename(name) {
 	currentSpot.value.name = name
+	renamedSpots.add(currentSpot.value)
 	changed()
+}
+
+/** Rename from the spot list; outside the editor it is saved right away. */
+async function renameFromList(index, name) {
+	const spot = tour.value.spots[index]
+	if (!name.trim() || name === spot.name) {
+		return
+	}
+	spot.name = name.trim()
+	renamedSpots.add(spot)
+	changed()
+	if (!editing.value) {
+		hint.value = (await save())
+			? t('"{name}" saved.', { name: spot.name })
+			: (status.value?.text ?? '')
+	}
 }
 
 function setDate(date) {
@@ -819,9 +886,53 @@ async function removeCurrent() {
 	changed()
 }
 
+/**
+ * Rename the image files of spots whose name changed, so the files carry the
+ * spot names. Runs before the tour file is written; the tour's ETag is
+ * checked first so nothing is renamed when the save would fail anyway.
+ */
+async function renameFiles() {
+	if (!renameFilesOnSave.value || renamedSpots.size === 0) {
+		return
+	}
+	if (etag.value && (await getEtag(props.node.encodedSource)) !== etag.value) {
+		throw new ConflictError()
+	}
+	for (const spot of tour.value.spots) {
+		if (!renamedSpots.has(spot)) {
+			continue
+		}
+		for (const capture of spot.captures) {
+			const wanted = renamedFile(capture.file, capture.date, spot.name)
+			if (wanted === capture.file) {
+				continue
+			}
+			const target = await freeName(capture.file, wanted)
+			if (target) {
+				Object.keys(picked).forEach(key => { if (picked[key] === capture.file) picked[key] = target })
+				capture.file = target
+			}
+		}
+	}
+	renamedSpots.clear()
+}
+
+/** Move a file to `wanted`, or to "wanted (2)" etc. if that name is taken. */
+async function freeName(current, wanted) {
+	const dot = wanted.lastIndexOf('.')
+	for (let n = 1; n <= 20; n++) {
+		const candidate = n === 1 ? wanted : `${wanted.slice(0, dot)} (${n})${wanted.slice(dot)}`
+		if (await moveFile(fileUrl(current), fileUrl(candidate))) {
+			return candidate
+		}
+	}
+	return null
+}
+
 async function save() {
 	saving.value = true
 	try {
+		await renameFiles()
 		etag.value = await writeText(props.node.encodedSource, serializeTour(tour.value), etag.value ?? undefined)
 		dirty.value = false
 		setStatus('success', t('Walkthrough saved'))

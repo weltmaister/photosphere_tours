@@ -260,6 +260,27 @@ export function dateFromFilename(name) {
 	return m ? `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}` : null
 }
 
+/**
+ * File name that carries a spot's name: the backup pattern keeps its number,
+ * date and time ("001_2024-04-18_2007_<name>.jpg"), other files get date and
+ * time of the capture ("2025-06-25_1114_<name>.jpg"). The folder stays.
+ *
+ * @param {string} file current path relative to the tour folder
+ * @param {string} date capture date YYYY-MM-DDTHH:MM
+ * @param {string} name spot name
+ */
+export function renamedFile(file, date, name) {
+	const slash = file.lastIndexOf('/')
+	const dir = slash >= 0 ? file.slice(0, slash + 1) : ''
+	const base = file.slice(slash + 1)
+	const dot = base.lastIndexOf('.')
+	const ext = dot > 0 ? base.slice(dot) : ''
+	const safe = name.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim() || 'Standort'
+	const pattern = base.match(/^((?:\d{3}_)?\d{4}-\d{2}-\d{2}_\d{4,6}_)/)
+	const prefix = pattern ? pattern[1] : `${date.slice(0, 10)}_${date.slice(11, 13)}${date.slice(14, 16)}_`
+	return `${dir}${prefix}${safe}${ext}`
+}
+
 /** Readable spot name from a file name, without number, date and extension. */
 export function nameFromFilename(name) {
 	return name.split('/').pop()

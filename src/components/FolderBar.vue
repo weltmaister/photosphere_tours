@@ -12,7 +12,7 @@
 		<NcIconSvgWrapper class="photosphere-tours-bar__icon" :path="mdiPanoramaSphereOutline" :size="24" />
 		<div class="photosphere-tours-bar__text">
 			<strong>{{ state.value.mode === 'open' ? t('This folder is a 360° walkthrough') : t('{count} 360° images in this folder', { count: state.value.count }) }}</strong>
-			<span>{{ state.value.mode === 'open' ? t('Floor plan, spots and site visits in one view.') : t('Place them on a floor plan to walk through the building.') }}</span>
+			<span>{{ state.value.mode === 'open' ? t('Stored in "360-Rundgang.json" – please do not delete or rename that file.') : t('Place them on a floor plan to walk through the building.') }}</span>
 		</div>
 		<NcButton variant="primary" @click="state.value.open()">
 			<template #icon>

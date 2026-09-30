@@ -13,7 +13,9 @@
 		:class="{ 'pt-plan--crosshair': crosshair, 'pt-plan--auto': autoHeight }"
 		:style="rootStyle"
 		@wheel.prevent="onWheel"
-		@pointerdown="onPointerDown">
+		@pointerdown="onPointerDown"
+		@focusin="onFocusIn"
+		@scroll="onScroll">
 		<div class="pt-plan__content" :style="contentStyle">
 			<img :src="src"
 				class="pt-plan__image"
@@ -39,11 +41,46 @@
 				<span class="pt-pin__dot" aria-hidden="true" />
 			</button>
 		</div>
+		<!-- zoom is also on the wheel and two fingers; the buttons make it visible -->
+		<div class="pt-plan__controls" @pointerdown.stop>
+			<NcButton variant="secondary"
+				size="small"
+				:aria-label="t('Zoom in')"
+				:title="t('Zoom in')"
+				@click="zoomBy(1.5)">
+				<template #icon>
+					<NcIconSvgWrapper :path="mdiPlus" />
+				</template>
+			</NcButton>
+			<NcButton variant="secondary"
+				size="small"
+				:aria-label="t('Zoom out')"
+				:title="t('Zoom out')"
+				@click="zoomBy(1 / 1.5)">
+				<template #icon>
+					<NcIconSvgWrapper :path="mdiMinus" />
+				</template>
+			</NcButton>
+			<NcButton variant="secondary"
+				size="small"
+				:aria-label="t('Show the whole floor plan')"
+				:title="t('Show the whole floor plan')"
+				@click="fit">
+				<template #icon>
+					<NcIconSvgWrapper :path="mdiFitToScreenOutline" />
+				</template>
+			</NcButton>
+		</div>
 	</div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { mdiFitToScreenOutline, mdiMinus, mdiPlus } from '@mdi/js'
+import NcButton from '@nextcloud/vue/components/NcButton'
+import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
+
+import { t } from '../l10n.js'
 
 const props = defineProps({
 	src: { type: String, required: true },
@@ -106,6 +143,11 @@ function zoomAt(clientX, clientY, factor) {
 	const applied = next / scale.value
 	offset.value = { x: px - (px - offset.value.x) * applied, y: py - (py - offset.value.y) * applied }
 	scale.value = next
+}
+
+function zoomBy(factor) {
+	const box = root.value.getBoundingClientRect()
+	zoomAt(box.left + box.width / 2, box.top + box.height / 2, factor)
 }
 
 function onWheel(e) {
@@ -241,6 +283,28 @@ function onPinKey(e, index) {
 	emit('move', index, { x: clamp(spot.x + delta[0]), y: clamp(spot.y + delta[1]) })
 }
 
+// Panning is done with the transform only. A pin reached with Tab while it
+// is outside the visible part is panned into view instead of letting the
+// browser scroll the box, which would shift the buttons and every click.
+function onFocusIn(e) {
+	const pin = e.target.closest('.pt-pin')
+	if (!pin) {
+		return
+	}
+	const box = root.value.getBoundingClientRect()
+	const rect = pin.getBoundingClientRect()
+	const x = rect.left + rect.width / 2 - box.left
+	const y = rect.top + rect.height / 2 - box.top
+	if (x < 0 || y < 0 || x > box.width || y > box.height) {
+		offset.value = { x: offset.value.x + box.width / 2 - x, y: offset.value.y + box.height / 2 - y }
+	}
+}
+
+function onScroll() {
+	root.value.scrollLeft = 0
+	root.value.scrollTop = 0
+}
+
 let observer = null
 onMounted(() => {
 	observer = new ResizeObserver(() => fit())
@@ -256,6 +320,8 @@ defineExpose({ fit })
 .pt-plan {
 	position: relative;
 	overflow: hidden;
+	/* clip also rules out programmatic scrolling (focus, scrollIntoView) */
+	overflow: clip;
 	width: 100%;
 	height: 100%;
 	background: #ffffff;
@@ -286,6 +352,20 @@ defineExpose({ fit })
 	width: 100%;
 	height: 100%;
 	pointer-events: none;
+}
+
+.pt-plan__controls {
+	position: absolute;
+	right: calc(var(--default-grid-baseline) * 2);
+	bottom: calc(var(--default-grid-baseline) * 2);
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	cursor: default;
+}
+
+.pt-plan__controls :deep(.button-vue) {
+	box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
 }
 
 .pt-plan__cone {

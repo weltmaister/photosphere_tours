@@ -14,6 +14,7 @@ import {
 	parseTour,
 	rawYaw,
 	relativePath,
+	renamedFile,
 	resolvePath,
 	serializeTour,
 	sphereCorrection,
@@ -228,6 +229,26 @@ describe('dateFromFilename', () => {
 	it('reads common camera names', () => {
 		expect(dateFromFilename('IMG_20260930_143012_00_012.jpg')).toBe('2026-09-30T14:30')
 		expect(dateFromFilename('R0010042.JPG')).toBeNull()
+	})
+})
+
+describe('renamedFile', () => {
+	it('keeps number, date and time of the backup pattern', () => {
+		expect(renamedFile('001_2024-04-18_2007_Zimmer 2.jpg', '2024-04-18T20:07', 'Schlafzimmer'))
+			.toBe('001_2024-04-18_2007_Schlafzimmer.jpg')
+		expect(renamedFile('_aeltere_Versionen/2025-03-05_0228_Raum1 - Mitte2.jpg', '2025-03-05T02:28', 'Büro'))
+			.toBe('_aeltere_Versionen/2025-03-05_0228_Büro.jpg')
+	})
+
+	it('gives camera files date, time and name', () => {
+		expect(renamedFile('IMG_9327-HDR Panorama.jpg', '2025-06-25T11:14', 'Verkauf'))
+			.toBe('2025-06-25_1114_Verkauf.jpg')
+	})
+
+	it('removes characters that are not allowed in file names', () => {
+		expect(renamedFile('a.JPG', '2025-06-25T11:14', ' Lager / Keller: 1 '))
+			.toBe('2025-06-25_1114_Lager - Keller- 1.JPG')
+		expect(renamedFile('a.jpg', '2025-06-25T11:14', '   ')).toBe('2025-06-25_1114_Standort.jpg')
 	})
 })
 

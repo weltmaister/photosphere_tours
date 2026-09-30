@@ -17,6 +17,31 @@ GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', i
 const LONG_SIDE = 6000
 
 /**
+ * Text of page 1 with positions normalised to the page (0–1, y downwards) –
+ * the same frame as the PNG made by pdfToPng().
+ *
+ * @param {string} url WebDAV URL of the PDF
+ * @return {Promise<Array<{str: string, x: number, y: number}>>}
+ */
+export async function pdfText(url) {
+	const { data } = await axios.get(url, { responseType: 'arraybuffer' })
+	const doc = await getDocument({ data }).promise
+	try {
+		const page = await doc.getPage(1)
+		const viewport = page.getViewport({ scale: 1 })
+		const { items } = await page.getTextContent()
+		return items
+			.filter(item => item.str?.trim())
+			.map((item) => {
+				const [x, y] = viewport.convertToViewportPoint(item.transform[4], item.transform[5])
+				return { str: item.str, x: x / viewport.width, y: y / viewport.height }
+			})
+	} finally {
+		doc.destroy()
+	}
+}
+
+/**
  * @param {string} url WebDAV URL of the PDF
  * @return {Promise<Blob>} PNG of page 1 on white
  */
