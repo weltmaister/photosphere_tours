@@ -25,7 +25,7 @@ by Robin Windey. Works alongside that app: single images keep opening in its vie
     <bugs>https://github.com/weltmaister/photosphere_tours/issues</bugs>
     <repository>https://github.com/weltmaister/photosphere_tours.git</repository>
     <dependencies>
-        <nextcloud min-version="33" max-version="33"/>
+        <nextcloud min-version="33" max-version="34"/>
         <php min-version="8.2" max-version="8.5"/>
     </dependencies>
 </info>
