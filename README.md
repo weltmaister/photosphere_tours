@@ -73,7 +73,7 @@ npm run build     # webpack → js/
 make appstore     # build/artifacts/appstore/photosphere_tours.tar.gz
 ```
 
-Supported: Nextcloud 33 and 34. Needs a browser with WebGL 2.
+Supported: Nextcloud 33 and 34, desktop and phone. Needs a browser with WebGL 2.
 
 ## License
 

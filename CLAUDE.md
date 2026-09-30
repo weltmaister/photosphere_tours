@@ -1,7 +1,7 @@
 # CLAUDE.md — photosphere_tours
 
 Nextcloud app (NC 33–34) for 360° walkthroughs: a `360-Rundgang.json` in a folder of
-panoramas opens the panorama with the floor plan, capture points and a timeline.
+panoramas opens the panorama with the floor plan, a spot list and site visits.
 Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
 
 ## Constraints
@@ -16,23 +16,31 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   so view yaw 0 = plan-up.
 - **Keep it simple** (explicit wish of the owner): one folder = one walkthrough, no floor
   switching, no arrows inside the panorama, no compare view — until asked for.
-- `js/` is build output and gitignored; `make appstore` builds the tarball.
+- **Nextcloud look only**: `@nextcloud/vue` components and Nextcloud CSS variables, no own
+  colours, fonts or sizes. Rules: `docs/ux/gestaltung.md`. Terms and all texts:
+  `docs/ux/texte.md` (one term per thing: Rundgang, Grundriss, Standort, Aufnahme,
+  Begehung). Vue templates use `t()` from `src/l10n.js` (no double escaping).
+- `js/` is build output and gitignored; `make appstore` builds the tarball. Bump the
+  version on every deploy to a test instance, otherwise browsers keep the old script.
 - Never write into the owner's Nextcloud sync folders without asking. The HoloBuilder
   importer (`tools/holobuilder-import.mjs`) is a dry run unless `--write`; use `--out`
-  to write elsewhere.
+  to write elsewhere. No real names or project codes in the public repo.
 
 ## Layout
 
 - `src/main.js` – file action for `360-Rundgang.json`, "New → 360° walkthrough"
-- `src/viewer.js` – overlay: Photo Sphere Viewer + MapPlugin (plan) + SettingsPlugin
-  (captures of the current point) + timeline chips
-- `src/editor.js` – plan editor (own zoomable plan, inbox of unplaced images, align, save
-  with `If-Match`)
-- `src/tour.js` – pure logic, fully unit-tested (`tests/tour.test.js`)
+- `src/app.js` – mounts `TourApp.vue` as full-screen overlay
+- `src/components/TourApp.vue` – state and layout: header, side bar (plan + spot list,
+  resizable), panorama, site visits; editor (plan large, 520 px column with panorama and
+  tabs); phone: bottom sheet / tabs. One `PanoramaView` for all layouts (CSS grid areas).
+- `FloorPlan.vue` (zoom, pan, pinch, pin drag, arrow keys), `PanoramaView.vue` (PSV
+  core, no navbar), `SpotList.vue` (capture badge + per-spot capture choice),
+  `SiteVisits.vue`, `SpotForm.vue`, `NewImages.vue`
+- `src/tour.js` – pure logic, unit-tested (`tests/tour.test.js`)
 - `tools/holobuilder.js` + `holobuilder-import.mjs` – HoloBuilder backup import
-- `tools/l10n-build.mjs` – `l10n/de_DE.json` (formal, source) → de/de_DE js+json
+- `tools/l10n-build.mjs` (`l10n/de_DE.json` formal → de/de_DE) and `tools/l10n-check.mjs`
 
 ## Commands
 
-`npm test` · `npm run build` · `node tools/l10n-build.mjs` after changing strings ·
-`make appstore`
+`npm test` (vitest + translation coverage) · `npm run build` · `npm run l10n` after
+changing strings · `make appstore`
