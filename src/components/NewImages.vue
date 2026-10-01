@@ -9,6 +9,24 @@
 -->
 <template>
 	<div class="pt-new">
+		<!-- first: below a long list of images it would be out of reach -->
+		<section class="pt-new__plan">
+			<div class="pt-new__plan-text">
+				<h3 class="pt-new__heading">
+					{{ t('Floor plan') }}
+				</h3>
+				<p class="pt-new__hint">
+					{{ plan }}
+				</p>
+			</div>
+			<NcButton v-if="canChangePlan" variant="secondary" @click="$emit('change-plan')">
+				<template #icon>
+					<NcIconSvgWrapper :path="mdiFloorPlan" />
+				</template>
+				{{ t('Change floor plan') }}
+			</NcButton>
+		</section>
+
 		<NcEmptyContent v-if="images.length === 0"
 			:name="t('No new images')"
 			:description="t('Copy new 360° images into this folder and they will show up here.')">
@@ -31,7 +49,7 @@
 						:class="{ 'pt-new__item--selected': image.path === selected }"
 						:aria-pressed="image.path === selected ? 'true' : 'false'"
 						@click="$emit('select', image.path === selected ? null : image.path)">
-						<img v-if="image.fileid"
+						<img v-if="image.fileid && previews"
 							class="pt-new__thumb"
 							:src="thumbnail(image.fileid)"
 							alt=""
@@ -43,36 +61,26 @@
 			</ul>
 		</template>
 
-		<section class="pt-new__plan">
-			<h3 class="pt-new__heading">
-				{{ t('Floor plan') }}
-			</h3>
-			<p class="pt-new__hint">
-				{{ t('File: {file}', { file: plan }) }}
-			</p>
-			<NcButton variant="secondary" @click="$emit('change-plan')">
-				<template #icon>
-					<NcIconSvgWrapper :path="mdiFloorPlan" />
-				</template>
-				{{ t('Change floor plan') }}
-			</NcButton>
-		</section>
 	</div>
 </template>
 
 <script setup>
-import { t } from '../l10n.js'
 import { generateUrl } from '@nextcloud/router'
 import { mdiFloorPlan, mdiImagePlusOutline } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
+import { t } from '../l10n.js'
+
 defineProps({
 	/** [{ path, fileid }] */
 	images: { type: Array, required: true },
 	selected: { type: String, default: null },
 	plan: { type: String, required: true },
+	/** false on share pages: previews and the file picker need a login */
+	previews: { type: Boolean, default: true },
+	canChangePlan: { type: Boolean, default: true },
 })
 defineEmits(['select', 'change-plan'])
 
@@ -88,12 +96,16 @@ const thumbnail = (fileid) => generateUrl('/core/preview?fileId={id}&x=320&y=160
 
 .pt-new__plan {
 	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
 	gap: calc(var(--default-grid-baseline) * 2);
-	margin-top: calc(var(--default-grid-baseline) * 2);
-	padding-top: calc(var(--default-grid-baseline) * 4);
-	border-top: 1px solid var(--color-border);
+	padding-bottom: calc(var(--default-grid-baseline) * 3);
+	border-bottom: 1px solid var(--color-border);
+}
+
+.pt-new__plan-text {
+	min-width: 0;
 }
 
 .pt-new__heading {
@@ -157,7 +169,7 @@ const thumbnail = (fileid) => generateUrl('/core/preview?fileId={id}&x=320&y=160
 	display: block;
 	width: 100%;
 	aspect-ratio: 2 / 1;
-	border-radius: var(--border-radius);
+	border-radius: var(--border-radius-small);
 	background: var(--color-background-dark);
 	object-fit: cover;
 }

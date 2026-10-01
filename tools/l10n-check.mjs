@@ -24,12 +24,19 @@ const walk = (dir) => {
 }
 walk('src')
 
-// t('…') in Vue components (l10n.js helper) and t(APP, '…') in plain modules
-const pattern = /\bt\((?:APP,\s*)?(['"])((?:\\.|(?!\1).)*)\1/g
+// t('…') and plurals n('…', '…', count) from src/l10n.js; Nextcloud keeps a
+// plural under the key "_singular_::_plural_"
+const single = /\bt\((['"])((?:\\.|(?!\1).)*)\1/g
+const plural = /\bn\((['"])((?:\\.|(?!\1).)*)\1,\s*(['"])((?:\\.|(?!\3).)*)\3/g
+const unescape = (s) => s.replace(/\\(['"])/g, '$1')
 const used = new Set()
 for (const file of files) {
-	for (const match of readFileSync(file, 'utf8').matchAll(pattern)) {
-		used.add(match[2].replace(/\\(['"])/g, '$1'))
+	const source = readFileSync(file, 'utf8')
+	for (const match of source.matchAll(single)) {
+		used.add(unescape(match[2]))
+	}
+	for (const match of source.matchAll(plural)) {
+		used.add(`_${unescape(match[2])}_::_${unescape(match[4])}_`)
 	}
 }
 

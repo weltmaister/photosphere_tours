@@ -3,7 +3,7 @@
 Alle wichtigen Änderungen dieser App stehen in dieser Datei.
 Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
-## 0.4.7 – 2026-10-01
+## 0.4.8 – 2026-10-01
 
 Erste Veröffentlichung im Nextcloud App Store.
 

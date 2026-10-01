@@ -10,7 +10,6 @@ import {
 	capturesNewestFirst,
 	dateFromFilename,
 	emptyTour,
-	mapZoom,
 	parseTour,
 	rawYaw,
 	relativePath,
@@ -200,22 +199,6 @@ describe('orientation', () => {
 		const yaw = alignYaw({ yaw: 0 }, 0, { x: 0.5, y: 0.5 }, { x: 0.6, y: 0.4 }, { w: 2000, h: 1000 })
 		const bearing = Math.atan2(200, 100) * 180 / Math.PI
 		expect(yaw).toBeCloseTo((360 - bearing) % 360)
-	})
-})
-
-describe('mapZoom', () => {
-	it('lets the whole plan fit and starts on about a third of it', () => {
-		// 8000 px plan in a 280 px map: the whole plan is 3.5 %
-		const zoom = mapZoom({ w: 5656, h: 7999 }, 280)
-		expect(zoom.min).toBeCloseTo(280 / 7999 * 100 * 0.8)
-		expect(zoom.initial).toBeCloseTo(280 / 7999 * 100 * 3)
-		expect(zoom.max).toBe(200)
-	})
-
-	it('never starts beyond 1:1 for small plans', () => {
-		const zoom = mapZoom({ w: 400, h: 300 }, 280)
-		expect(zoom.initial).toBe(100)
-		expect(zoom.min).toBeLessThan(zoom.initial)
 	})
 })
 

@@ -13,6 +13,9 @@ import { createApp } from 'vue'
 import TourApp from './components/TourApp.vue'
 
 export function openTour(node) {
+	if (document.querySelector('.photosphere-tours-overlay')) {
+		return
+	}
 	const previousFocus = document.activeElement
 	const overlay = document.createElement('div')
 	overlay.className = 'photosphere-tours-overlay'
@@ -39,5 +42,4 @@ export function openTour(node) {
 	})
 	app.mount(overlay)
 	overlay.focus()
-	return app
 }

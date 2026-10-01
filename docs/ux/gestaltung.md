@@ -43,63 +43,53 @@ Fett nur für Titel, Buttons, Tabs und den gewählten Eintrag. Nie fett zum Herv
 
 ## Bausteine
 
-Nur Komponenten aus `@nextcloud/vue`. Eigene Bausteine gibt es nur für Grundriss und Zeitachse, die mit denselben Tokens gebaut werden.
+Nur Komponenten aus `@nextcloud/vue`. Eigene Bausteine gibt es nur dort, wo Nextcloud keinen passenden hat; sie nutzen dieselben Tokens.
 
 | Zweck | Baustein | Regel |
 |---|---|---|
-| Hauptaktion | `NcButton variant="primary"` | Genau eine je Bereich: „Speichern“ in der Seitenleiste, „Bearbeiten“ in der Kopfleiste |
-| Weitere Aktionen | `NcButton variant="secondary"` | z. B. „Blickrichtung festlegen“ |
-| Symbolaktion | `NcButton variant="tertiary"` mit `aria-label` und Tooltip | Schließen, Grundriss ein/aus, Zoom |
-| Entfernen | `NcButton variant="error"` in einem Dialog, im Formular `tertiary` mit Fehlerfarbe | Immer mit Rückfrage |
+| Hauptaktion | `NcButton variant="primary"` | Genau eine je Bereich: „Speichern“ im Editor, „Bearbeiten“ im Viewer |
+| Weitere Aktionen | `NcButton variant="secondary"` | z. B. „Blickrichtung festlegen“, „Rückgängig“ in einer Meldung |
+| Symbolaktion | `NcButton variant="tertiary"` mit `aria-label` und Tooltip | Schließen, Seitenleiste ein/aus, Zoom |
+| Entfernen | im Formular `tertiary` mit Fehlerfarbe, bestätigt über `showConfirmation` | Immer mit Rückfrage |
 | Eingabe | `NcTextField`, `NcDateTimePickerNative type="datetime-local"` | Beschriftung als Label, nicht als Platzhalter |
-| Auswahl | `NcSelect` (Aufnahme) | – |
-| Umschalter | `NcCheckboxRadioSwitch type="button"` als Segmentgruppe | Zeitachse, wenn ≤ 6 Begehungen |
-| Tabs | `NcAppSidebar`-Tabs bzw. `NcAppSidebarTab` | „Standort“, „Neue Bilder (n)“ |
-| Meldung in der Fläche | `NcNoteCard type="success"`, `"error"`, `"info"` | Ersetzt Toasts, die hinter dem Vollbild verschwinden |
+| Auswahl der Aufnahme | `NcCheckboxRadioSwitch type="radio"` im Editor, aufklappbare Liste in der Standortliste | – |
+| Begehungen | `SiteVisits.vue`: Segmentgruppe in der Fußleiste bzw. im Handy-Blatt | erst ab zwei Begehungen |
+| Tabs | `TabBar.vue` (ARIA-Tabs, Pfeiltasten) | „Standort“, „Neue Bilder (n)“; auf dem Handy auch „Grundriss“ |
+| Meldung in der Fläche | `NoteBar.vue` = `NcNoteCard` + optionale Aktion | Ersetzt Toasts, die hinter dem Vollbild verschwinden; im Editor schwebt sie über dem Grundriss, damit er sich nicht verschiebt |
 | Leerzustand | `NcEmptyContent` mit Icon, Titel und Text | „Keine neuen Bilder“, „Noch keine Standorte“ |
 | Dialog | `showConfirmation` aus `@nextcloud/dialogs` | Buttons nach [texte.md](texte.md) („Entfernen / Behalten“) |
-| Icons | `NcIconSvgWrapper` mit Pfaden aus `@mdi/js` | 20 px, eine Linienstärke |
+| Icons | `NcIconSvgWrapper` mit Pfaden aus `@mdi/js` | 20 px, kleine Symbole in Listen 18 px |
+| Grundriss | `FloorPlan.vue` (eigener Baustein, kein PSV-Plugin) | siehe unten |
 
 Größen: Alle Buttons und Felder haben die Höhe `--default-clickable-area`, auf Touch-Geräten `--clickable-area-large`. Symbolbuttons sind quadratisch.
 
 ## Layout
 
 ```
-┌───────────────────────────────────────────────────────────┐
-│ Kopfleiste (Titel · Standortname)   [Grundriss] [Bearbeiten] [✕] │  Höhe --header-height, Hintergrund Glas
-├───────────────────────────────────────────────────────────┤
-│ ┌──────────┐                                              │
-│ │Grundriss │                Panorama                      │  Grundriss eckig, einklappbar,
-│ │ (klein)  │                                              │  max. 30 % der Höhe
-│ └──────────┘                                              │
-├───────────────────────────────────────────────────────────┤
-│ Begehung [18.04.24][16.10.24][Neueste]   Aufnahme [▾ …]   [− +] │  Fußleiste, Höhe --header-height
-└───────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│ [◧] Titel · Standort, Datum               [Bearbeiten] [✕]     │  Kopfleiste, Höhe --header-height
+├───────────────┬────────────────────────────────────────────────┤
+│ Grundriss     │                                                │
+│ (zoombar)     │                 Panorama                       │  Seitenleiste 240–560 px,
+│ Standorte (n) │                                                │  Breite ziehbar, ausblendbar
+│ • Büro 1  2 ▾ │                                                │
+├───────────────┴────────────────────────────────────────────────┤
+│ Begehung [18.04.24][16.10.24][Neueste]                [− + ⛶]  │  Fußleiste
+└────────────────────────────────────────────────────────────────┘
 ```
 
-- **Keine schwebenden Leisten über dem Bild.** Kopf- und Fußleiste sind feste Flächen mit Glas-Hintergrund. Das Panorama liegt dazwischen und wird nie verdeckt.
-- **Die PSV-Navbar entfällt** (`navbar: false`). Zoom, Vollbild und Aufnahmeauswahl sitzen in Kopf- oder Fußleiste.
-- **Der Grundriss im Viewer** (MapPlugin) ist eckig mit `--border-radius-container` und bekommt Glas-Hintergrund. Größe `min(30vh, 280px)`, einklappbar über den Button in der Kopfleiste. Die Kompassmarken und die Prozentanzeige fallen weg.
-- **Der Editor ist eine Seitenleiste** nach der in Schritt 4 gewählten Variante. Sie ist mindestens 360 px breit, und ihr Inhalt scrollt, nicht die ganze Fläche.
-- **Schmal (< 768 px):** Die Seitenleiste wird zum unteren Blatt (50 % der Höhe). Die Zeitachse zeigt dann nur die Auswahl statt der Segmente.
+- **Keine schwebenden Leisten über dem Bild.** Kopf- und Fußleiste sind feste Flächen. Das Panorama liegt dazwischen und wird nie verdeckt.
+- **Die PSV-Navbar entfällt** (`navbar: false`). Zoom und Vollbild sitzen in der Fußleiste, die Wahl einer Aufnahme in der Standortliste.
+- **Editor:** Grundriss groß links; rechts eine Spalte von 520 px mit Panorama (292 px hoch) und den Tabs.
+- **Schmal (< 768 px):** Der Viewer zeigt die Seitenleiste als unteres Blatt (50 % der Höhe) mit den Tabs „Grundriss“ und „Standorte“; die Begehungen bleiben darunter sichtbar. Der Editor hat drei Tabs unter dem Panorama.
 
-## Panorama-Fläche
+## Grundriss und Panorama
 
-Das Panorama selbst hat keinen Theme-Hintergrund. Alles, was darüber liegt (Standort-Tooltips, Blickkegel, Ladeanzeige), nimmt Glas-Hintergrund und Nextcloud-Schrift.
+Der Grundriss liegt immer auf Weiß, weil Pläne schwarz auf weiß gezeichnet sind – auch im dunklen Theme. Deshalb haben Punkte und Blickkegel feste Farben mit hohem Kontrast zum Plan statt Theme-Farben: Punkt weiß mit dunklem Rand, aktueller Punkt in `--color-primary-element`, ausgegraut grau. Punkte sind 34 px groß, auf Touch-Geräten 48 px.
 
-PSV bringt keine CSS-Variablen mit. Die Angleichung läuft deshalb über Selektoren unter `.pt-overlay`:
+Bedienung: Mausrad und zwei Finger zoomen, Ziehen verschiebt, Buttons unten rechts (+, −, ganzer Plan). In der Seitenleiste scrollt das Mausrad die Leiste, gezoomt wird dort mit Strg.
 
-| PSV-Teil | Anpassung |
-|---|---|
-| `.psv-container` | `font-family: var(--font-face)`, `font-size: var(--default-font-size)` |
-| `.psv-tooltip`, `.psv-map__tooltip` | Glas-Hintergrund, `--color-main-text`, `--border-radius-element`, Schrift Hinweis-Stufe |
-| `.psv-map` | Eckig, `--border-radius-container`, Rahmen `--color-border`, ohne Kompassring |
-| `.psv-map__toolbar` | ausblenden (Zoom über die Fußleiste) |
-| `.psv-loader` | Farbe `--color-primary-element` |
-| `.psv-notification` | nicht verwenden, stattdessen `NcNoteCard` in der Kopfleiste |
-| Standort-Punkte (MapPlugin `spotStyle`) | Farbe und Rand aus `--color-primary-element` bzw. `--color-main-background`, Größe 16 px, Hover 20 px. Ausgegraut mit `--color-text-maxcontrast` |
-
-Farben für das Canvas des MapPlugins (es akzeptiert keine CSS-Variablen) werden beim Öffnen einmal mit `getComputedStyle(document.body)` gelesen. Damit gilt auch dort die Instanzfarbe.
+PSV bringt keine CSS-Variablen mit. Angepasst werden nur die Schrift des Containers (`--font-face`) und die Farbe der Ladeanzeige (`--color-primary-element`); `.psv-notification` wird nicht verwendet.
 
 ## Zustände
 
@@ -115,7 +105,8 @@ Farben für das Canvas des MapPlugins (es akzeptiert keine CSS-Variablen) werden
 
 - Jeder Symbolbutton hat `aria-label` und Tooltip mit demselben Text.
 - Standorte im Editor sind per Tastatur erreichbar (Tab) und verschiebbar (Pfeiltasten, mit Umschalt in größeren Schritten).
-- Escape schließt erst Menüs und Dialoge, dann den Blickrichtungs-Modus, zuletzt den Rundgang.
+- Escape schließt erst Menüs und Dialoge, dann den Blickrichtungs-Modus bzw. die Bildauswahl, dann den Editor, zuletzt den Rundgang.
+- Tabs folgen dem ARIA-Muster (Pfeiltasten, Pos1/Ende); Meldungen werden zusätzlich über eine `aria-live`-Region vorgelesen.
 - Kontrast: Text auf Glas-Hintergrund mindestens 4,5 : 1, in Hell und Dunkel prüfen.
 
 ## Was nicht

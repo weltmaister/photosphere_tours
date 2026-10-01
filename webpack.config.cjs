@@ -42,6 +42,9 @@ module.exports = (env, argv) => ({
 	},
 	plugins: [
 		new VueLoaderPlugin(),
+		// the file picker pulls in NcDateTimePicker with ~90 date-fns locales that
+		// are never loaded here; it falls back to English when one is missing
+		new webpack.IgnorePlugin({ resourceRegExp: /^date-fns\/locale\/(?!en-US$)/ }),
 		new webpack.DefinePlugin({
 			__VUE_OPTIONS_API__: true,
 			__VUE_PROD_DEVTOOLS__: false,

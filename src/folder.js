@@ -8,7 +8,7 @@
  * candidates. Only the folder itself counts – subfolders are ignored (they
  * often hold copies, e.g. compressed versions).
  */
-import { TOUR_FILENAME } from './tour.js'
+import { TOUR_FILENAME } from './constants.js'
 
 const JPEG_RE = /\.jpe?g$/i
 const PLAN_RE = /\.(pdf|png|webp|svg)$/i
@@ -23,27 +23,28 @@ export function pngNameFor(pdfName) {
 }
 
 /**
- * @param {Array<{name: string, isFolder: boolean, mime?: string, mtime?: Date, panorama?: boolean|null}>} entries
+ * @param {Array<{name: string, isFolder: boolean, mtime?: Date, panorama?: boolean|null}>} entries
  *   direct children of the folder; `panorama` is true/false when the
  *   files_photospheres app reported it, null when unknown
- * @return {{ hasTour: boolean, panoramas: string[], knownPanoramas: number, plans: string[] }}
+ * @return {{ hasTour: boolean, panoramas: string[], plans: string[], offer: number }}
+ *   offer: number of 360° images to mention when proposing a walkthrough, 0 for none
  */
 export function classifyFolder(entries) {
 	const files = entries.filter(e => !e.isFolder)
-	const panoramas = files.filter(e => JPEG_RE.test(e.name) && e.panorama !== false).map(e => e.name)
-	const knownPanoramas = files.filter(e => JPEG_RE.test(e.name) && e.panorama === true).length
+	const jpegs = files.filter(e => JPEG_RE.test(e.name))
+	const panoramas = jpegs.filter(e => e.panorama !== false).map(e => e.name)
 	const names = new Set(files.map(e => e.name))
 	const plans = files
 		.filter(e => PLAN_RE.test(e.name) || (JPEG_RE.test(e.name) && e.panorama !== true && PLAN_NAME_RE.test(e.name)))
 		// a PDF that was already converted is offered as its PNG
 		.filter(e => !(isPdf(e.name) && names.has(pngNameFor(e.name))))
 		.map(e => e.name)
-	return {
-		hasTour: names.has(TOUR_FILENAME),
-		panoramas,
-		knownPanoramas,
-		plans,
-	}
+	const known = jpegs.filter(e => e.panorama === true).length
+	// without files_photospheres nothing is known about the images: a few JPEGs
+	// next to a floor plan are a good enough sign, an ordinary photo folder is not
+	const unknown = jpegs.length > 0 && jpegs.every(e => e.panorama === null || e.panorama === undefined)
+	const offer = known || (unknown && panoramas.length >= 2 && plans.length > 0 ? panoramas.length : 0)
+	return { hasTour: names.has(TOUR_FILENAME), panoramas, plans, offer }
 }
 
 /**
@@ -60,10 +61,13 @@ export function newerPlan(entries, currentPlan) {
 		return null
 	}
 	const since = current.mtime.getTime()
+	// the PDF the current PNG was made from, updated since: convert it again
+	const source = entries.find(e => isPdf(e.name) && pngNameFor(e.name) === currentPlan)
+	if (source?.mtime && source.mtime.getTime() > since) {
+		return source.name
+	}
 	const candidates = classifyFolder(entries).plans
 		.filter(name => name !== currentPlan)
-		// the PDF the current PNG was made from is not "newer"
-		.filter(name => !(isPdf(name) && pngNameFor(name) === currentPlan))
 		.map(name => entries.find(e => e.name === name))
 		.filter(e => e.mtime && e.mtime.getTime() > since)
 		.sort((a, b) => b.mtime - a.mtime)

@@ -11,8 +11,8 @@
 	<div v-if="state.value" class="photosphere-tours-bar">
 		<NcIconSvgWrapper class="photosphere-tours-bar__icon" :path="mdiPanoramaSphereOutline" :size="24" />
 		<div class="photosphere-tours-bar__text">
-			<strong>{{ state.value.mode === 'open' ? t('This folder is a 360° walkthrough') : t('{count} 360° images in this folder', { count: state.value.count }) }}</strong>
-			<span>{{ state.value.mode === 'open' ? t('Stored in "360-Rundgang.json" – please do not delete or rename that file.') : t('Place them on a floor plan to walk through the building.') }}</span>
+			<strong>{{ state.value.mode === 'open' ? t('This folder is a 360° walkthrough') : n('{count} 360° image in this folder', '{count} 360° images in this folder', state.value.count) }}</strong>
+			<span>{{ secondLine }}</span>
 		</div>
 		<NcButton variant="primary" @click="state.value.open()">
 			<template #icon>
@@ -28,11 +28,23 @@ import { mdiPanoramaSphereOutline, mdiPlay, mdiPlus } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
-import { t } from '../l10n.js'
+import { computed } from 'vue'
 
-defineProps({
-	/** ref: null | { mode: 'open'|'create', count?: number, open: Function } */
+import { n, t } from '../l10n.js'
+
+const props = defineProps({
+	/** ref: null | { mode: 'open'|'create', count?: number, readOnly?: boolean, open: Function } */
 	state: { type: Object, required: true },
+})
+
+const secondLine = computed(() => {
+	const state = props.state.value
+	if (state.mode === 'create') {
+		return t('Place them on a floor plan to walk through the building.')
+	}
+	return state.readOnly
+		? t('Floor plan, spots and site visits in one view.')
+		: t('Stored in "360-Rundgang.json" – please do not delete or rename that file.')
 })
 </script>
 

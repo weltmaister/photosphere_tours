@@ -78,7 +78,7 @@ Braucht einen Browser mit WebGL 2. Läuft neben *Photo Sphere Viewer*
 (files_photospheres), der weiter einzelne Panoramen öffnet. Basiert auf dieser App von
 Robin Windey. Sprachen: Englisch, Deutsch.
     ]]></description>
-    <version>0.4.7</version>
+    <version>0.4.8</version>
     <licence>AGPL-3.0-or-later</licence>
     <author>weltmaister</author>
     <author>Robin Windey (files_photospheres)</author>

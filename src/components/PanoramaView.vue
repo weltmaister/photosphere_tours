@@ -94,8 +94,15 @@ onBeforeUnmount(() => {
 	viewer = null
 })
 
-watch(() => props.url, (url) => {
+// One watcher for both: a new image brings its own correction, and setting
+// that on the old image first would turn it just before the fade
+watch(() => [props.url, props.correction?.pan], ([url], [previousUrl]) => {
 	if (!viewer || !url) {
+		return
+	}
+	if (url === previousUrl) {
+		// same image, new view direction (set in the editor)
+		viewer.setOption('sphereCorrection', props.correction)
 		return
 	}
 	viewer.setPanorama(url, {
@@ -105,12 +112,6 @@ watch(() => props.url, (url) => {
 	}).catch(() => {
 		// interrupted by the next click, or reported by the viewer itself
 	})
-})
-
-watch(() => props.correction, (correction, previous) => {
-	if (viewer && correction && previous && correction.pan !== previous.pan) {
-		viewer.setOption('sphereCorrection', correction)
-	}
 })
 
 defineExpose({

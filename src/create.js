@@ -40,11 +40,12 @@ export function tourNode(folder, id = undefined) {
  *
  * @param {object} folder Files node or { source, path, root, owner } of the folder
  * @param {Array} entries listFolder() of the folder
- * @param {{ auto?: boolean, file?: string }} options auto: take the only
- *   candidate without asking; file: use this file of the folder
+ * @param {{ auto?: boolean, file?: string, onWork?: Function }} options auto: take
+ *   the only candidate without asking; file: use this file of the folder;
+ *   onWork: called once the plan is chosen, before the slow part
  * @return {Promise<string>}
  */
-export async function choosePlan(folder, entries, { auto = true, file = null } = {}) {
+export async function choosePlan(folder, entries, { auto = true, file = null, onWork = null } = {}) {
 	const candidates = classifyFolder(entries).plans
 	let name = file
 	let absolute = null
@@ -80,6 +81,7 @@ export async function choosePlan(folder, entries, { auto = true, file = null } =
 	if (pngEntry && pdfEntry && pngEntry.mtime >= pdfEntry.mtime) {
 		return png
 	}
+	onWork?.()
 	const rootUrl = folder.source.slice(0, folder.source.length - folder.path.length)
 	const { pdfToPng } = await import(/* webpackChunkName: "pdf" */ './pdf.js')
 	const blob = await pdfToPng(urlFor(rootUrl, path))
@@ -100,14 +102,16 @@ export async function choosePlan(folder, entries, { auto = true, file = null } =
 /**
  * Create the walkthrough file of a folder. Resolves with its node, or with
  * the existing one when the folder already has a walkthrough.
+ *
+ * @param {Function} onWork called once the floor plan is chosen
  */
-export async function createTour(folder) {
+export async function createTour(folder, onWork = null) {
 	const entries = await listFolder(folder.encodedSource)
 	const node = tourNode(folder)
 	if (classifyFolder(entries).hasTour) {
 		return node
 	}
-	const plan = await choosePlan(folder, entries)
+	const plan = await choosePlan(folder, entries, { onWork })
 	await writeText(node.encodedSource, serializeTour(emptyTour(folder.basename, plan)), null)
 	const created = tourNode(folder, await getFileId(node.encodedSource).catch(() => null) ?? undefined)
 	announce(created)

@@ -12,7 +12,7 @@
 		class="pt-plan"
 		:class="{ 'pt-plan--crosshair': crosshair, 'pt-plan--auto': autoHeight }"
 		:style="rootStyle"
-		@wheel.prevent="onWheel"
+		@wheel="onWheel"
 		@pointerdown="onPointerDown"
 		@focusin="onFocusIn"
 		@scroll="onScroll">
@@ -93,6 +93,8 @@ const props = defineProps({
 	crosshair: { type: Boolean, default: false },
 	/** height follows the width (side bar); otherwise the plan fills its box */
 	autoHeight: { type: Boolean, default: false },
+	/** a click just beside a spot means that spot; off while setting a view direction */
+	snap: { type: Boolean, default: true },
 })
 const emit = defineEmits(['select', 'move', 'place'])
 
@@ -151,6 +153,11 @@ function zoomBy(factor) {
 }
 
 function onWheel(e) {
+	// in the side bar the wheel scrolls the side bar; zoom with Ctrl like a page
+	if (props.autoHeight && !e.ctrlKey && !e.metaKey) {
+		return
+	}
+	e.preventDefault()
 	zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0015))
 }
 
@@ -179,9 +186,13 @@ function onPointerDown(e) {
 		return
 	}
 	const pin = e.target.closest('.pt-pin')
+	const index = pin ? Number(pin.dataset.index) : null
+	// on touch most pans start on some spot: only the selected one can be dragged
+	const draggable = index !== null && (e.pointerType !== 'touch' || props.spots[index]?.state === 'current')
 	gesture = {
 		type: 'press',
-		index: pin ? Number(pin.dataset.index) : null,
+		index,
+		draggable,
 		start: { x: e.clientX, y: e.clientY },
 		startOffset: { ...offset.value },
 		moved: false,
@@ -212,7 +223,7 @@ function onPointerMove(e) {
 	if (!gesture.moved) {
 		return
 	}
-	if (gesture.index !== null && props.editable) {
+	if (gesture.draggable && props.editable) {
 		gesture.dragTo = toPlan(e.clientX, e.clientY)
 		emit('move', gesture.index, gesture.dragTo)
 	} else {
@@ -233,7 +244,7 @@ function onPointerUp(e) {
 	if (!g || g.type !== 'press' || g.moved || e.type === 'pointercancel') {
 		return
 	}
-	const index = g.index ?? nearestSpot(e.clientX, e.clientY)
+	const index = g.index ?? (props.snap ? nearestSpot(e.clientX, e.clientY) : null)
 	if (index !== null) {
 		emit('select', index)
 	} else {
@@ -312,8 +323,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => observer?.disconnect())
 watch(() => [props.src, props.size.w, props.size.h], () => fit())
-
-defineExpose({ fit })
 </script>
 
 <style scoped>
@@ -334,6 +343,8 @@ defineExpose({ fit })
 .pt-plan--auto {
 	height: auto;
 	max-height: 70vh;
+	/* one finger scrolls the side bar, two fingers zoom and pan the plan */
+	touch-action: pan-y;
 }
 
 .pt-plan--crosshair {

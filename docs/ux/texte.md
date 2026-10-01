@@ -62,7 +62,7 @@ Regeln:
 
 ### Seitenleiste „Grundriss und Standorte“ (neu)
 
-Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie steckt in der Standortliste: Einträge mit mehreren Aufnahmen tragen eine Markierung (Uhr + Anzahl) und lassen sich aufklappen.
+Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie steckt in der Standortliste: Einträge mit mehreren Aufnahmen zeigen „{n} Aufnahmen“ und lassen sich aufklappen; im Editor wählt man die Aufnahme unter „Standort“.
 
 | Stelle | de | de_DE | en |
 |---|---|---|---|
@@ -84,7 +84,7 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 |---|---|---|---|
 | Tooltip Standort | {name} · {date} | = | {name} · {date} |
 | Tooltip Standort grau | {name} · erst ab {date} | = | {name} · from {date} on |
-| Klick auf grauen Standort | {name} wurde erst am {date} aufgenommen. Wähl unten eine spätere Begehung. | … Wählen Sie … | {name} was first captured on {date}. Pick a later site visit below. |
+| Klick auf grauen Standort | Am {day} gibt es hier keine Aufnahme – gezeigt wird die vom {date}. | = | No capture here on {day} – showing the one from {date}. |
 | Karte vergrößern / verkleinern | Grundriss vergrößern / Grundriss verkleinern | = | Enlarge / shrink floor plan |
 | Karte zurücksetzen | Auf aktuellen Standort zentrieren | = | Center on current spot |
 | Zoom | Vergrößern / Verkleinern | = | Zoom in / Zoom out |
@@ -153,7 +153,9 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Fehler | Speichern fehlgeschlagen: {error}. Prüf die Verbindung und versuch es noch einmal. | … Prüfen Sie … versuchen Sie … | Saving failed: {error}. Check your connection and try again. |
 | Dialog Aufnahme: Titel | Aufnahme vom {date} entfernen? | = | Remove the capture from {date}? |
 | Dialog Standort: Titel | Standort „{name}“ entfernen? | = | Remove spot "{name}"? |
-| Dialog: Text | Sie verschwindet aus dem Rundgang. Die Bilddatei bleibt im Ordner. | = | It disappears from the walkthrough. The image file stays in the folder. |
+| Dialog: Text (Standort) | Der Standort verschwindet aus dem Rundgang. Seine Bilddatei bleibt im Ordner. | = | The spot disappears from the walkthrough. Its image file stays in the folder. |
+| Dialog: Text (Aufnahme) | Die Aufnahme verschwindet aus dem Rundgang. Die Bilddatei bleibt im Ordner. | = | The capture disappears from the walkthrough. The image file stays in the folder. |
+| Meldung nach Klick auf einen Standort mit gewähltem Bild | Als weitere Aufnahme zu „{name}“ hinzugefügt. [Rückgängig] | = | Added as another capture of "{name}". [Undo] |
 | Dialog: Buttons | Entfernen / Behalten | = | Remove / Keep |
 | Ungespeichert: Titel | Änderungen speichern? | = | Save changes? |
 | Ungespeichert: Text | Du hast den Rundgang geändert, aber noch nicht gespeichert. | Sie haben … | You changed the walkthrough but have not saved it yet. |

@@ -9,7 +9,7 @@
   permission the name can be changed right here.
 -->
 <template>
-	<ul class="pt-spots">
+	<ul ref="list" class="pt-spots">
 		<li v-for="(row, index) in rows" :key="index" class="pt-spots__item">
 			<div class="pt-spots__row" :class="{ 'pt-spots__row--current': row.state === 'current' }">
 				<form v-if="renaming === index" class="pt-spots__rename" @submit.prevent="commit(index)">
@@ -44,7 +44,7 @@
 					type="button"
 					class="pt-spots__captures-toggle"
 					:aria-expanded="expanded === index ? 'true' : 'false'"
-					:title="row.badgeLabel"
+					:title="row.capturesLabel"
 					@click="expanded = expanded === index ? null : index">
 					{{ t('{count} captures', { count: row.captures.length }) }}
 					<NcIconSvgWrapper :path="expanded === index ? mdiChevronUp : mdiChevronDown" :size="18" />
@@ -53,7 +53,7 @@
 			<div v-if="expanded === index"
 				class="pt-spots__captures"
 				role="radiogroup"
-				:aria-label="row.badgeLabel">
+				:aria-label="row.capturesLabel">
 				<button v-for="(capture, cIndex) in row.captures"
 					:key="cIndex"
 					type="button"
@@ -70,14 +70,14 @@
 </template>
 
 <script setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { mdiChevronDown, mdiChevronUp, mdiPencilOutline } from '@mdi/js'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
 import { t } from '../l10n.js'
 
-defineProps({
-	/** [{ name, date, state, badgeLabel, captures: [{ label, value, checked }] }] */
+const props = defineProps({
+	/** [{ name, date, state, capturesLabel, captures: [{ label, value, checked }] }] */
 	rows: { type: Array, required: true },
 	/** show the rename button (write permission) */
 	editable: { type: Boolean, default: false },
@@ -88,6 +88,13 @@ const expanded = ref(null)
 const renaming = ref(null)
 const draft = ref('')
 const field = ref(null)
+const list = ref(null)
+
+// a spot chosen on the plan scrolls into view in a long list
+watch(() => props.rows.findIndex(row => row.state === 'current'), async () => {
+	await nextTick()
+	list.value?.querySelector('[aria-current="true"]')?.scrollIntoView({ block: 'nearest' })
+})
 
 async function startRename(index, name) {
 	renaming.value = index

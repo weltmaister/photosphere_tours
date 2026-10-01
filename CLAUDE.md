@@ -28,18 +28,24 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
 
 ## Layout
 
-- `src/main.js` – file action for `360-Rundgang.json`, "New → 360° walkthrough"
+- `src/main.js` – runs on every Files page, keep it small: file actions, "New → 360°
+  walkthrough", hint bar. Heavy parts are lazy chunks (`folder`, `create`, `viewer`, `pdf`);
+  the bar's folder check must stay in the small `folder` chunk.
+- `src/constants.js` (app id, file name), `src/l10n.js` (`t`, `n` plurals, `errorText`)
 - `src/app.js` – mounts `TourApp.vue` as full-screen modal dialog (page behind inert)
-- `src/folder.js` (what a folder holds; only the folder itself), `src/create.js` (create
-  a walkthrough, choose/convert the plan), `src/pdf.js` (PDF → PNG, pdf.js), `src/exif.js`,
-  `src/bar.js` + `FolderBar.vue` (hint bar above the file list)
-- `src/components/TourApp.vue` – state and layout: header, side bar (plan + spot list,
-  resizable), panorama, site visits; editor (plan large, 520 px column with panorama and
-  tabs); phone: bottom sheet / tabs. One `PanoramaView` for all layouts (CSS grid areas).
-- `FloorPlan.vue` (zoom, pan, pinch, pin drag, arrow keys), `PanoramaView.vue` (PSV
-  core, no navbar), `SpotList.vue` (rename, "n captures" toggle + capture choice),
-  `SiteVisits.vue`, `SpotForm.vue`, `NewImages.vue`
-- `src/tour.js` – pure logic, unit-tested (`tests/tour.test.js`)
+- `src/dav.js` (WebDAV), `src/folder.js` (what a folder holds; only the folder itself),
+  `src/create.js` (create a walkthrough, choose/convert the plan), `src/pdf.js` (PDF → PNG,
+  room text), `src/exif.js`, `src/rooms.js`, `src/rename.js` (image files follow spot
+  names; undone when the save fails), `src/bar.js` + `FolderBar.vue` (hint bar)
+- `src/components/TourApp.vue` – state, loading, editing, saving and the CSS grid. One
+  `PanoramaView` for all layouts. Parts: `TourHeader`, `ViewerSidebar` (plan + list,
+  resizable), `PhoneSheet`, `TabBar` (ARIA tabs), `NoteBar` (note + action), `SpotForm`,
+  `NewImages`, `SpotList`, `SiteVisits`, `FloorPlan` (zoom, pan, pinch, pin drag, arrow
+  keys); `src/composables/useLayout.js` (phone query, stored settings)
+- Spots are objects in a reactive tour: keep per-spot state in a `reactive(Map)` keyed by
+  the spot or in a `Set` of `toRaw(spot)` – never by index, never mix raw and proxy.
+- `src/tour.js`, `folder.js`, `exif.js`, `rooms.js`, `rename.js` – pure logic, unit-tested
+  (`tests/`)
 - `tools/holobuilder.js` + `holobuilder-import.mjs` – HoloBuilder backup import
 - `tools/l10n-build.mjs` (`l10n/de_DE.json` formal → de/de_DE) and `tools/l10n-check.mjs`
 - `tools/demo/` – CC0 demo data for the store screenshots (`screenshots/`, ≤ 2 MiB each)

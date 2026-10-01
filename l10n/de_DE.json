@@ -27,7 +27,6 @@
 		"{name} · from {date} on": "{name} · erst ab {date}",
 		"{count} captures of {name}": "{count} Aufnahmen von {name}",
 		"{date} (latest)": "{date} (neueste)",
-		"{name} was first captured on {date}. Pick a later site visit below.": "{name} wurde erst am {date} aufgenommen. Wählen Sie unten eine spätere Begehung.",
 		"Drag to change the width": "Ziehen, um die Breite zu ändern",
 		"Collapse": "Einklappen",
 		"Loading …": "Wird geladen …",
@@ -70,7 +69,6 @@
 		"Saving failed: {error}. Check your connection and try again.": "Speichern fehlgeschlagen: {error}. Prüfen Sie die Verbindung und versuchen Sie es noch einmal.",
 		"Remove the capture from {date}?": "Aufnahme vom {date} entfernen?",
 		"Remove spot \"{name}\"?": "Standort „{name}“ entfernen?",
-		"It disappears from the walkthrough. The image file stays in the folder.": "Sie verschwindet aus dem Rundgang. Die Bilddatei bleibt im Ordner.",
 		"Remove": "Entfernen",
 		"Keep": "Behalten",
 		"Save changes?": "Änderungen speichern?",
@@ -94,15 +92,38 @@
 		"Pick an image under \"New images\" and click on the floor plan.": "Wählen Sie unter „Neue Bilder“ ein Bild und klicken Sie in den Grundriss.",
 		"This folder has no walkthrough yet.": "In diesem Ordner gibt es noch keinen Rundgang.",
 		"This folder is a 360° walkthrough": "Dieser Ordner ist ein 360°-Rundgang",
-		"{count} 360° images in this folder": "{count} 360°-Bilder in diesem Ordner",
-		"Place them on a floor plan to walk through the building.": "Auf einem Grundriss platziert, lässt sich das Gebäude begehen.",
+		"Place them on a floor plan to walk through the building.": "Auf einem Grundriss platziert, werden sie zum Rundgang durchs Gebäude.",
 		"Open walkthrough": "Rundgang öffnen",
 		"Create 360° walkthrough": "360°-Rundgang anlegen",
 		"Change floor plan": "Grundriss wechseln",
 		"There is a newer floor plan in the folder: {file}": "Im Ordner liegt ein neuerer Grundriss: {file}",
 		"Use it": "Übernehmen",
 		"Floor plan changed – not saved yet. The spots keep their places.": "Grundriss gewechselt – noch nicht gespeichert. Die Standorte bleiben an ihrer Stelle.",
-		"The floor plan could not be changed: {error}": "Der Grundriss konnte nicht gewechselt werden: {error}"
+		"The floor plan could not be changed: {error}": "Der Grundriss konnte nicht gewechselt werden: {error}",
+		"Floor plan, spots and site visits in one view.": "Grundriss, Standorte und Begehungen in einer Ansicht.",
+		"_{count} 360° image in this folder_::_{count} 360° images in this folder_": [
+			"{count} 360°-Bild in diesem Ordner",
+			"{count} 360°-Bilder in diesem Ordner"
+		],
+		"Capture": "Aufnahme",
+		"The floor plan {file} was not found.": "Der Grundriss {file} wurde nicht gefunden.",
+		"The walkthrough could not be loaded again: {error}": "Der Rundgang konnte nicht neu geladen werden: {error}",
+		"Added as another capture of \"{name}\".": "Als weitere Aufnahme zu „{name}“ hinzugefügt.",
+		"Undo": "Rückgängig",
+		"The spot disappears from the walkthrough. Its image file stays in the folder.": "Der Standort verschwindet aus dem Rundgang. Seine Bilddatei bleibt im Ordner.",
+		"The capture disappears from the walkthrough. The image file stays in the folder.": "Die Aufnahme verschwindet aus dem Rundgang. Die Bilddatei bleibt im Ordner.",
+		"_Saved. {count} image file could not be renamed and keeps its name._::_Saved. {count} image files could not be renamed and keep their names._": [
+			"Gespeichert. {count} Bilddatei ließ sich nicht umbenennen und behält ihren Namen.",
+			"Gespeichert. {count} Bilddateien ließen sich nicht umbenennen und behalten ihre Namen."
+		],
+		"No connection to the server": "Keine Verbindung zum Server",
+		"You are not allowed to do this here": "Dafür fehlt Ihnen hier die Berechtigung",
+		"The file no longer exists": "Die Datei gibt es nicht mehr",
+		"The file is locked, maybe it is open somewhere else": "Die Datei ist gesperrt, vielleicht ist sie gerade anderswo geöffnet",
+		"There is no storage space left": "Der Speicherplatz ist voll",
+		"The server answered with error {status}": "Der Server meldet Fehler {status}",
+		"There are no 360° images in this folder. Put the images and a floor plan into one folder first.": "In diesem Ordner liegen keine 360°-Bilder. Legen Sie zuerst die Bilder und einen Grundriss in einen Ordner.",
+		"Creating the walkthrough …": "Rundgang wird angelegt …"
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

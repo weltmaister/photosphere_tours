@@ -10,72 +10,24 @@
 -->
 <template>
 	<div class="pt-app" :class="layoutClass">
-		<header class="pt-header">
-			<NcButton v-if="!editing && !mobile && ready"
-				variant="tertiary"
-				:pressed="sidebarOpen"
-				:aria-label="t('Show or hide floor plan and spots')"
-				:title="t('Show or hide floor plan and spots')"
-				@click="sidebarOpen = !sidebarOpen">
-				<template #icon>
-					<NcIconSvgWrapper :path="mdiDockLeft" />
-				</template>
-			</NcButton>
-			<div class="pt-header__titles">
-				<h2 id="photosphere-tours-title" class="pt-header__title">
-					{{ editing ? t('Edit walkthrough') : title }}
-				</h2>
-				<p class="pt-header__subline">
-					{{ subline }}
-				</p>
-			</div>
-			<template v-if="editing">
-				<NcButton v-if="!mobile" variant="secondary" @click="stopEditing">
-					{{ t('Stop editing') }}
-				</NcButton>
-				<NcButton variant="primary"
-					:disabled="!dirty || saving"
-					:title="dirty ? '' : t('No unsaved changes')"
-					@click="save">
-					<template #icon>
-						<NcLoadingIcon v-if="saving" />
-						<NcIconSvgWrapper v-else :path="mdiCheck" />
-					</template>
-					{{ t('Save') }}
-				</NcButton>
-				<NcButton v-if="mobile"
-					variant="tertiary"
-					:aria-label="t('Stop editing')"
-					:title="t('Stop editing')"
-					@click="stopEditing">
-					<template #icon>
-						<NcIconSvgWrapper :path="mdiClose" />
-					</template>
-				</NcButton>
-			</template>
-			<template v-else>
-				<NcButton v-if="canEdit && ready"
-					:variant="mobile ? 'tertiary' : 'primary'"
-					:aria-label="mobile ? t('Edit') : undefined"
-					:title="t('Place and move spots, set view directions')"
-					@click="startEditing">
-					<template #icon>
-						<NcIconSvgWrapper :path="mdiPencil" />
-					</template>
-					<template v-if="!mobile">
-						{{ t('Edit') }}
-					</template>
-				</NcButton>
-				<NcButton variant="tertiary"
-					:aria-label="t('Close walkthrough (Esc)')"
-					:title="t('Close walkthrough (Esc)')"
-					@click="requestClose">
-					<template #icon>
-						<NcIconSvgWrapper :path="mdiClose" />
-					</template>
-				</NcButton>
-			</template>
-		</header>
+		<TourHeader :mode="!ready ? 'loading' : (editing ? 'edit' : 'view')"
+			:title="editing ? t('Edit walkthrough') : title"
+			:subline="subline"
+			:mobile="mobile"
+			:can-edit="canEdit"
+			:sidebar-open="sidebarOpen"
+			:dirty="dirty"
+			:saving="saving"
+			@toggle-sidebar="sidebarOpen = !sidebarOpen"
+			@edit="startEditing"
+			@stop-editing="stopEditing()"
+			@save="save"
+			@close="requestClose" />
+
+		<!-- notes and hints for screen readers; NcNoteCard alone is not announced -->
+		<p class="pt-live" aria-live="polite">
+			{{ liveText }}
+		</p>
 
 		<div v-if="!ready" class="pt-state">
 			<NcLoadingIcon v-if="!loadError" :size="44" />
@@ -88,61 +40,20 @@
 
 		<div v-else class="pt-body" :style="bodyStyle">
 			<!-- viewer, desktop: side bar with floor plan and spot list -->
-			<aside v-if="!editing && !mobile && sidebarOpen" class="pt-side" :aria-label="t('Floor plan and spots')">
-				<div class="pt-side__scroll">
-					<h3 class="pt-section">
-						{{ t('Floor plan') }}
-					</h3>
-					<div class="pt-side__plan">
-						<FloorPlan :src="planUrl"
-							:size="planSize"
-							:spots="planSpots"
-							:heading="heading"
-							auto-height
-							@select="selectSpot" />
-					</div>
-					<h3 class="pt-section">
-						{{ t('Spots ({count})', { count: tour.spots.length }) }}
-					</h3>
-					<SpotList class="pt-side__list"
-						:rows="spotRows"
-						:editable="canEdit"
-						@select="selectSpot"
-						@rename="renameFromList"
-						@pick-capture="pickCapture" />
-				</div>
-				<div class="pt-side__resize"
-					role="separator"
-					tabindex="0"
-					aria-orientation="vertical"
-					:aria-label="t('Width of the side bar')"
-					:aria-valuenow="sidebarWidth"
-					aria-valuemin="240"
-					aria-valuemax="560"
-					:title="t('Drag to change the width')"
-					@pointerdown="startResize"
-					@keydown.left.prevent="sidebarWidth = Math.max(240, sidebarWidth - 16)"
-					@keydown.right.prevent="sidebarWidth = Math.min(560, sidebarWidth + 16)" />
-			</aside>
+			<ViewerSidebar v-if="!editing && !mobile && sidebarOpen"
+				v-model:width="sidebarWidth"
+				:plan="planProps"
+				:rows="spotRows"
+				:editable="canEdit"
+				@select="selectSpot"
+				@rename="renameFromList"
+				@pick-capture="pickCapture" />
 
 			<!-- editor, desktop: the floor plan is the work area -->
 			<div v-if="editing && !mobile" class="pt-editplan">
-				<div v-if="note" class="pt-note">
-					<NcNoteCard :type="note.type" :text="note.text" />
-					<NcButton v-if="note.action" variant="secondary" @click="note.onAction">
-						{{ note.action }}
-					</NcButton>
-				</div>
+				<NoteBar v-if="note" :note="note" floating />
 				<div class="pt-editplan__plan">
-					<FloorPlan :src="planUrl"
-						:size="planSize"
-						:spots="planSpots"
-						:heading="heading"
-						editable
-						:crosshair="aligning || !!selectedImage"
-						@select="onPlanSelect"
-						@move="onPlanMove"
-						@place="onPlanPlace" />
+					<FloorPlan v-bind="editPlanProps" v-on="editPlanEvents" />
 				</div>
 			</div>
 
@@ -168,41 +79,26 @@
 
 			<!-- editor: tabs next to (desktop) or below (phone) the panorama -->
 			<section v-if="editing" class="pt-panel">
-				<div class="pt-tabs" role="tablist" :aria-label="t('Edit walkthrough')">
-					<button v-for="tab in editorTabs"
-						:key="tab.id"
-						type="button"
-						role="tab"
-						class="pt-tab"
-						:aria-selected="editorTab === tab.id ? 'true' : 'false'"
-						@click="editorTab = tab.id">
-						{{ tab.label }}
-					</button>
-				</div>
-				<div v-if="note && mobile" class="pt-note pt-note--panel">
-					<NcNoteCard :type="note.type" :text="note.text" />
-					<NcButton v-if="note.action" variant="secondary" @click="note.onAction">
-						{{ note.action }}
-					</NcButton>
-				</div>
-				<div class="pt-panel__content" :class="{ 'pt-panel__content--plan': editorTab === 'plan' }">
-					<FloorPlan v-if="editorTab === 'plan'"
-						:src="planUrl"
-						:size="planSize"
-						:spots="planSpots"
-						:heading="heading"
-						editable
-						:crosshair="aligning || !!selectedImage"
-						@select="onPlanSelect"
-						@move="onPlanMove"
-						@place="onPlanPlace" />
+				<TabBar v-model="editorTab"
+					:tabs="editorTabs"
+					:label="t('Edit walkthrough')"
+					panel-id="pt-editor-panel"
+					id-prefix="pt-editor-tab" />
+				<NoteBar v-if="note && mobile" class="pt-note--panel" :note="note" />
+				<div id="pt-editor-panel"
+					role="tabpanel"
+					:aria-labelledby="`pt-editor-tab-${editorTab}`"
+					class="pt-panel__content"
+					:class="{ 'pt-panel__content--plan': editorTab === 'plan' }">
+					<FloorPlan v-if="editorTab === 'plan'" v-bind="editPlanProps" v-on="editPlanEvents" />
 					<SpotForm v-else-if="editorTab === 'spot'"
+						v-model:renameFiles="renameFilesOnSave"
 						:spot="currentSpot"
 						:capture="currentCapture"
+						:captures="spotRows[spotIndex]?.captures ?? []"
 						:aligning="aligning"
-						:rename-files="renameFilesOnSave"
-						@update:rename-files="renameFilesOnSave = $event"
 						@rename="rename"
+						@pick="(file) => pickCapture(spotIndex, file)"
 						@set-date="setDate"
 						@align="toggleAlign"
 						@remove="removeCurrent" />
@@ -210,71 +106,38 @@
 						:images="unplacedImages"
 						:selected="selectedImage"
 						:plan="tour.plan"
+						:previews="!shared"
+						:can-change-plan="!shared"
 						@select="selectImage"
 						@change-plan="switchPlan()" />
 				</div>
 			</section>
 
 			<!-- viewer, phone: bottom sheet -->
-			<section v-if="!editing && mobile" class="pt-sheet" :aria-label="t('Floor plan and spots')">
-				<button type="button"
-					class="pt-sheet__toggle"
-					:aria-expanded="sheetOpen ? 'true' : 'false'"
-					@click="sheetOpen = !sheetOpen">
-					<span class="pt-sheet__grip" aria-hidden="true" />
-					<NcIconSvgWrapper :path="sheetOpen ? mdiChevronDown : mdiChevronUp" />
-					{{ sheetOpen ? t('Collapse') : t('Floor plan and spots') }}
-				</button>
-				<template v-if="sheetOpen">
-					<div class="pt-tabs" role="tablist" :aria-label="t('Floor plan and spots')">
-						<button type="button"
-							role="tab"
-							class="pt-tab"
-							:aria-selected="sheetTab === 'plan' ? 'true' : 'false'"
-							@click="sheetTab = 'plan'">
-							{{ t('Floor plan') }}
-						</button>
-						<button type="button"
-							role="tab"
-							class="pt-tab"
-							:aria-selected="sheetTab === 'list' ? 'true' : 'false'"
-							@click="sheetTab = 'list'">
-							{{ t('Spots ({count})', { count: tour.spots.length }) }}
-						</button>
-					</div>
-					<div class="pt-sheet__content">
-						<FloorPlan v-if="sheetTab === 'plan'"
-							:src="planUrl"
-							:size="planSize"
-							:spots="planSpots"
-							:heading="heading"
-							@select="selectSpot" />
-						<SpotList v-else
-							:rows="spotRows"
-							:editable="canEdit"
-							@select="selectSpot"
-							@rename="renameFromList"
-							@pick-capture="pickCapture" />
-					</div>
-				</template>
-				<SiteVisits v-if="visits.length > 2"
-					v-model="visit"
-					class="pt-sheet__visits"
-					:visits="visits" />
-			</section>
+			<PhoneSheet v-if="!editing && mobile"
+				v-model:open="sheetOpen"
+				v-model:tab="sheetTab"
+				:plan="planProps"
+				:rows="spotRows"
+				:editable="canEdit"
+				@select="selectSpot"
+				@rename="renameFromList"
+				@pick-capture="pickCapture">
+				<SiteVisits v-if="showVisits" v-model="visit" :visits="visits" />
+			</PhoneSheet>
 		</div>
 
 		<footer v-if="ready && !editing && !mobile" class="pt-footer">
-			<SiteVisits v-if="visits.length > 2" v-model="visit" :visits="visits" />
+			<SiteVisits v-if="showVisits" v-model="visit" :visits="visits" />
 			<div class="pt-footer__tools">
 				<NcButton variant="tertiary" :aria-label="t('Zoom out')" :title="t('Zoom out')" @click="pano?.zoomOut()">
 					<template #icon>
-						<NcIconSvgWrapper :path="mdiMinus" :size="24" />
+						<NcIconSvgWrapper :path="mdiMinus" />
 					</template>
 				</NcButton>
 				<NcButton variant="tertiary" :aria-label="t('Zoom in')" :title="t('Zoom in')" @click="pano?.zoomIn()">
 					<template #icon>
-						<NcIconSvgWrapper :path="mdiPlus" :size="24" />
+						<NcIconSvgWrapper :path="mdiPlus" />
 					</template>
 				</NcButton>
 				<NcButton variant="tertiary" :aria-label="t('Fullscreen')" :title="t('Fullscreen')" @click="pano?.toggleFullscreen()">
@@ -288,40 +151,33 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, toRaw, watch } from 'vue'
 import { showConfirmation } from '@nextcloud/dialogs'
 import { Permission } from '@nextcloud/files'
-import {
-	mdiAlertCircleOutline,
-	mdiCheck,
-	mdiChevronDown,
-	mdiChevronUp,
-	mdiClose,
-	mdiDockLeft,
-	mdiFullscreen,
-	mdiMapMarkerPlusOutline,
-	mdiMinus,
-	mdiPencil,
-	mdiPlus,
-} from '@mdi/js'
+import { mdiAlertCircleOutline, mdiFullscreen, mdiMapMarkerPlusOutline, mdiMinus, mdiPlus } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
-import NcNoteCard from '@nextcloud/vue/components/NcNoteCard'
 
 import FloorPlan from './FloorPlan.vue'
 import NewImages from './NewImages.vue'
+import NoteBar from './NoteBar.vue'
 import PanoramaView from './PanoramaView.vue'
+import PhoneSheet from './PhoneSheet.vue'
 import SiteVisits from './SiteVisits.vue'
 import SpotForm from './SpotForm.vue'
-import SpotList from './SpotList.vue'
+import TabBar from './TabBar.vue'
+import TourHeader from './TourHeader.vue'
+import ViewerSidebar from './ViewerSidebar.vue'
+import { stored, useLayout } from '../composables/useLayout.js'
 import { Cancelled, choosePlan } from '../create.js'
 import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readText, urlFor, writeText } from '../dav.js'
 import { exifDate } from '../exif.js'
 import { classifyFolder, newerPlan, pngNameFor } from '../folder.js'
+import { displayDate, errorText, n, t } from '../l10n.js'
+import { renameSpotFiles, undoMoves } from '../rename.js'
 import { roomLabels, suggestName } from '../rooms.js'
-import { displayDate, t } from '../l10n.js'
 import {
 	TourError,
 	addCapture,
@@ -332,9 +188,9 @@ import {
 	captureDays,
 	capturesNewestFirst,
 	dateFromFilename,
+	firstCapture,
 	formatDate,
 	parseTour,
-	renamedFile,
 	resolvePath,
 	serializeTour,
 	sphereCorrection,
@@ -347,11 +203,14 @@ const props = defineProps({
 })
 const emit = defineEmits(['close'])
 
-// ---- loading -------------------------------------------------------------
+// ---- state ---------------------------------------------------------------
 
 const location = locate(props.node)
 const canEdit = (props.node.permissions & Permission.UPDATE) !== 0
+// share pages: no previews and no file picker without a login
+const shared = props.node.source.includes('/public.php/')
 const fileUrl = (relative) => urlFor(location.rootUrl, resolvePath(location.dir, relative))
+const folderUrl = urlFor(location.rootUrl, location.dir)
 
 const ready = ref(false)
 const loadError = ref('')
@@ -360,22 +219,55 @@ const etag = ref(null)
 const planSize = ref({ w: 1, h: 1 })
 const planUrl = ref('')
 
-function loadImage(url) {
+const { mobile, sidebarOpen, sidebarWidth, sheetOpen, sheetTab } = useLayout()
+
+const editing = ref(false)
+const dirty = ref(false)
+const saving = ref(false)
+const aligning = ref(false)
+const selectedImage = ref(null)
+const images = ref([])
+const editorTab = ref('spot')
+const status = ref(null)
+
+const pano = ref(null)
+const heading = ref(0)
+const spotIndex = ref(0)
+/** 'latest' or YYYY-MM-DD */
+const visit = ref('latest')
+/** spot -> capture file picked in the spot list; keyed by the spot, so removing another spot changes nothing */
+const picked = reactive(new Map())
+/** viewer message in the header's second line */
+const hint = ref('')
+
+// ---- loading -------------------------------------------------------------
+
+function loadImage(url, file) {
 	return new Promise((resolve, reject) => {
 		const img = new Image()
 		img.onload = () => resolve(img)
-		img.onerror = () => reject(new Error(t('The floor plan {file} was not found. Check the "plan" entry in {tour}.', { file: tour.value.plan, tour: props.node.basename })))
+		img.onerror = () => reject(new Error(canEdit
+			? t('The floor plan {file} was not found. Check the "plan" entry in {tour}.', { file, tour: props.node.basename })
+			: t('The floor plan {file} was not found.', { file })))
 		img.src = url
 	})
 }
 
+/** Show a floor plan. `fresh`: the file may have changed under the same name. */
+async function setPlan(plan, fresh = false) {
+	const url = fresh ? `${fileUrl(plan)}?v=${Date.now()}` : fileUrl(plan)
+	const img = await loadImage(url, plan)
+	planUrl.value = url
+	planSize.value = { w: img.naturalWidth, h: img.naturalHeight }
+}
+
 async function load() {
 	const { text, etag: tag } = await readText(props.node.encodedSource)
+	const next = parseTour(text)
+	await setPlan(next.plan)
 	etag.value = tag
-	tour.value = parseTour(text)
-	planUrl.value = fileUrl(tour.value.plan)
-	const img = await loadImage(planUrl.value)
-	planSize.value = { w: img.naturalWidth, h: img.naturalHeight }
+	tour.value = next
+	picked.clear()
 }
 
 onMounted(async () => {
@@ -389,39 +281,11 @@ onMounted(async () => {
 			startEditing()
 		}
 	} catch (e) {
-		loadError.value = e instanceof TourError ? e.problems.join(' ') : e.message
+		loadError.value = e instanceof TourError ? e.problems.join(' ') : errorText(e)
 	}
 })
 
 // ---- layout --------------------------------------------------------------
-
-const phoneQuery = window.matchMedia('(max-width: 767px)')
-const mobile = ref(phoneQuery.matches)
-const onPhoneChange = (e) => { mobile.value = e.matches }
-phoneQuery.addEventListener('change', onPhoneChange)
-
-const stored = (key, fallback) => {
-	try {
-		const value = window.localStorage.getItem(`photosphere_tours.${key}`)
-		return value === null ? fallback : JSON.parse(value)
-	} catch {
-		return fallback
-	}
-}
-const store = (key, value) => {
-	try {
-		window.localStorage.setItem(`photosphere_tours.${key}`, JSON.stringify(value))
-	} catch {
-		// private window or blocked storage: the setting just is not kept
-	}
-}
-
-const sidebarOpen = ref(stored('sidebarOpen', true))
-const sidebarWidth = ref(stored('sidebarWidth', 320))
-const sheetOpen = ref(false)
-const sheetTab = ref('plan')
-watch(sidebarOpen, (v) => store('sidebarOpen', v))
-watch(sidebarWidth, (v) => store('sidebarWidth', v))
 
 const layoutClass = computed(() => ({
 	'pt-app--mobile': mobile.value,
@@ -431,47 +295,28 @@ const bodyStyle = computed(() => (!editing.value && !mobile.value && sidebarOpen
 	? { gridTemplateColumns: `${sidebarWidth.value}px minmax(0, 1fr)` }
 	: {})
 
-function startResize(e) {
-	const start = { x: e.clientX, w: sidebarWidth.value }
-	const target = e.currentTarget
-	target.setPointerCapture(e.pointerId)
-	const move = (ev) => {
-		sidebarWidth.value = Math.round(Math.min(560, Math.max(240, start.w + ev.clientX - start.x)))
+// a phone turned to landscape gets the desktop editor, which has no plan tab
+watch(mobile, (isMobile) => {
+	if (!isMobile && editorTab.value === 'plan') {
+		editorTab.value = 'spot'
 	}
-	const up = () => {
-		target.removeEventListener('pointermove', move)
-		target.removeEventListener('pointerup', up)
-	}
-	target.addEventListener('pointermove', move)
-	target.addEventListener('pointerup', up)
-}
+})
 
 // ---- what is shown -------------------------------------------------------
-
-const pano = ref(null)
-const heading = ref(0)
-const spotIndex = ref(0)
-/** 'latest' or YYYY-MM-DD */
-const visit = ref('latest')
-/** spot index -> capture file picked in the spot list */
-const picked = reactive({})
-const hint = ref('')
 
 const title = computed(() => tour.value?.title || props.node.dirname.split('/').pop())
 const visitDay = computed(() => visit.value === 'latest' ? null : visit.value)
 
-function shownCapture(spot, index) {
-	const file = picked[index]
+function shownCapture(spot) {
+	const file = picked.get(spot)
 	return (file && spot.captures.find(c => c.file === file)) || captureAt(spot, visitDay.value)
 }
 
 const currentSpot = computed(() => tour.value?.spots[spotIndex.value] ?? null)
 const currentCapture = computed(() => {
 	const spot = currentSpot.value
-	if (!spot) {
-		return null
-	}
-	return shownCapture(spot, spotIndex.value) ?? capturesNewestFirst(spot)[0]
+	// a spot first captured after the chosen site visit shows its earliest capture
+	return spot ? (shownCapture(spot) ?? firstCapture(spot)) : null
 })
 const panoramaUrl = computed(() => currentCapture.value ? fileUrl(currentCapture.value.file) : null)
 const panoramaLabel = computed(() => currentCapture.value
@@ -479,11 +324,8 @@ const panoramaLabel = computed(() => currentCapture.value
 	: '')
 const correction = computed(() => currentCapture.value ? sphereCorrection(currentCapture.value) : null)
 
-const visits = computed(() => {
-	if (!tour.value) {
-		return []
-	}
-	return [
+const visits = computed(() => tour.value
+	? [
 		...captureDays(tour.value).map(day => ({
 			value: day,
 			label: displayDate(day, false),
@@ -491,42 +333,55 @@ const visits = computed(() => {
 		})),
 		{ value: 'latest', label: t('Latest'), title: t('Show every spot with its latest capture') },
 	]
-})
+	: [])
+// one site visit and "Latest" would show the same
+const showVisits = computed(() => visits.value.length > 2)
+
+const spotState = (index, shown) => index === spotIndex.value ? 'current' : (shown ? 'normal' : 'missing')
 
 const planSpots = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
-	const shown = editing.value ? true : shownCapture(spot, index)
-	const first = capturesNewestFirst(spot).at(-1)
+	const shown = editing.value ? true : shownCapture(spot)
 	let label
 	if (editing.value) {
 		label = t('{name} – drag to move', { name: spot.name })
 	} else if (shown) {
 		label = `${spot.name} · ${displayDate(shown.date, false)}`
 	} else {
-		label = t('{name} · from {date} on', { name: spot.name, date: displayDate(first.date, false) })
+		label = t('{name} · from {date} on', { name: spot.name, date: displayDate(firstCapture(spot).date, false) })
 	}
-	return {
-		x: spot.x,
-		y: spot.y,
-		label,
-		state: index === spotIndex.value ? 'current' : (shown ? 'normal' : 'missing'),
-	}
+	return { x: spot.x, y: spot.y, label, state: spotState(index, shown) }
 }))
 
 const spotRows = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
-	const shown = shownCapture(spot, index)
+	const shown = shownCapture(spot)
 	const sorted = capturesNewestFirst(spot)
 	return {
 		name: spot.name,
 		date: shown ? displayDate(shown.date) : t('from {date} on', { date: displayDate(sorted.at(-1).date, false) }),
-		state: index === spotIndex.value ? 'current' : (shown ? 'normal' : 'missing'),
-		badgeLabel: t('{count} captures of {name}', { count: spot.captures.length, name: spot.name }),
+		state: spotState(index, shown),
+		capturesLabel: t('{count} captures of {name}', { count: spot.captures.length, name: spot.name }),
 		captures: sorted.map((capture, i) => ({
 			value: capture.file,
 			label: i === 0 ? t('{date} (latest)', { date: displayDate(capture.date) }) : displayDate(capture.date),
-			checked: shown === capture,
+			checked: (editing.value ? currentCapture.value : shown) === capture,
 		})),
 	}
 }))
+
+const planProps = computed(() => ({
+	src: planUrl.value,
+	size: planSize.value,
+	spots: planSpots.value,
+	heading: heading.value,
+}))
+const editPlanProps = computed(() => ({
+	...planProps.value,
+	editable: true,
+	crosshair: aligning.value || !!selectedImage.value,
+	// while setting a view direction a click next to the spot is a direction
+	snap: !aligning.value,
+}))
+const editPlanEvents = { select: onPlanSelect, move: onPlanMove, place: onPlanPlace }
 
 const subline = computed(() => {
 	if (!ready.value) {
@@ -543,53 +398,39 @@ const subline = computed(() => {
 	if (!spot || !capture) {
 		return ''
 	}
-	if (visitDay.value && capture.date.slice(0, 10) !== visitDay.value && picked[spotIndex.value] === undefined) {
+	if (visitDay.value && capture.date.slice(0, 10) !== visitDay.value && !picked.has(spot)) {
 		return t('No capture here on {day} – showing the one from {date}.', { day: displayDate(visitDay.value, false), date: displayDate(capture.date, false) })
 	}
 	return `${spot.name} · ${displayDate(capture.date)}`
 })
 
 function selectSpot(index) {
-	const spot = tour.value.spots[index]
-	if (!shownCapture(spot, index)) {
-		const first = capturesNewestFirst(spot).at(-1)
-		hint.value = t('{name} was first captured on {date}. Pick a later site visit below.', { name: spot.name, date: displayDate(first.date, false) })
-		return
-	}
 	hint.value = ''
 	spotIndex.value = index
 }
 
 function pickCapture(index, file) {
-	picked[index] = file
+	picked.set(tour.value.spots[index], file)
 	hint.value = ''
 	spotIndex.value = index
 }
 
 watch(visit, () => {
-	for (const key of Object.keys(picked)) {
-		delete picked[key]
-	}
+	picked.clear()
 	hint.value = ''
 })
 
 // ---- editing -------------------------------------------------------------
 
-const editing = ref(false)
-const dirty = ref(false)
-const saving = ref(false)
-const aligning = ref(false)
-const selectedImage = ref(null)
-const images = ref([])
-const editorTab = ref('spot')
-const status = ref(null)
+/** images being placed (their date is still read): not offered twice */
+const pending = reactive(new Set())
 
 const unplacedImages = computed(() => {
 	if (!tour.value) {
 		return []
 	}
 	const free = new Set(unplacedFiles(tour.value, images.value.map(i => i.path)))
-	return images.value.filter(i => free.has(i.path))
+	return images.value.filter(i => free.has(i.path) && !pending.has(i.path))
 })
 
 const editorTabs = computed(() => [
@@ -607,20 +448,31 @@ const note = computed(() => {
 	}
 	return status.value
 })
+// the editor's notes, in the viewer the second header line (spot, date, hints)
+const liveText = computed(() => editing.value ? (note.value?.text ?? '') : subline.value)
 
-function setStatus(type, text, action = null, onAction = null) {
-	status.value = { type, text, action, onAction }
-	if (type === 'success') {
-		const shown = status.value
+/**
+ * Show a note in the editor. Success and plain info notes go away by
+ * themselves; notes asking for something stay until replaced.
+ */
+function setStatus(type, text, action = null, onAction = null, timeout = undefined) {
+	const shown = { type, text, action, onAction }
+	status.value = shown
+	const hideAfter = timeout ?? (type === 'success' ? 4000 : (type === 'info' && !action ? 8000 : 0))
+	if (hideAfter) {
 		setTimeout(() => {
 			if (status.value === shown) {
 				status.value = null
 			}
-		}, 4000)
+		}, hideAfter)
 	}
 }
 
+// counts changes, so a change made while saving is not taken as saved
+let revision = 0
+
 function changed() {
+	revision++
 	dirty.value = true
 }
 
@@ -637,7 +489,7 @@ let folderEntries = []
 // Only the folder itself: subfolders often hold copies (compressed versions)
 async function loadImages() {
 	try {
-		folderEntries = await listFolder(urlFor(location.rootUrl, location.dir))
+		folderEntries = await listFolder(folderUrl)
 		const panoramas = new Set(classifyFolder(folderEntries).panoramas)
 		images.value = folderEntries
 			.filter(e => panoramas.has(e.name))
@@ -649,27 +501,23 @@ async function loadImages() {
 		}
 		loadRooms()
 	} catch (e) {
-		setStatus('error', t('The images in this folder could not be loaded: {error}', { error: e.message }))
+		setStatus('error', t('The images in this folder could not be loaded: {error}', { error: errorText(e) }))
 	}
 }
 
 async function switchPlan(file = null) {
 	try {
 		const plan = await choosePlan(folder, folderEntries, { auto: false, file })
-		// a PDF converted again keeps the PNG's name; without a new URL the
-		// browser shows the image it already holds for this page
-		const url = `${fileUrl(plan)}?v=${Date.now()}`
-		const img = await loadImage(url)
+		// a PDF converted again keeps the PNG's name
+		await setPlan(plan, true)
 		tour.value.plan = plan
-		planUrl.value = url
-		planSize.value = { w: img.naturalWidth, h: img.naturalHeight }
-		folderEntries = await listFolder(urlFor(location.rootUrl, location.dir))
+		folderEntries = await listFolder(folderUrl)
 		loadRooms()
 		changed()
 		setStatus('success', t('Floor plan changed – not saved yet. The spots keep their places.'))
 	} catch (e) {
 		if (!(e instanceof Cancelled)) {
-			setStatus('error', t('The floor plan could not be changed: {error}', { error: e.message }))
+			setStatus('error', t('The floor plan could not be changed: {error}', { error: errorText(e) }))
 		}
 	}
 }
@@ -686,7 +534,13 @@ function startEditing() {
 	loadImages()
 }
 
-async function stopEditing() {
+/**
+ * Leave the editor, asking about unsaved changes. When the walkthrough is
+ * closed anyway, discarding needs no reload.
+ *
+ * @return {Promise<boolean>} false if the user stays in the editor
+ */
+async function stopEditing({ closing = false } = {}) {
 	if (dirty.value) {
 		const keep = await showConfirmation({
 			name: t('Save changes?'),
@@ -697,8 +551,10 @@ async function stopEditing() {
 		if (keep && !(await save())) {
 			return false
 		}
-		if (!keep) {
-			await reload()
+		if (!keep && !closing && !(await reload())) {
+			// it cannot be read again: show why instead of the discarded state
+			loadError.value = status.value?.text ?? ''
+			ready.value = false
 		}
 	}
 	editing.value = false
@@ -708,11 +564,22 @@ async function stopEditing() {
 	return true
 }
 
+/** @return {Promise<boolean>} false if the walkthrough could not be read */
 async function reload() {
-	await load()
+	try {
+		await load()
+	} catch (e) {
+		setStatus('error', t('The walkthrough could not be loaded again: {error}', { error: e instanceof TourError ? e.problems.join(' ') : errorText(e) }))
+		return false
+	}
 	dirty.value = false
 	status.value = null
+	renamedSpots.clear()
 	spotIndex.value = Math.min(spotIndex.value, Math.max(0, tour.value.spots.length - 1))
+	if (editing.value) {
+		loadImages()
+	}
+	return true
 }
 
 /**
@@ -766,21 +633,35 @@ async function alignTo(target) {
 
 /**
  * Room names of the floor plan, when it was made from a PDF in the folder
- * (the PNG next to it has the same name). Read once, in the background.
+ * (the PNG next to it has the same name). Read in the background, once per
+ * version of the PDF.
  */
 let planRooms = []
+let roomsKey = null
+let roomsRequest = 0
 
 async function loadRooms() {
-	planRooms = []
 	const source = pdfSourceOf(tour.value.plan)
+	const key = source ? `${source}|${folderEntries.find(e => e.name === source)?.mtime?.getTime()}` : ''
+	if (key === roomsKey) {
+		return
+	}
+	roomsKey = key
+	planRooms = []
+	const request = ++roomsRequest
 	if (!source) {
 		return
 	}
 	try {
 		const { pdfText } = await import(/* webpackChunkName: "pdf" */ '../pdf.js')
-		planRooms = roomLabels(await pdfText(fileUrl(source)))
+		const rooms = roomLabels(await pdfText(fileUrl(source)))
+		// a plan switched in the meantime has its own request
+		if (request === roomsRequest) {
+			planRooms = rooms
+		}
 	} catch {
-		// no suggestions then
+		// no suggestions then; try again next time
+		roomsKey = null
 	}
 }
 
@@ -788,45 +669,68 @@ function pdfSourceOf(plan) {
 	if (plan.includes('/') || !/\.png$/i.test(plan)) {
 		return null
 	}
-	const pdf = folderEntries.find(e => /\.pdf$/i.test(e.name) && pngNameFor(e.name) === plan)
-	return pdf?.name ?? null
+	return folderEntries.find(e => /\.pdf$/i.test(e.name) && pngNameFor(e.name) === plan)?.name ?? null
+}
+
+/** Run `task` with the selected image taken out of "New images" until it is placed. */
+async function placeSelected(task) {
+	const file = selectedImage.value
+	selectedImage.value = null
+	pending.add(file)
+	try {
+		return await task(file, await fallbackDate(file))
+	} finally {
+		pending.delete(file)
+	}
 }
 
 async function onPlanPlace(point) {
 	if (aligning.value) {
 		alignTo(point)
-	} else if (selectedImage.value) {
-		const file = selectedImage.value
-		selectedImage.value = null
-		addSpot(tour.value, { ...point, file, fallbackDate: await fallbackDate(file) })
-		spotIndex.value = tour.value.spots.length - 1
-		// the reactive proxy, not the raw object addSpot returns: renameFiles()
-		// looks spots up while iterating tour.value.spots
-		const spot = tour.value.spots[spotIndex.value]
-		const room = suggestName(planRooms, point, planSize.value)
-		if (room) {
-			spot.name = room
-			renamedSpots.add(spot)
-			setStatus('info', t('Name taken from the floor plan: {name}. You can change it under "Spot".', { name: room }))
-		}
-		changed()
+		return
 	}
+	if (!selectedImage.value) {
+		return
+	}
+	await placeSelected((file, date) => addSpot(tour.value, { ...point, file, fallbackDate: date }))
+	spotIndex.value = tour.value.spots.length - 1
+	const spot = currentSpot.value
+	const room = suggestName(planRooms, point, planSize.value)
+	if (room) {
+		spot.name = room
+		renamedSpots.add(toRaw(spot))
+		setStatus('info', t('Name taken from the floor plan: {name}. You can change it under "Spot".', { name: room }))
+	}
+	changed()
 }
 
 async function onPlanSelect(index) {
 	const spot = tour.value.spots[index]
 	if (aligning.value) {
-		alignTo({ x: spot.x, y: spot.y })
+		// the spot itself gives no direction
+		if (index !== spotIndex.value) {
+			alignTo({ x: spot.x, y: spot.y })
+		}
 		return
 	}
 	if (selectedImage.value) {
-		const file = selectedImage.value
-		selectedImage.value = null
-		const capture = addCapture(spot, { file, fallbackDate: await fallbackDate(file) })
-		picked[index] = capture.file
+		const capture = await placeSelected((file, date) => addCapture(spot, { file, fallbackDate: date }))
+		picked.set(spot, capture.file)
 		changed()
+		// a click just beside a spot lands here too: say so and offer the way back
+		setStatus('info', t('Added as another capture of "{name}".', { name: spot.name }), t('Undo'), () => undoCapture(spot, capture.file), 10000)
 	}
 	spotIndex.value = index
+}
+
+function undoCapture(spot, file) {
+	const index = spot.captures.findIndex(c => c.file === file)
+	if (index >= 0 && spot.captures.length > 1) {
+		spot.captures.splice(index, 1)
+		picked.delete(spot)
+		changed()
+	}
+	status.value = null
 }
 
 function onPlanMove(index, point) {
@@ -834,14 +738,13 @@ function onPlanMove(index, point) {
 	changed()
 }
 
-/** spots whose files should follow a new name on the next save */
+/** spots (raw objects) whose files should follow a new name on the next save */
 const renamedSpots = new Set()
-const renameFilesOnSave = ref(stored('renameFiles', true))
-watch(renameFilesOnSave, (v) => store('renameFiles', v))
+const renameFilesOnSave = stored('renameFiles', true)
 
 function rename(name) {
 	currentSpot.value.name = name
-	renamedSpots.add(currentSpot.value)
+	renamedSpots.add(toRaw(currentSpot.value))
 	changed()
 }
 
@@ -852,7 +755,7 @@ async function renameFromList(index, name) {
 		return
 	}
 	spot.name = name.trim()
-	renamedSpots.add(spot)
+	renamedSpots.add(toRaw(spot))
 	changed()
 	if (!editing.value) {
 		hint.value = (await save())
@@ -874,7 +777,9 @@ async function removeCurrent() {
 		name: last
 			? t('Remove spot "{name}"?', { name: spot.name })
 			: t('Remove the capture from {date}?', { date: displayDate(capture.date) }),
-		text: t('It disappears from the walkthrough. The image file stays in the folder.'),
+		text: last
+			? t('The spot disappears from the walkthrough. Its image file stays in the folder.')
+			: t('The capture disappears from the walkthrough. The image file stays in the folder.'),
 		labelConfirm: t('Remove'),
 		labelReject: t('Keep'),
 	})
@@ -884,69 +789,71 @@ async function removeCurrent() {
 	if (last) {
 		tour.value.spots.splice(spotIndex.value, 1)
 		spotIndex.value = Math.max(0, spotIndex.value - 1)
+		renamedSpots.delete(toRaw(spot))
 	} else {
 		spot.captures.splice(spot.captures.indexOf(capture), 1)
-		delete picked[spotIndex.value]
 	}
+	picked.delete(spot)
 	changed()
 }
 
+// ---- saving --------------------------------------------------------------
+
+const moveRelative = (from, to) => moveFile(fileUrl(from), fileUrl(to))
+
+/** Keep the spot list's capture choice on files that were moved (or moved back). */
+function followMoves(moves) {
+	for (const [spot, file] of picked) {
+		const move = moves.find(m => m.from === file || m.to === file)
+		if (move && move.capture.file !== file) {
+			picked.set(spot, move.capture.file)
+		}
+	}
+}
+
 /**
- * Rename the image files of spots whose name changed, so the files carry the
- * spot names. Runs before the tour file is written; the tour's ETag is
- * checked first so nothing is renamed when the save would fail anyway.
+ * Rename image files if needed, then write the walkthrough. If writing fails
+ * the files are moved back, so the saved walkthrough still matches them.
  */
-async function renameFiles() {
-	if (!renameFilesOnSave.value || renamedSpots.size === 0) {
-		return
-	}
-	if (etag.value && (await getEtag(props.node.encodedSource)) !== etag.value) {
-		throw new ConflictError()
-	}
-	for (const spot of tour.value.spots) {
-		if (!renamedSpots.has(spot)) {
-			continue
-		}
-		for (const capture of spot.captures) {
-			const wanted = renamedFile(capture.file, capture.date, spot.name)
-			if (wanted === capture.file) {
-				continue
-			}
-			const target = await freeName(capture.file, wanted)
-			if (target) {
-				Object.keys(picked).forEach(key => { if (picked[key] === capture.file) picked[key] = target })
-				capture.file = target
-			}
-		}
-	}
-	renamedSpots.clear()
-}
-
-/** Move a file to `wanted`, or to "wanted (2)" etc. if that name is taken. */
-async function freeName(current, wanted) {
-	const dot = wanted.lastIndexOf('.')
-	for (let n = 1; n <= 20; n++) {
-		const candidate = n === 1 ? wanted : `${wanted.slice(0, dot)} (${n})${wanted.slice(dot)}`
-		if (await moveFile(fileUrl(current), fileUrl(candidate))) {
-			return candidate
-		}
-	}
-	return null
-}
-
-async function save() {
+async function saveNow() {
 	saving.value = true
+	const startedAt = revision
+	let moves = []
 	try {
-		await renameFiles()
+		let failed = []
+		if (renameFilesOnSave.value && renamedSpots.size > 0) {
+			// nothing is renamed when the save would fail anyway
+			if (etag.value && (await getEtag(props.node.encodedSource)) !== etag.value) {
+				throw new ConflictError()
+			}
+			const renamed = { has: (spot) => renamedSpots.has(toRaw(spot)) }
+			;({ moves, failed } = await renameSpotFiles(tour.value.spots, renamed, moveRelative))
+			followMoves(moves)
+		}
 		etag.value = await writeText(props.node.encodedSource, serializeTour(tour.value), etag.value ?? undefined)
-		dirty.value = false
-		setStatus('success', t('Walkthrough saved'))
+		renamedSpots.clear()
+		if (moves.length > 0 && editing.value) {
+			// "New images" must not list the old names
+			loadImages()
+		}
+		if (revision === startedAt) {
+			dirty.value = false
+		}
+		if (failed.length > 0) {
+			setStatus('warning', n('Saved. {count} image file could not be renamed and keeps its name.', 'Saved. {count} image files could not be renamed and keep their names.', failed.length))
+		} else {
+			setStatus('success', t('Walkthrough saved'))
+		}
 		return true
 	} catch (e) {
+		if (moves.length > 0) {
+			await undoMoves(moves, moveRelative)
+			followMoves(moves)
+		}
 		if (e instanceof ConflictError) {
 			setStatus('error', t('Someone else changed the walkthrough in the meantime, so it cannot be saved. Reload it – your changes will be lost.'), t('Reload'), () => reload())
 		} else {
-			setStatus('error', t('Saving failed: {error}. Check your connection and try again.', { error: e.message }))
+			setStatus('error', t('Saving failed: {error}. Check your connection and try again.', { error: errorText(e) }))
 		}
 		return false
 	} finally {
@@ -954,10 +861,19 @@ async function save() {
 	}
 }
 
+// one save at a time: two quick renames in the list would otherwise both
+// write with the same ETag and the second would report a conflict
+let saveQueue = Promise.resolve(true)
+
+function save() {
+	saveQueue = saveQueue.then(saveNow)
+	return saveQueue
+}
+
 // ---- closing and keyboard ------------------------------------------------
 
 async function requestClose() {
-	if (editing.value && !(await stopEditing())) {
+	if (editing.value && !(await stopEditing({ closing: true }))) {
 		return
 	}
 	emit('close')
@@ -992,15 +908,29 @@ function onKeyDown(e) {
 	}
 }
 
+// closing the browser tab with unsaved changes asks first
+function onBeforeUnload(e) {
+	if (dirty.value) {
+		e.preventDefault()
+		e.returnValue = ''
+	}
+}
+
 document.addEventListener('keydown', onKeyDown)
+window.addEventListener('beforeunload', onBeforeUnload)
 onBeforeUnmount(() => {
 	document.removeEventListener('keydown', onKeyDown)
-	phoneQuery.removeEventListener('change', onPhoneChange)
+	window.removeEventListener('beforeunload', onBeforeUnload)
 })
 </script>
 
 <style scoped>
 .pt-app {
+	/* layout sizes of the editor: panorama height and the column beside the plan */
+	--pt-editor-column: 520px;
+	--pt-editor-pano: 292px;
+	--pt-phone-pano: 200px;
+
 	display: grid;
 	grid-template-rows: auto minmax(0, 1fr) auto;
 	width: 100%;
@@ -1012,41 +942,13 @@ onBeforeUnmount(() => {
 	line-height: var(--default-line-height);
 }
 
-/* ---- header ---- */
-.pt-header {
-	display: flex;
-	align-items: center;
-	gap: calc(var(--default-grid-baseline) * 2);
-	min-height: var(--header-height, 50px);
-	padding: 0 calc(var(--default-grid-baseline) * 2);
-	border-bottom: 1px solid var(--color-border);
-}
-
-.pt-header__titles {
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
-	min-width: 0;
-	padding-inline-start: calc(var(--default-grid-baseline) * 2);
-}
-
-.pt-header__title {
-	margin: 0;
+/* read by screen readers only */
+.pt-live {
+	position: absolute;
+	width: 1px;
+	height: 1px;
 	overflow: hidden;
-	font-size: calc(var(--default-font-size) * 1.2);
-	font-weight: 600;
-	line-height: 1.2;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.pt-header__subline {
-	margin: 0;
-	overflow: hidden;
-	color: var(--color-text-maxcontrast);
-	font-size: var(--font-size-small);
-	line-height: 1.3;
-	text-overflow: ellipsis;
+	clip-path: inset(50%);
 	white-space: nowrap;
 }
 
@@ -1070,8 +972,8 @@ onBeforeUnmount(() => {
 
 .pt-app--editing .pt-body {
 	grid-template-areas: 'plan pano' 'plan panel';
-	grid-template-columns: minmax(0, 1fr) 520px;
-	grid-template-rows: 292px minmax(0, 1fr);
+	grid-template-columns: minmax(0, 1fr) var(--pt-editor-column);
+	grid-template-rows: var(--pt-editor-pano) minmax(0, 1fr);
 }
 
 .pt-app--mobile .pt-body {
@@ -1082,7 +984,7 @@ onBeforeUnmount(() => {
 
 .pt-app--mobile.pt-app--editing .pt-body {
 	grid-template-areas: 'pano' 'panel';
-	grid-template-rows: 200px minmax(0, 1fr);
+	grid-template-rows: var(--pt-phone-pano) minmax(0, 1fr);
 }
 
 .pt-pano-area {
@@ -1095,56 +997,6 @@ onBeforeUnmount(() => {
 	align-items: center;
 	justify-content: center;
 	background: var(--color-main-background);
-}
-
-/* ---- viewer side bar ---- */
-.pt-side {
-	position: relative;
-	grid-area: side;
-	min-height: 0;
-	border-inline-end: 1px solid var(--color-border);
-}
-
-.pt-side__scroll {
-	height: 100%;
-	overflow-x: hidden;
-	overflow-y: auto;
-	padding-bottom: calc(var(--default-grid-baseline) * 2);
-}
-
-.pt-section {
-	margin: 0;
-	padding: calc(var(--default-grid-baseline) * 3) calc(var(--default-grid-baseline) * 3) calc(var(--default-grid-baseline) * 2);
-	border-top: 1px solid var(--color-border);
-	color: var(--color-main-text);
-	font-size: var(--default-font-size);
-	font-weight: 600;
-}
-
-.pt-section:first-child {
-	border-top: none;
-}
-
-.pt-side__plan {
-	padding: 0 calc(var(--default-grid-baseline) * 2) calc(var(--default-grid-baseline) * 2);
-}
-
-.pt-side__list {
-	padding: 0 calc(var(--default-grid-baseline) * 2);
-}
-
-.pt-side__resize {
-	position: absolute;
-	top: 0;
-	inset-inline-end: -4px;
-	z-index: 1;
-	width: 8px;
-	height: 100%;
-	cursor: col-resize;
-}
-
-.pt-side__resize:hover {
-	background: linear-gradient(var(--color-primary-element), var(--color-primary-element)) center / 2px 100% no-repeat;
 }
 
 /* ---- editor ---- */
@@ -1161,33 +1013,6 @@ onBeforeUnmount(() => {
 .pt-editplan__plan {
 	flex-grow: 1;
 	min-height: 0;
-}
-
-/* the note floats over the plan: if it pushed the plan down, the plan would
-   move between two clicks and the second one would land beside its target */
-.pt-editplan > .pt-note {
-	position: absolute;
-	z-index: 2;
-	top: calc(var(--default-grid-baseline) * 6);
-	right: calc(var(--default-grid-baseline) * 6);
-	left: calc(var(--default-grid-baseline) * 6);
-	pointer-events: none;
-}
-
-.pt-editplan > .pt-note > * {
-	pointer-events: auto;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-.pt-note {
-	display: flex;
-	align-items: center;
-	gap: calc(var(--default-grid-baseline) * 3);
-}
-
-.pt-note :deep(.notecard) {
-	flex-grow: 1;
-	margin: 0;
 }
 
 .pt-note--panel {
@@ -1214,100 +1039,19 @@ onBeforeUnmount(() => {
 	padding: calc(var(--default-grid-baseline) * 2);
 }
 
-.pt-tabs {
-	display: flex;
-	flex-shrink: 0;
-	border-bottom: 1px solid var(--color-border);
-}
-
-.pt-tab {
-	flex: 1;
-	min-height: var(--clickable-area-large);
-	border: none;
-	border-bottom: 3px solid transparent;
-	background: transparent;
-	color: var(--color-main-text);
-	font: inherit;
-	font-weight: 600;
-	cursor: pointer;
-}
-
-.pt-tab:hover {
-	background: var(--color-background-hover);
-}
-
-.pt-tab[aria-selected='true'] {
-	border-bottom-color: var(--color-primary-element);
-}
-
-/* keyboard focus, visible on every background */
-.pt-tab:focus-visible,
-.pt-sheet__toggle:focus-visible,
-.pt-side__resize:focus-visible {
-	outline: 2px solid var(--color-main-text);
-	outline-offset: -2px;
-}
-
-/* ---- phone: bottom sheet ---- */
-.pt-sheet {
-	display: flex;
-	flex-direction: column;
-	grid-area: sheet;
-	border-top: 1px solid var(--color-border);
-	border-radius: var(--border-radius-container) var(--border-radius-container) 0 0;
-	background: var(--color-main-background);
-}
-
-.pt-sheet__toggle {
-	position: relative;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: calc(var(--default-grid-baseline) * 2);
-	min-height: var(--clickable-area-large);
-	border: none;
-	background: transparent;
-	color: var(--color-main-text);
-	font: inherit;
-	font-weight: 600;
-	cursor: pointer;
-}
-
-.pt-sheet__grip {
-	position: absolute;
-	top: 6px;
-	left: 50%;
-	width: 36px;
-	height: 4px;
-	margin-left: -18px;
-	border-radius: 2px;
-	background: var(--color-border-maxcontrast);
-}
-
-.pt-sheet__content {
-	height: 45vh;
-	overflow: auto;
-	padding: calc(var(--default-grid-baseline) * 2);
-}
-
-.pt-sheet__visits {
-	padding: calc(var(--default-grid-baseline) * 2) calc(var(--default-grid-baseline) * 3) calc(var(--default-grid-baseline) * 4);
-	border-top: 1px solid var(--color-border);
-}
-
 /* ---- footer ---- */
 .pt-footer {
 	display: flex;
 	align-items: center;
 	gap: calc(var(--default-grid-baseline) * 3);
-	min-height: 56px;
+	min-height: var(--header-height, 50px);
 	padding: 0 calc(var(--default-grid-baseline) * 3) 0 calc(var(--default-grid-baseline) * 4);
 	border-top: 1px solid var(--color-border);
 }
 
 .pt-footer__tools {
 	display: flex;
-	gap: 4px;
+	gap: var(--default-grid-baseline);
 	margin-inline-start: auto;
 }
 </style>

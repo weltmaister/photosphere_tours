@@ -25,12 +25,11 @@ const encodePath = (path) => path.split('/').map(encodeURIComponent).join('/')
  * the path below it.
  *
  * @param {import('@nextcloud/files').INode} node
- * @return {{ rootUrl: string, dir: string, path: string }}
+ * @return {{ rootUrl: string, dir: string }}
  */
 export function locate(node) {
 	const source = node.source
-	const rootUrl = source.slice(0, source.length - node.path.length)
-	return { rootUrl, dir: node.dirname, path: node.path }
+	return { rootUrl: source.slice(0, source.length - node.path.length), dir: node.dirname }
 }
 
 /** URL of an absolute path below the root of the user or share. */
@@ -38,21 +37,31 @@ export function urlFor(rootUrl, path) {
 	return rootUrl + encodePath(path)
 }
 
+const DAV = 'DAV:'
+const OC = 'http://owncloud.org/ns'
+const NC = 'http://nextcloud.org/ns'
+
+/** PROPFIND for the given `<d:prop>` content; resolves with the parsed XML. */
+async function propfind(url, props, depth = 0) {
+	const response = await axios.request({
+		method: 'PROPFIND',
+		url,
+		data: `<?xml version="1.0"?><d:propfind xmlns:d="${DAV}" xmlns:oc="${OC}" xmlns:nc="${NC}"><d:prop>${props}</d:prop></d:propfind>`,
+		headers: { Depth: String(depth), 'Content-Type': 'application/xml; charset=utf-8' },
+		responseType: 'text',
+	})
+	return new DOMParser().parseFromString(response.data, 'application/xml')
+}
+
+const text = (el, ns, name) => el.getElementsByTagNameNS(ns, name)[0]?.textContent ?? ''
+
 /**
  * The file's ETag as WebDAV knows it. The ETag header of a GET cannot be used
  * for If-Match: servers that compress responses append a suffix to it
  * (e.g. `"…-zstd"`), and the conditional PUT then always fails with 412.
  */
 export async function getEtag(url) {
-	const response = await axios.request({
-		method: 'PROPFIND',
-		url,
-		data: '<?xml version="1.0"?><d:propfind xmlns:d="DAV:"><d:prop><d:getetag/></d:prop></d:propfind>',
-		headers: { Depth: '0', 'Content-Type': 'application/xml; charset=utf-8' },
-		responseType: 'text',
-	})
-	const xml = new DOMParser().parseFromString(response.data, 'application/xml')
-	return xml.getElementsByTagNameNS('DAV:', 'getetag')[0]?.textContent || null
+	return text(await propfind(url, '<d:getetag/>'), DAV, 'getetag') || null
 }
 
 /**
@@ -62,15 +71,7 @@ export async function getEtag(url) {
  * @return {Promise<number|null>}
  */
 export async function getFileId(url) {
-	const response = await axios.request({
-		method: 'PROPFIND',
-		url,
-		data: '<?xml version="1.0"?><d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns"><d:prop><oc:fileid/></d:prop></d:propfind>',
-		headers: { Depth: '0', 'Content-Type': 'application/xml; charset=utf-8' },
-		responseType: 'text',
-	})
-	const xml = new DOMParser().parseFromString(response.data, 'application/xml')
-	const id = Number(xml.getElementsByTagNameNS('http://owncloud.org/ns', 'fileid')[0]?.textContent)
+	const id = Number(text(await propfind(url, '<oc:fileid/>'), OC, 'fileid'))
 	return Number.isFinite(id) && id > 0 ? id : null
 }
 
@@ -111,13 +112,6 @@ export async function writeText(url, text, etag) {
 	}
 }
 
-// files-photospheres-xmp-metadata comes from the files_photospheres app when it
-// is installed; it tells whether a JPEG is a 360° image without downloading it
-const PROPFIND_BODY = `<?xml version="1.0"?>
-<d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
-	<d:prop><d:resourcetype/><d:getlastmodified/><d:getcontenttype/><oc:fileid/><nc:files-photospheres-xmp-metadata/></d:prop>
-</d:propfind>`
-
 function panoramaFlag(xmp) {
 	if (!xmp) {
 		return null
@@ -132,33 +126,22 @@ function panoramaFlag(xmp) {
 
 /**
  * Direct children of a folder. A missing folder yields an empty list.
+ * `panorama` comes from the files_photospheres app when it is installed: it
+ * tells whether a JPEG is a 360° image without downloading it (null: unknown).
  *
- * @return {Promise<Array<{ name: string, isFolder: boolean, mtime: Date|null, mime: string, fileid: string|null, panorama: boolean|null }>>}
+ * @return {Promise<Array<{ name: string, isFolder: boolean, mtime: Date|null, fileid: string|null, panorama: boolean|null }>>}
  */
 export async function listFolder(url) {
-	let response
+	let xml
 	try {
-		response = await axios.request({
-			method: 'PROPFIND',
-			url,
-			data: PROPFIND_BODY,
-			headers: { Depth: '1', 'Content-Type': 'application/xml; charset=utf-8' },
-			responseType: 'text',
-		})
+		xml = await propfind(url, '<d:resourcetype/><d:getlastmodified/><oc:fileid/><nc:files-photospheres-xmp-metadata/>', 1)
 	} catch (e) {
 		if (e.response?.status === 404) {
 			return []
 		}
 		throw e
 	}
-
-	const xml = new DOMParser().parseFromString(response.data, 'application/xml')
-	const DAV = 'DAV:'
-	const OC = 'http://owncloud.org/ns'
-	const NC = 'http://nextcloud.org/ns'
-	const self = new URL(url, window.location.href).pathname.replace(/\/$/, '')
-	const text = (el, ns, name) => el.getElementsByTagNameNS(ns, name)[0]?.textContent ?? ''
-
+	const self = decodeURIComponent(new URL(url, window.location.href).pathname.replace(/\/$/, ''))
 	return [...xml.getElementsByTagNameNS(DAV, 'response')]
 		.map((el) => {
 			const href = decodeURIComponent(text(el, DAV, 'href')).replace(/\/$/, '')
@@ -168,12 +151,11 @@ export async function listFolder(url) {
 				name: href.split('/').pop(),
 				isFolder: el.getElementsByTagNameNS(DAV, 'collection').length > 0,
 				mtime: modified ? new Date(modified) : null,
-				mime: text(el, DAV, 'getcontenttype'),
 				fileid: text(el, OC, 'fileid') || null,
 				panorama: panoramaFlag(text(el, NC, 'files-photospheres-xmp-metadata')),
 			}
 		})
-		.filter((entry) => entry.href !== decodeURIComponent(self))
+		.filter((entry) => entry.href !== self)
 }
 
 /** The first bytes of a file, e.g. for its EXIF block. */

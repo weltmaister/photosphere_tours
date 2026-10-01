@@ -12,9 +12,11 @@ import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
 
 GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).href
 
-// long side of the image; enough to zoom into a 1:100 plan, small enough
-// for canvas limits on phones
+// long side of the image: enough to zoom into a 1:100 plan
 const LONG_SIDE = 6000
+// iOS Safari refuses canvases above 16.7 megapixels (an A-size sheet at
+// 6000 px would be 25)
+const MAX_PIXELS = 16e6
 
 /**
  * Text of page 1 with positions normalised to the page (0–1, y downwards) –
@@ -51,7 +53,7 @@ export async function pdfToPng(url) {
 	try {
 		const page = await doc.getPage(1)
 		const base = page.getViewport({ scale: 1 })
-		const scale = LONG_SIDE / Math.max(base.width, base.height)
+		const scale = Math.min(LONG_SIDE / Math.max(base.width, base.height), Math.sqrt(MAX_PIXELS / (base.width * base.height)))
 		const viewport = page.getViewport({ scale })
 		const canvas = document.createElement('canvas')
 		canvas.width = Math.round(viewport.width)

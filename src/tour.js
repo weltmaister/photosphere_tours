@@ -17,7 +17,7 @@
  * means "up on the plan" and the view direction survives switching captures.
  */
 
-export const TOUR_FILENAME = '360-Rundgang.json'
+export { TOUR_FILENAME } from './constants.js'
 export const TOUR_VERSION = 1
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/
@@ -175,6 +175,11 @@ export function capturesNewestFirst(spot) {
 	return [...spot.captures].sort((a, b) => b.date.localeCompare(a.date))
 }
 
+/** The spot's earliest capture. */
+export function firstCapture(spot) {
+	return capturesNewestFirst(spot).at(-1)
+}
+
 /**
  * The capture that shows a spot as it was on a given day.
  *
@@ -226,21 +231,6 @@ export function bearing(from, to, planSize) {
 	const dx = (to.x - from.x) * planSize.w
 	const dy = (to.y - from.y) * planSize.h
 	return normDeg(toDeg(Math.atan2(dx, -dy)))
-}
-
-/**
- * Zoom levels (percent) for Photo Sphere Viewer's MapPlugin, where 100 %
- * means one screen pixel per plan pixel. Floor plans are often 8000 px tall,
- * so fixed levels do not work: start on about a third of the plan and allow
- * zooming out until the whole plan fits.
- *
- * @param {{w:number,h:number}} planSize plan size in pixels
- * @param {number} mapSize size of the map in screen pixels
- * @return {{min:number, initial:number, max:number}}
- */
-export function mapZoom(planSize, mapSize) {
-	const fit = mapSize / Math.max(planSize.w, planSize.h) * 100
-	return { min: fit * 0.8, initial: Math.min(100, fit * 3), max: 200 }
 }
 
 /**
