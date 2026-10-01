@@ -81,7 +81,6 @@
 		"Name of the spot": "Name des Standorts",
 		"Rename {name}": "{name} umbenennen",
 		"{count} captures": "{count} Aufnahmen",
-		"Name taken from the floor plan: {name}. You can change it under \"Spot\".": "Name aus dem Grundriss übernommen: {name}. Du kannst ihn unter „Standort“ ändern.",
 		"\"{name}\" saved.": "„{name}“ gespeichert.",
 		"What is this file?": "Was ist diese Datei?",
 		"360° walkthrough – do not delete": "360°-Rundgang – nicht löschen",
@@ -123,7 +122,18 @@
 		"There is no storage space left": "Der Speicherplatz ist voll",
 		"The server answered with error {status}": "Der Server meldet Fehler {status}",
 		"There are no 360° images in this folder. Put the images and a floor plan into one folder first.": "In diesem Ordner liegen keine 360°-Bilder. Leg zuerst die Bilder und einen Grundriss in einen Ordner.",
-		"Creating the walkthrough …": "Rundgang wird angelegt …"
+		"Creating the walkthrough …": "Rundgang wird angelegt …",
+		"The floor plan says \"{name}\" here.": "Im Grundriss steht hier „{name}“.",
+		"Floor plan: {name}": "Im Grundriss: {name}",
+		"Use all suggestions ({count})": "Alle Vorschläge übernehmen ({count})",
+		"_{count} spot still has the file name of the camera. The floor plan has a room name for it._::_{count} spots still have the file name of the camera. The floor plan has room names for them._": [
+			"{count} Standort trägt noch den Dateinamen der Kamera. Der Grundriss hat dafür einen Raumnamen.",
+			"{count} Standorte tragen noch den Dateinamen der Kamera. Der Grundriss hat dafür Raumnamen."
+		],
+		"_{count} name taken from the floor plan – check it under \"Spot\" before saving._::_{count} names taken from the floor plan – check them under \"Spot\" before saving._": [
+			"{count} Name aus dem Grundriss übernommen – bitte vor dem Speichern unter „Standort“ prüfen.",
+			"{count} Namen aus dem Grundriss übernommen – bitte vor dem Speichern unter „Standort“ prüfen."
+		]
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

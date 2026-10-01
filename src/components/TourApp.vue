@@ -92,6 +92,7 @@
 					:class="{ 'pt-panel__content--plan': editorTab === 'plan' }">
 					<FloorPlan v-if="editorTab === 'plan'" v-bind="editPlanProps" v-on="editPlanEvents" />
 					<SpotForm v-else-if="editorTab === 'spot'"
+						ref="spotForm"
 						v-model:renameFiles="renameFilesOnSave"
 						:spot="currentSpot"
 						:capture="currentCapture"
@@ -101,6 +102,8 @@
 						@pick="(file) => pickCapture(spotIndex, file)"
 						@set-date="setDate"
 						@align="toggleAlign"
+						:suggestion="currentSpot ? suggestionFor(currentSpot) : null"
+						@accept-suggestion="acceptSuggestion(currentSpot)"
 						@remove="removeCurrent" />
 					<NewImages v-else
 						:images="unplacedImages"
@@ -109,6 +112,8 @@
 						:previews="!shared"
 						:can-change-plan="!shared"
 						@select="selectImage"
+						:suggestions="pendingSuggestions.length"
+						@accept-all="acceptAllSuggestions"
 						@change-plan="switchPlan()" />
 				</div>
 			</section>
@@ -151,7 +156,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, toRaw, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, toRaw, watch } from 'vue'
 import { showConfirmation } from '@nextcloud/dialogs'
 import { Permission } from '@nextcloud/files'
 import { mdiAlertCircleOutline, mdiFullscreen, mdiMapMarkerPlusOutline, mdiMinus, mdiPlus } from '@mdi/js'
@@ -190,6 +195,7 @@ import {
 	dateFromFilename,
 	firstCapture,
 	formatDate,
+	hasCameraName,
 	parseTour,
 	resolvePath,
 	serializeTour,
@@ -231,6 +237,7 @@ const editorTab = ref('spot')
 const status = ref(null)
 
 const pano = ref(null)
+const spotForm = ref(null)
 const heading = ref(0)
 const spotIndex = ref(0)
 /** 'latest' or YYYY-MM-DD */
@@ -542,6 +549,9 @@ function startEditing() {
  */
 async function stopEditing({ closing = false } = {}) {
 	if (dirty.value) {
+		// the dialog returns focus where it was; the editor's buttons are gone by
+		// then, the walkthrough's own frame is not
+		document.querySelector('.photosphere-tours-overlay')?.focus()
 		const keep = await showConfirmation({
 			name: t('Save changes?'),
 			text: t('You changed the walkthrough but have not saved it yet.'),
@@ -561,6 +571,11 @@ async function stopEditing({ closing = false } = {}) {
 	aligning.value = false
 	selectedImage.value = null
 	status.value = null
+	// the focused editor control is gone: keep keyboard users inside the walkthrough
+	await nextTick()
+	if (!document.activeElement || document.activeElement === document.body) {
+		document.querySelector('.photosphere-tours-overlay')?.focus()
+	}
 	return true
 }
 
@@ -636,7 +651,7 @@ async function alignTo(target) {
  * (the PNG next to it has the same name). Read in the background, once per
  * version of the PDF.
  */
-let planRooms = []
+const planRooms = shallowRef([])
 let roomsKey = null
 let roomsRequest = 0
 
@@ -647,7 +662,7 @@ async function loadRooms() {
 		return
 	}
 	roomsKey = key
-	planRooms = []
+	planRooms.value = []
 	const request = ++roomsRequest
 	if (!source) {
 		return
@@ -657,7 +672,7 @@ async function loadRooms() {
 		const rooms = roomLabels(await pdfText(fileUrl(source)))
 		// a plan switched in the meantime has its own request
 		if (request === roomsRequest) {
-			planRooms = rooms
+			planRooms.value = rooms
 		}
 	} catch {
 		// no suggestions then; try again next time
@@ -695,13 +710,51 @@ async function onPlanPlace(point) {
 	await placeSelected((file, date) => addSpot(tour.value, { ...point, file, fallbackDate: date }))
 	spotIndex.value = tour.value.spots.length - 1
 	const spot = currentSpot.value
-	const room = suggestName(planRooms, point, planSize.value)
+	const room = suggestionFor(spot)
 	if (room) {
-		spot.name = room
-		renamedSpots.add(toRaw(spot))
-		setStatus('info', t('Name taken from the floor plan: {name}. You can change it under "Spot".', { name: room }))
+		setStatus('info', t('The floor plan says "{name}" here.', { name: room }), t('Use it'), () => acceptSuggestion(spot))
 	}
 	changed()
+}
+
+/**
+ * The room name the floor plan has at a spot, offered while the spot still
+ * carries the camera's file name. Nothing is changed until it is taken over.
+ */
+function suggestionFor(spot) {
+	if (planRooms.value.length === 0 || !hasCameraName(spot)) {
+		return null
+	}
+	const room = suggestName(planRooms.value, spot, planSize.value)
+	return room && room !== spot.name ? room : null
+}
+
+const pendingSuggestions = computed(() => (tour.value?.spots ?? []).filter(spot => suggestionFor(spot)))
+
+/** Take the plan's name, then let the user correct it before saving. */
+async function acceptSuggestion(spot) {
+	const room = suggestionFor(spot)
+	if (!room) {
+		return
+	}
+	spot.name = room
+	renamedSpots.add(toRaw(spot))
+	changed()
+	status.value = null
+	spotIndex.value = tour.value.spots.indexOf(spot)
+	editorTab.value = 'spot'
+	await nextTick()
+	spotForm.value?.focusName()
+}
+
+function acceptAllSuggestions() {
+	const spots = pendingSuggestions.value
+	for (const spot of spots) {
+		spot.name = suggestionFor(spot)
+		renamedSpots.add(toRaw(spot))
+	}
+	changed()
+	setStatus('info', n('{count} name taken from the floor plan – check it under "Spot" before saving.', '{count} names taken from the floor plan – check them under "Spot" before saving.', spots.length))
 }
 
 async function onPlanSelect(index) {

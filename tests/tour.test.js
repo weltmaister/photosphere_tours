@@ -10,6 +10,7 @@ import {
 	capturesNewestFirst,
 	dateFromFilename,
 	emptyTour,
+	hasCameraName,
 	parseTour,
 	rawYaw,
 	relativePath,
@@ -260,5 +261,23 @@ describe('editing', () => {
 		addCapture(spot, { file: 'R0010042.JPG', fallbackDate: '2026-10-02T08:00' })
 		expect(spot.captures[1].date).toBe('2026-10-02T08:00')
 		expect(parseTour(serializeTour(tour)).spots[0].captures).toHaveLength(2)
+	})
+})
+
+describe('hasCameraName', () => {
+	const spot = (name, file) => ({ name, x: 0, y: 0, captures: [{ file, date: '2023-07-24T15:00', yaw: 0 }] })
+
+	it('is true while the spot is named after a camera file', () => {
+		expect(hasCameraName(spot('R0010236', 'R0010236.jpg'))).toBe(true)
+		expect(hasCameraName(spot('IMG_9279-HDR Panorama', 'IMG_9279-HDR Panorama.jpg'))).toBe(true)
+	})
+
+	it('is false for a name the user chose', () => {
+		expect(hasCameraName(spot('Meeting room', 'R0010236.jpg'))).toBe(false)
+	})
+
+	it('is false when the file is already named after its spot', () => {
+		expect(hasCameraName(spot('Meeting room', '2023-07-24_1500_Meeting room.jpg'))).toBe(false)
+		expect(hasCameraName(spot('Zimmer 2', '001_2024-04-18_2007_Zimmer 2.jpg'))).toBe(false)
 	})
 })

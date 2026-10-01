@@ -28,7 +28,8 @@
 				</NcCheckboxRadioSwitch>
 			</fieldset>
 			<div class="pt-form__fields">
-				<NcTextField :model-value="spot.name"
+				<NcTextField ref="nameField"
+					:model-value="spot.name"
 					:label="t('Name')"
 					@update:model-value="$emit('rename', $event)" />
 				<NcDateTimePickerNative :model-value="date"
@@ -36,6 +37,13 @@
 					:label="t('Captured on')"
 					@update:model-value="onDate" />
 			</div>
+			<!-- a room name read from the plan is only a proposal until taken over -->
+			<p v-if="suggestion" class="pt-form__suggestion">
+				<span>{{ t('Floor plan: {name}', { name: suggestion }) }}</span>
+				<NcButton variant="secondary" size="small" @click="$emit('accept-suggestion')">
+					{{ t('Use it') }}
+				</NcButton>
+			</p>
 			<p class="pt-form__hint">
 				{{ t('File: {file}', { file: capture.file }) }}
 			</p>
@@ -73,7 +81,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { mdiCompassOutline, mdiTrashCanOutline } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
@@ -87,12 +95,23 @@ import { formatDate } from '../tour.js'
 const props = defineProps({
 	spot: { type: Object, default: null },
 	capture: { type: Object, default: null },
+	/** room name from the floor plan, offered while the spot has its camera name */
+	suggestion: { type: String, default: null },
 	/** the spot's captures, newest first: [{ value: file, label, checked }] */
 	captures: { type: Array, default: () => [] },
 	aligning: { type: Boolean, default: false },
 	renameFiles: { type: Boolean, default: true },
 })
-const emit = defineEmits(['rename', 'pick', 'set-date', 'align', 'remove', 'update:renameFiles'])
+const emit = defineEmits(['rename', 'pick', 'accept-suggestion', 'set-date', 'align', 'remove', 'update:renameFiles'])
+const nameField = ref(null)
+
+defineExpose({
+	/** put the cursor into the name, e.g. to correct a name taken from the plan */
+	focusName() {
+		nameField.value?.focus()
+		nameField.value?.select()
+	},
+})
 
 const date = computed(() => props.capture ? new Date(props.capture.date) : null)
 
@@ -131,6 +150,15 @@ function onDate(value) {
 	color: var(--color-text-maxcontrast);
 	font-size: var(--font-size-small);
 	word-break: break-word;
+}
+
+.pt-form__suggestion {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: calc(var(--default-grid-baseline) * 2);
+	margin: calc(var(--default-grid-baseline) * -2) 0 0;
+	color: var(--color-text-maxcontrast);
 }
 
 .pt-form__fields + .pt-form__hint {

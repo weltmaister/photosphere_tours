@@ -27,6 +27,18 @@
 			</NcButton>
 		</section>
 
+		<section v-if="suggestions > 0" class="pt-new__suggestions">
+			<p class="pt-new__hint">
+				{{ n('{count} spot still has the file name of the camera. The floor plan has a room name for it.', '{count} spots still have the file name of the camera. The floor plan has room names for them.', suggestions) }}
+			</p>
+			<NcButton variant="secondary" @click="$emit('accept-all')">
+				<template #icon>
+					<NcIconSvgWrapper :path="mdiFormatListChecks" />
+				</template>
+				{{ t('Use all suggestions ({count})', { count: suggestions }) }}
+			</NcButton>
+		</section>
+
 		<NcEmptyContent v-if="images.length === 0"
 			:name="t('No new images')"
 			:description="t('Copy new 360° images into this folder and they will show up here.')">
@@ -66,12 +78,12 @@
 
 <script setup>
 import { generateUrl } from '@nextcloud/router'
-import { mdiFloorPlan, mdiImagePlusOutline } from '@mdi/js'
+import { mdiFloorPlan, mdiFormatListChecks, mdiImagePlusOutline } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
-import { t } from '../l10n.js'
+import { n, t } from '../l10n.js'
 
 defineProps({
 	/** [{ path, fileid }] */
@@ -81,8 +93,10 @@ defineProps({
 	/** false on share pages: previews and the file picker need a login */
 	previews: { type: Boolean, default: true },
 	canChangePlan: { type: Boolean, default: true },
+	/** number of spots with a room name proposal from the floor plan */
+	suggestions: { type: Number, default: 0 },
 })
-defineEmits(['select', 'change-plan'])
+defineEmits(['select', 'change-plan', 'accept-all'])
 
 const thumbnail = (fileid) => generateUrl('/core/preview?fileId={id}&x=320&y=160&a=1', { id: fileid })
 </script>
@@ -99,6 +113,15 @@ const thumbnail = (fileid) => generateUrl('/core/preview?fileId={id}&x=320&y=160
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
+	gap: calc(var(--default-grid-baseline) * 2);
+	padding-bottom: calc(var(--default-grid-baseline) * 3);
+	border-bottom: 1px solid var(--color-border);
+}
+
+.pt-new__suggestions {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
 	gap: calc(var(--default-grid-baseline) * 2);
 	padding-bottom: calc(var(--default-grid-baseline) * 3);
 	border-bottom: 1px solid var(--color-border);

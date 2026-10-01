@@ -14,8 +14,9 @@ A lean replacement for tools like HoloBuilder, built on
 - Put the 360° images and a floor plan (PDF, PNG, JPG, WebP or SVG) into a folder.
   A bar above the file list offers **Create 360° walkthrough**. A single plan in the
   folder is taken right away; a PDF is converted once.
-- Pick an image and click its place on the plan. The spot is named after the room
-  stamp nearby (for PDF plans with text), the capture date comes from the camera.
+- Pick an image and click its place on the plan. For PDF plans with text the room name
+  from the plan is offered – take it over, correct it or give your own name. The
+  capture date comes from the camera.
 - Set the view direction once, so the cone on the plan shows where you are looking.
 - Rename spots in the list – the image files can follow the new name.
 
@@ -102,8 +103,10 @@ share links.
   left, panorama and the tabs *Spot* and *New images* on the right.
   *New images* lists images of the folder that belong to no spot yet; pick one and
   click on the plan for a new spot, or on a spot to add it as another capture. With
-  a PDF plan, a new spot is named after the nearest room stamp. Drag spots to move
-  them (or use the arrow keys).
+  a PDF plan, the room name of the nearest room stamp is offered: *Use it* puts it into
+  the name field, where it can still be corrected; *Use all suggestions* does it for
+  every spot that still has the camera's file name. Nothing is renamed before that.
+  Drag spots to move them (or use the arrow keys).
   *Set view direction*: turn the panorama towards something you can find on the
   plan and click it there. Removing only drops images from the walkthrough, files
   are never deleted. The capture date comes from the file name, else from the

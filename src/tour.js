@@ -275,7 +275,23 @@ export function renamedFile(file, date, name) {
 export function nameFromFilename(name) {
 	return name.split('/').pop()
 		.replace(/\.[^.]+$/, '')
-		.replace(/^(\d{3}_)?\d{4}-\d{2}-\d{2}_\d{4,6}_/, '')
+		.replace(NAMED_FILE_RE, '')
+}
+
+// "2024-04-18_2007_Zimmer 2.jpg": a file already named after its spot (by the
+// HoloBuilder export or by renamedFile())
+const NAMED_FILE_RE = /^(\d{3}_)?\d{4}-\d{2}-\d{2}_\d{4,6}_/
+
+/**
+ * Whether the spot still carries the name the camera gave its file
+ * ("R0010236") – then a room name from the floor plan is worth offering.
+ * A name the user chose, or a file already named after its spot, is kept.
+ */
+export function hasCameraName(spot) {
+	return spot.captures.some((capture) => {
+		const base = capture.file.split('/').pop()
+		return !NAMED_FILE_RE.test(base) && nameFromFilename(base) === spot.name
+	})
 }
 
 /**

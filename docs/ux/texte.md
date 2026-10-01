@@ -156,6 +156,10 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Dialog: Text (Standort) | Der Standort verschwindet aus dem Rundgang. Seine Bilddatei bleibt im Ordner. | = | The spot disappears from the walkthrough. Its image file stays in the folder. |
 | Dialog: Text (Aufnahme) | Die Aufnahme verschwindet aus dem Rundgang. Die Bilddatei bleibt im Ordner. | = | The capture disappears from the walkthrough. The image file stays in the folder. |
 | Meldung nach Klick auf einen Standort mit gewähltem Bild | Als weitere Aufnahme zu „{name}“ hinzugefügt. [Rückgängig] | = | Added as another capture of "{name}". [Undo] |
+| Vorschlag nach dem Platzieren (PDF-Plan) | Im Grundriss steht hier „{name}“. [Übernehmen] | = | The floor plan says "{name}" here. [Use it] |
+| Vorschlag am Namensfeld | Im Grundriss: {name} [Übernehmen] | = | Floor plan: {name} [Use it] |
+| Neue Bilder: offene Vorschläge | {n} Standorte tragen noch den Dateinamen der Kamera. Der Grundriss hat dafür Raumnamen. [Alle Vorschläge übernehmen ({n})] | = | {n} spots still have the file name of the camera. … [Use all suggestions ({n})] |
+| Nach „Alle übernehmen“ | {n} Namen aus dem Grundriss übernommen – bitte vor dem Speichern unter „Standort“ prüfen. | = | {n} names taken from the floor plan – check them under "Spot" before saving. |
 | Dialog: Buttons | Entfernen / Behalten | = | Remove / Keep |
 | Ungespeichert: Titel | Änderungen speichern? | = | Save changes? |
 | Ungespeichert: Text | Du hast den Rundgang geändert, aber noch nicht gespeichert. | Sie haben … | You changed the walkthrough but have not saved it yet. |
@@ -178,3 +182,5 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 - Datumsangaben immer über `formatDate` (Locale der Nutzerin bzw. des Nutzers), nie im Text zusammenbauen.
 - Deutsche Texte sind rund 30 % länger. Tabs und Buttons müssen „Neue Bilder (12)“ und „Blickrichtung festlegen“ ohne Umbruch fassen.
 - „Standort“ ist bewusst kein „Raum“: Mehrere Standorte können in einem Raum liegen.
+
+**Raumnamen aus dem Grundriss sind Vorschläge.** Sie ändern nichts, bis man „Übernehmen“ klickt; danach steht der Name im Feld und lässt sich vor dem Speichern korrigieren. Erst beim Speichern folgen die Bilddateien (Schalter unter „Standort“). Vorgeschlagen wird nur, solange ein Standort noch den Dateinamen der Kamera trägt.

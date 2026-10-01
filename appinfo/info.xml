@@ -14,8 +14,9 @@ documentation, construction progress or facility management, right inside Nextcl
 - Put the 360° images and a floor plan (PDF, PNG, JPG, WebP or SVG) into a folder.
   A bar above the file list offers **Create 360° walkthrough**. A single plan in the
   folder is taken right away; a PDF is converted once.
-- Pick an image and click its place on the plan. The spot is named after the room
-  stamp nearby (for PDF plans with text), the capture date comes from the camera.
+- Pick an image and click its place on the plan. For PDF plans with text the room name
+  from the plan is offered – take it over, correct it or give your own name. The
+  capture date comes from the camera.
 - Set the view direction once, so the cone on the plan shows where you are looking.
 - Rename spots in the list – the image files can follow the new name.
 
@@ -49,9 +50,9 @@ Bestandsaufnahme, Baudokumentation oder Gebäudemanagement, direkt in Nextcloud.
 - 360°-Bilder und einen Grundriss (PDF, PNG, JPG, WebP oder SVG) in einen Ordner legen.
   Über der Dateiliste erscheint **360°-Rundgang anlegen**. Ein einzelner Grundriss im
   Ordner wird direkt genommen, ein PDF einmalig umgewandelt.
-- Bild wählen und im Grundriss an seine Stelle klicken. Der Standort bekommt den Namen
-  des Raumstempels in der Nähe (bei PDF-Plänen mit Text), das Aufnahmedatum kommt aus
-  der Kamera.
+- Bild wählen und im Grundriss an seine Stelle klicken. Bei PDF-Plänen mit Text schlägt
+  die App den Raumnamen aus dem Plan vor – übernehmen, korrigieren oder einen eigenen
+  Namen geben. Das Aufnahmedatum kommt aus der Kamera.
 - Einmal die Blickrichtung festlegen, dann zeigt der Kegel im Grundriss, wohin man schaut.
 - Standorte in der Liste umbenennen – die Bilddateien können den neuen Namen übernehmen.
 
@@ -78,7 +79,7 @@ Braucht einen Browser mit WebGL 2. Läuft neben *Photo Sphere Viewer*
 (files_photospheres), der weiter einzelne Panoramen öffnet. Basiert auf dieser App von
 Robin Windey. Sprachen: Englisch, Deutsch.
     ]]></description>
-    <version>0.4.8</version>
+    <version>0.4.11</version>
     <licence>AGPL-3.0-or-later</licence>
     <author>weltmaister</author>
     <author>Robin Windey (files_photospheres)</author>

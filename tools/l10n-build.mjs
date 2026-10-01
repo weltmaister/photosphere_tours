@@ -24,7 +24,6 @@ const informal = {
 	'Someone else changed the walkthrough in the meantime, so it cannot be saved. Reload it – your changes will be lost.': 'Jemand anderes hat den Rundgang inzwischen geändert, deshalb kann nicht gespeichert werden. Lade ihn neu – deine Änderungen gehen dabei verloren.',
 	'Saving failed: {error}. Check your connection and try again.': 'Speichern fehlgeschlagen: {error}. Prüf die Verbindung und versuch es noch einmal.',
 	'You changed the walkthrough but have not saved it yet.': 'Du hast den Rundgang geändert, aber noch nicht gespeichert.',
-	'Name taken from the floor plan: {name}. You can change it under "Spot".': 'Name aus dem Grundriss übernommen: {name}. Du kannst ihn unter „Standort“ ändern.',
 	'Pick an image under "New images" and click on the floor plan.': 'Wähl unter „Neue Bilder“ ein Bild und klick in den Grundriss.',
 	'You are not allowed to do this here': 'Dafür fehlt dir hier die Berechtigung',
 	'There are no 360° images in this folder. Put the images and a floor plan into one folder first.': 'In diesem Ordner liegen keine 360°-Bilder. Leg zuerst die Bilder und einen Grundriss in einen Ordner.',
