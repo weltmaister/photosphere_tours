@@ -15,8 +15,9 @@ A walkthrough is one file, `360-Rundgang.json`, in a folder of panoramas.
 Clicking it opens the panorama together with a side bar: the floor plan with all
 spots and a list of the spots. Clicking a spot goes there, the view direction is
 kept. *Site visit* at the bottom shows every spot as it was on one day; spots with
-several captures carry a clock badge in the list and unfold to pick one. The side
-bar can be resized or hidden; on phones it is a bottom sheet.
+several captures show *n captures* in the list and unfold to pick one. The floor
+plan zooms (buttons, wheel, two fingers) and pans by dragging. The side bar can be
+resized or hidden; on phones it is a bottom sheet.
 
 ```json
 {
@@ -53,14 +54,18 @@ share links.
   click on `360-Rundgang.json`.
 - **Edit** (needs write permission): *Edit* opens the editor – floor plan on the
   left, panorama and the tabs *Spot* and *New images* on the right.
-  *New images* lists images of the folder and its subfolders that belong to no
-  spot yet; pick one and click on the plan for a new spot, or on a spot to add it
-  as another capture. Drag spots to move them (or use the arrow keys).
+  *New images* lists images of the folder that belong to no spot yet; pick one and
+  click on the plan for a new spot, or on a spot to add it as another capture. With
+  a PDF plan, a new spot is named after the nearest room stamp. Drag spots to move
+  them (or use the arrow keys).
   *Set view direction*: turn the panorama towards something you can find on the
   plan and click it there. Removing only drops images from the walkthrough, files
   are never deleted. The capture date comes from the file name, else from the
   camera's EXIF data. When a newer floor plan appears in the folder the editor
   offers to switch; *Change floor plan* does it by hand.
+- **Rename:** the pencil next to a spot in the list renames it and saves right away;
+  the spot's image files are renamed too (`2024-08-14_1602_<name>.jpg`). In the
+  editor this is a switch under *Spot*.
 - **Keyboard:** Tab through header, plan, spot list and site visits; arrow keys turn
   the focused panorama (+/− zoom) and move the focused spot in the editor; Escape
   leaves modes, then the editor, then the walkthrough.

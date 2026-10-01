@@ -48,8 +48,9 @@ jobs:
         uses: R0Wi/nextcloud-appstore-push-action@9244bb5445776688cfe90fa1903ea8dff95b0c28 # v1
         with:
           app_name: ${{ env.APP_NAME }}
-          appstore_username: ${{ secrets.APPSTORE_USER }}
-          appstore_password: ${{ secrets.APPSTORE_PASSWORD }}
+          # API token from apps.nextcloud.com (account settings); accounts created
+          # with GitHub have no password, so the token is the only way
+          appstore_token: ${{ secrets.APPSTORE_TOKEN }}
           download_url: ${{ steps.attach_to_release.outputs.browser_download_url }}
           app_private_key: ${{ secrets.APP_PRIVATE_KEY }}
           nightly: ${{ github.event.release.prerelease }}
