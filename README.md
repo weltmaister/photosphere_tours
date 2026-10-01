@@ -9,6 +9,8 @@ Robin Windey, reduced to walkthroughs. Both apps can run side by side: single
 panoramas keep opening in files_photospheres (or the Viewer app), this app only
 reacts to walkthrough files.
 
+![Walkthrough with floor plan, spot list and site visits](screenshots/viewer.jpg)
+
 ## How it works
 
 A walkthrough is one file, `360-Rundgang.json`, in a folder of panoramas.
@@ -93,6 +95,12 @@ make appstore     # build/artifacts/appstore/photosphere_tours.tar.gz
 ```
 
 Supported: Nextcloud 33 and 34, desktop and phone. Needs a browser with WebGL 2.
+
+## Screenshots and demo data
+
+The screenshots in `screenshots/` show a demo walkthrough: panoramas from
+[Poly Haven](https://polyhaven.com) (CC0) and a floor plan drawn for the purpose.
+`tools/demo/` recreates the data.
 
 ## License
 

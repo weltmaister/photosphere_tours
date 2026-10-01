@@ -37,11 +37,12 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   resizable), panorama, site visits; editor (plan large, 520 px column with panorama and
   tabs); phone: bottom sheet / tabs. One `PanoramaView` for all layouts (CSS grid areas).
 - `FloorPlan.vue` (zoom, pan, pinch, pin drag, arrow keys), `PanoramaView.vue` (PSV
-  core, no navbar), `SpotList.vue` (capture badge + per-spot capture choice),
+  core, no navbar), `SpotList.vue` (rename, "n captures" toggle + capture choice),
   `SiteVisits.vue`, `SpotForm.vue`, `NewImages.vue`
 - `src/tour.js` – pure logic, unit-tested (`tests/tour.test.js`)
 - `tools/holobuilder.js` + `holobuilder-import.mjs` – HoloBuilder backup import
 - `tools/l10n-build.mjs` (`l10n/de_DE.json` formal → de/de_DE) and `tools/l10n-check.mjs`
+- `tools/demo/` – CC0 demo data for the store screenshots (`screenshots/`, ≤ 2 MiB each)
 
 ## Commands
 

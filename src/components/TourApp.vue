@@ -656,7 +656,9 @@ async function loadImages() {
 async function switchPlan(file = null) {
 	try {
 		const plan = await choosePlan(folder, folderEntries, { auto: false, file })
-		const url = fileUrl(plan)
+		// a PDF converted again keeps the PNG's name; without a new URL the
+		// browser shows the image it already holds for this page
+		const url = `${fileUrl(plan)}?v=${Date.now()}`
 		const img = await loadImage(url)
 		tour.value.plan = plan
 		planUrl.value = url
@@ -796,8 +798,11 @@ async function onPlanPlace(point) {
 	} else if (selectedImage.value) {
 		const file = selectedImage.value
 		selectedImage.value = null
-		const spot = addSpot(tour.value, { ...point, file, fallbackDate: await fallbackDate(file) })
+		addSpot(tour.value, { ...point, file, fallbackDate: await fallbackDate(file) })
 		spotIndex.value = tour.value.spots.length - 1
+		// the reactive proxy, not the raw object addSpot returns: renameFiles()
+		// looks spots up while iterating tour.value.spots
+		const spot = tour.value.spots[spotIndex.value]
 		const room = suggestName(planRooms, point, planSize.value)
 		if (room) {
 			spot.name = room
@@ -1144,9 +1149,9 @@ onBeforeUnmount(() => {
 
 /* ---- editor ---- */
 .pt-editplan {
+	position: relative;
 	display: flex;
 	flex-direction: column;
-	gap: calc(var(--default-grid-baseline) * 3);
 	grid-area: plan;
 	min-height: 0;
 	padding: calc(var(--default-grid-baseline) * 4);
@@ -1156,6 +1161,22 @@ onBeforeUnmount(() => {
 .pt-editplan__plan {
 	flex-grow: 1;
 	min-height: 0;
+}
+
+/* the note floats over the plan: if it pushed the plan down, the plan would
+   move between two clicks and the second one would land beside its target */
+.pt-editplan > .pt-note {
+	position: absolute;
+	z-index: 2;
+	top: calc(var(--default-grid-baseline) * 6);
+	right: calc(var(--default-grid-baseline) * 6);
+	left: calc(var(--default-grid-baseline) * 6);
+	pointer-events: none;
+}
+
+.pt-editplan > .pt-note > * {
+	pointer-events: auto;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .pt-note {

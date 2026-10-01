@@ -12,7 +12,7 @@ import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs'
 import { emit } from '@nextcloud/event-bus'
 import { File } from '@nextcloud/files'
 
-import { listFolder, urlFor, writeBlob, writeText } from './dav.js'
+import { getFileId, listFolder, urlFor, writeBlob, writeText } from './dav.js'
 import { classifyFolder, pngNameFor } from './folder.js'
 import { t } from './l10n.js'
 import { TOUR_FILENAME, emptyTour, relativePath, serializeTour } from './tour.js'
@@ -22,8 +22,9 @@ const PLAN_MIMES = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 
 export class Cancelled extends Error {}
 
 /** The Files node of the walkthrough file in a folder (it may not exist yet). */
-export function tourNode(folder) {
+export function tourNode(folder, id = undefined) {
 	return new File({
+		id,
 		source: `${folder.source}/${TOUR_FILENAME}`,
 		root: folder.root,
 		owner: folder.owner,
@@ -82,8 +83,10 @@ export async function choosePlan(folder, entries, { auto = true, file = null } =
 	const rootUrl = folder.source.slice(0, folder.source.length - folder.path.length)
 	const { pdfToPng } = await import(/* webpackChunkName: "pdf" */ './pdf.js')
 	const blob = await pdfToPng(urlFor(rootUrl, path))
-	await writeBlob(urlFor(rootUrl, `${folder.path}/${png}`), blob)
-	emit('files:node:created', new File({
+	const pngUrl = urlFor(rootUrl, `${folder.path}/${png}`)
+	await writeBlob(pngUrl, blob)
+	announce(new File({
+		id: await getFileId(pngUrl).catch(() => null) ?? undefined,
 		source: `${folder.source}/${png}`,
 		root: folder.root,
 		owner: folder.owner,
@@ -106,6 +109,14 @@ export async function createTour(folder) {
 	}
 	const plan = await choosePlan(folder, entries)
 	await writeText(node.encodedSource, serializeTour(emptyTour(folder.basename, plan)), null)
-	emit('files:node:created', node)
-	return node
+	const created = tourNode(folder, await getFileId(node.encodedSource).catch(() => null) ?? undefined)
+	announce(created)
+	return created
+}
+
+/** Show a new file in the file list; without a file id the Files app refuses it. */
+function announce(node) {
+	if (node.id) {
+		emit('files:node:created', node)
+	}
 }

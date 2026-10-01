@@ -131,6 +131,9 @@ defineExpose({
 	min-height: 0;
 	background: #000000;
 	font-family: var(--font-face);
+	/* keeps the viewer's own z-indexes (loader, overlays) inside, so the
+	   "No spots yet" layer on top really covers it */
+	isolation: isolate;
 }
 
 .pt-pano:focus-visible {

@@ -55,6 +55,25 @@ export async function getEtag(url) {
 	return xml.getElementsByTagNameNS('DAV:', 'getetag')[0]?.textContent || null
 }
 
+/**
+ * The Nextcloud file id, which the Files app needs for nodes announced with
+ * `files:node:created`.
+ *
+ * @return {Promise<number|null>}
+ */
+export async function getFileId(url) {
+	const response = await axios.request({
+		method: 'PROPFIND',
+		url,
+		data: '<?xml version="1.0"?><d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns"><d:prop><oc:fileid/></d:prop></d:propfind>',
+		headers: { Depth: '0', 'Content-Type': 'application/xml; charset=utf-8' },
+		responseType: 'text',
+	})
+	const xml = new DOMParser().parseFromString(response.data, 'application/xml')
+	const id = Number(xml.getElementsByTagNameNS('http://owncloud.org/ns', 'fileid')[0]?.textContent)
+	return Number.isFinite(id) && id > 0 ? id : null
+}
+
 /** @return {Promise<{ text: string, etag: string|null }>} */
 export async function readText(url) {
 	// ETag first: if the file changes in between, the older ETag makes the

@@ -78,7 +78,7 @@ Braucht einen Browser mit WebGL 2. Läuft neben *Photo Sphere Viewer*
 (files_photospheres), der weiter einzelne Panoramen öffnet. Basiert auf dieser App von
 Robin Windey. Sprachen: Englisch, Deutsch.
     ]]></description>
-    <version>0.4.3</version>
+    <version>0.4.7</version>
     <licence>AGPL-3.0-or-later</licence>
     <author>weltmaister</author>
     <author>Robin Windey (files_photospheres)</author>
@@ -91,6 +91,10 @@ Robin Windey. Sprachen: Englisch, Deutsch.
     <website>https://github.com/weltmaister/photosphere_tours</website>
     <bugs>https://github.com/weltmaister/photosphere_tours/issues</bugs>
     <repository>https://github.com/weltmaister/photosphere_tours.git</repository>
+    <screenshot small-thumbnail="https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/viewer-small.jpg">https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/viewer.jpg</screenshot>
+    <screenshot>https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/site-visits.jpg</screenshot>
+    <screenshot>https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/editor.jpg</screenshot>
+    <screenshot>https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/phone.jpg</screenshot>
     <dependencies>
         <php min-version="8.2" max-version="8.5"/>
         <nextcloud min-version="33" max-version="34"/>
