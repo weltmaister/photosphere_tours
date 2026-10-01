@@ -1,15 +1,59 @@
 # Photosphere Tours
 
-Nextcloud app for 360° walkthroughs: panoramas on a floor plan, with a timeline.
-A lean replacement for site documentation tools like HoloBuilder, built on
+Turn a folder of 360° panoramas into a walkthrough on a floor plan – for site
+documentation, construction progress or facility management, right inside Nextcloud.
+A lean replacement for tools like HoloBuilder, built on
 [Photo Sphere Viewer](https://photo-sphere-viewer.js.org/).
+
+![Walkthrough with floor plan, spot list and site visits](screenshots/viewer.jpg)
+
+## Features
+
+### Create a walkthrough in a minute
+
+- Put the 360° images and a floor plan (PDF, PNG, JPG, WebP or SVG) into a folder.
+  A bar above the file list offers **Create 360° walkthrough**. A single plan in the
+  folder is taken right away; a PDF is converted once.
+- Pick an image and click its place on the plan. The spot is named after the room
+  stamp nearby (for PDF plans with text), the capture date comes from the camera.
+- Set the view direction once, so the cone on the plan shows where you are looking.
+- Rename spots in the list – the image files can follow the new name.
+
+![Editor: floor plan on the left, panorama and spot details on the right](screenshots/editor.jpg)
+
+### Document progress over time
+
+Add later captures of the same spot. **Site visits** show every spot as it was on a
+given day; spots with several captures let you pick one. Spots that did not exist
+yet on that day are greyed out.
+
+![Site visit in October 2022: the same office as a shell](screenshots/site-visits.jpg)
+
+### Walk through it – on any device
+
+Panorama next to the floor plan and the spot list. The plan zooms and pans, the side
+bar can be resized or hidden, everything works with keyboard, mouse, touch and on
+phones. Share the folder by link and guests see the walkthrough read-only.
+
+<img src="screenshots/phone.jpg" alt="Phone: panorama, and the floor plan in a bottom sheet" width="480">
+
+### Your data stays plain files
+
+Everything is stored in one file, `360-Rundgang.json`, next to the images – no
+database, no server component. It syncs with the desktop client, moves with its
+folder and is versioned like any other file. Removing a spot never deletes an image.
+
+## Installation
+
+The first release for the Nextcloud App Store is being prepared; once it is out,
+install **Photosphere Tours** under *Apps → Multimedia*. Until then, build the tarball
+with `make appstore` and unpack it into `custom_apps/`. Requires Nextcloud 33 or 34
+and a browser with WebGL 2. Languages: English, German.
 
 Fork of [files_photospheres](https://github.com/nextcloud/files_photospheres) by
 Robin Windey, reduced to walkthroughs. Both apps can run side by side: single
 panoramas keep opening in files_photospheres (or the Viewer app), this app only
 reacts to walkthrough files.
-
-![Walkthrough with floor plan, spot list and site visits](screenshots/viewer.jpg)
 
 ## How it works
 
