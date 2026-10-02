@@ -3,7 +3,7 @@
 All notable changes to this app are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 0.4.11 – 2026-10-01
+## 0.4.11 – 2026-10-02
 
 First release in the Nextcloud App Store.
 
