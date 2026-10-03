@@ -9,7 +9,6 @@
     "dev": "webpack --mode development --config webpack.config.cjs",
     "watch": "webpack --mode development --config webpack.config.cjs --watch",
     "test": "vitest run && node tools/l10n-check.mjs",
-    "import-holobuilder": "node tools/holobuilder-import.mjs",
     "l10n": "node tools/l10n-build.mjs && node tools/l10n-check.mjs"
   },
   "repository": {

@@ -22,9 +22,9 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   Begehung). Vue templates use `t()` from `src/l10n.js` (no double escaping).
 - `js/` is build output and gitignored; `make appstore` builds the tarball. Bump the
   version on every deploy to a test instance, otherwise browsers keep the old script.
-- Never write into the owner's Nextcloud sync folders without asking. The HoloBuilder
-  importer (`tools/holobuilder-import.mjs`) is a dry run unless `--write`; use `--out`
-  to write elsewhere. No real names or project codes in the public repo.
+- Never write into the owner's Nextcloud sync folders without asking. No real names,
+  project codes or names of other products in the public repo; descriptions stay neutral
+  (not aimed at one trade, no comparison with other tools).
 
 ## Layout
 
@@ -46,7 +46,6 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   the spot or in a `Set` of `toRaw(spot)` – never by index, never mix raw and proxy.
 - `src/tour.js`, `folder.js`, `exif.js`, `rooms.js`, `rename.js` – pure logic, unit-tested
   (`tests/`)
-- `tools/holobuilder.js` + `holobuilder-import.mjs` – HoloBuilder backup import
 - `tools/l10n-build.mjs` (`l10n/de_DE.json` formal → de/de_DE) and `tools/l10n-check.mjs`
 - `tools/demo/` – CC0 demo data for the store screenshots (`screenshots/`, ≤ 2 MiB each)
 

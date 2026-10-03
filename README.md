@@ -120,18 +120,6 @@ share links.
   leaves modes, then the editor, then the walkthrough.
 - **Share:** share the folder by link. Guests see the walkthrough read-only.
 
-## Importing a HoloBuilder backup
-
-`tools/holobuilder-import.mjs` creates a walkthrough per floor folder from a backup
-with `_meta/index.csv`, `_meta/index.json`, `_meta/slideNodes_<floor>.json` and
-`Grundrisse/<floor>.png`:
-
-```bash
-node tools/holobuilder-import.mjs "<backup folder>"            # dry run with report
-node tools/holobuilder-import.mjs "<backup folder>" --write    # write the files
-node tools/holobuilder-import.mjs "<backup folder>" --write --out=<dir>   # write elsewhere
-```
-
 ## Development
 
 ```bash
