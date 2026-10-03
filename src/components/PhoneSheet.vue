@@ -5,7 +5,7 @@
   later. See the COPYING file.
 
   The viewer on phones: a bottom sheet with floor plan and spot list under
-  the panorama, and the site visits always in reach.
+  the panorama, and the visits always in reach.
 -->
 <template>
 	<section class="pt-sheet" :aria-label="t('Floor plan and spots')">

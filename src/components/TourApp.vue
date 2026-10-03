@@ -5,7 +5,7 @@
   later. See the COPYING file.
 
   The full-screen walkthrough: header, panorama, floor plan with spots,
-  site visits – and with write permission the editor. One panorama instance
+  visits – and with write permission the editor. One panorama instance
   serves every layout; only the CSS grid around it changes.
 -->
 <template>
@@ -322,7 +322,7 @@ function shownCapture(spot) {
 const currentSpot = computed(() => tour.value?.spots[spotIndex.value] ?? null)
 const currentCapture = computed(() => {
 	const spot = currentSpot.value
-	// a spot first captured after the chosen site visit shows its earliest capture
+	// a spot first captured after the chosen visit shows its earliest capture
 	return spot ? (shownCapture(spot) ?? firstCapture(spot)) : null
 })
 const panoramaUrl = computed(() => currentCapture.value ? fileUrl(currentCapture.value.file) : null)
@@ -341,7 +341,7 @@ const visits = computed(() => tour.value
 		{ value: 'latest', label: t('Latest'), title: t('Show every spot with its latest capture') },
 	]
 	: [])
-// one site visit and "Latest" would show the same
+// one visit and "Latest" would show the same
 const showVisits = computed(() => visits.value.length > 2)
 
 const spotState = (index, shown) => index === spotIndex.value ? 'current' : (shown ? 'normal' : 'missing')

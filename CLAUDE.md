@@ -1,7 +1,7 @@
 # CLAUDE.md — photosphere_tours
 
 Nextcloud app (NC 33–34) for 360° walkthroughs: a `360-Rundgang.json` in a folder of
-panoramas opens the panorama with the floor plan, a spot list and site visits.
+panoramas opens the panorama with the floor plan, a spot list and visits.
 Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
 
 ## Constraints

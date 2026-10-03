@@ -3,11 +3,12 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>photosphere_tours</id>
     <name>Photosphere Tours</name>
-    <summary lang="en">360° walkthroughs on a floor plan – spots, view directions and site visits, stored next to your images</summary>
+    <summary lang="en">360° walkthroughs on a floor plan – spots, view directions and visits over time, stored next to your images</summary>
     <summary lang="de">360°-Rundgänge auf dem Grundriss – Standorte, Blickrichtungen und Begehungen, gespeichert neben den Bildern</summary>
     <description lang="en"><![CDATA[
-Turn a folder of 360° panoramas into a walkthrough on a floor plan – for site
-documentation, construction progress or facility management, right inside Nextcloud.
+Turn a folder of 360° panoramas into a walkthrough on a floor plan, right inside
+Nextcloud – for a home, an office, a venue, an exhibition or any other place you want
+to show or keep on record.
 
 **Create a walkthrough in a minute**
 
@@ -20,9 +21,9 @@ documentation, construction progress or facility management, right inside Nextcl
 - Set the view direction once, so the cone on the plan shows where you are looking.
 - Rename spots in the list – the image files can follow the new name.
 
-**Document progress over time**
+**See how places change**
 
-Add later captures of the same spot. **Site visits** show every spot as it was on a
+Add later captures of the same spot. **Visits** show every spot as it was on a
 given day; spots with several captures let you pick one.
 
 **Walk through it**
@@ -42,8 +43,9 @@ Requires a browser with WebGL 2. Runs alongside *Photo Sphere Viewer*
 Robin Windey. Languages: English, German.
     ]]></description>
     <description lang="de"><![CDATA[
-Macht aus einem Ordner mit 360°-Panoramen einen Rundgang auf dem Grundriss – für
-Bestandsaufnahme, Baudokumentation oder Gebäudemanagement, direkt in Nextcloud.
+Macht aus einem Ordner mit 360°-Panoramen einen Rundgang auf dem Grundriss, direkt in
+Nextcloud – für Wohnung, Büro, Veranstaltungsort, Ausstellung oder jeden anderen Ort, den
+Sie zeigen oder festhalten möchten.
 
 **Rundgang in einer Minute anlegen**
 
@@ -56,7 +58,7 @@ Bestandsaufnahme, Baudokumentation oder Gebäudemanagement, direkt in Nextcloud.
 - Einmal die Blickrichtung festlegen, dann zeigt der Kegel im Grundriss, wohin man schaut.
 - Standorte in der Liste umbenennen – die Bilddateien können den neuen Namen übernehmen.
 
-**Fortschritt über die Zeit**
+**Veränderungen über die Zeit**
 
 Spätere Aufnahmen desselben Standorts hinzufügen. **Begehungen** zeigen jeden Standort
 so, wie er an einem Tag war; bei mehreren Aufnahmen lässt sich eine auswählen.
@@ -93,7 +95,7 @@ Robin Windey. Sprachen: Englisch, Deutsch.
     <bugs>https://github.com/weltmaister/photosphere_tours/issues</bugs>
     <repository>https://github.com/weltmaister/photosphere_tours.git</repository>
     <screenshot small-thumbnail="https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/viewer-small.jpg">https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/viewer.jpg</screenshot>
-    <screenshot>https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/site-visits.jpg</screenshot>
+    <screenshot>https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/visits.jpg</screenshot>
     <screenshot>https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/editor.jpg</screenshot>
     <screenshot>https://raw.githubusercontent.com/weltmaister/photosphere_tours/master/screenshots/phone.jpg</screenshot>
     <dependencies>

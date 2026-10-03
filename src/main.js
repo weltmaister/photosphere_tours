@@ -122,7 +122,7 @@ registerFileAction({
 
 // Label next to 360-Rundgang.json, so nobody deletes it by accident – only
 // for those who could
-const FILE_HINT = () => t('This file holds the walkthrough: spots, view directions and site visits. Deleting or renaming it removes the walkthrough – the images stay.')
+const FILE_HINT = () => t('This file holds the walkthrough: spots, view directions and visits. Deleting or renaming it removes the walkthrough – the images stay.')
 
 registerFileAction({
 	id: 'photosphere-tours-label',

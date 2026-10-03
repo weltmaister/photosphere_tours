@@ -4,14 +4,14 @@
   This file is licensed under the Affero General Public License version 3 or
   later. See the COPYING file.
 
-  Site visit switch: show every spot as it was on one day, or the latest.
+  Visit switch: show every spot as it was on one day, or the latest.
 -->
 <template>
 	<div class="pt-visits">
-		<span class="pt-visits__label" aria-hidden="true">{{ t('Site visit') }}</span>
+		<span class="pt-visits__label" aria-hidden="true">{{ t('Visit') }}</span>
 		<div class="pt-visits__scroll">
 			<NcRadioGroup :model-value="modelValue"
-				:label="t('Site visit')"
+				:label="t('Visit')"
 				hide-label
 				@update:model-value="$emit('update:modelValue', $event)">
 				<NcRadioGroupButton v-for="visit in visits"

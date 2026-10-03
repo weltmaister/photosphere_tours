@@ -204,7 +204,7 @@ describe('orientation', () => {
 })
 
 describe('dateFromFilename', () => {
-	it('reads the HoloBuilder backup patterns', () => {
+	it('reads date and time in front of the name', () => {
 		expect(dateFromFilename('001_2024-07-02_1213_Whg 7 - Flur 1.jpg')).toBe('2024-07-02T12:13')
 		expect(dateFromFilename('2025-03-05_0228_Raum1 - Mitte2.jpg')).toBe('2025-03-05T02:28')
 		expect(dateFromFilename('2024-10-15_101148_Flur - 2_01.jpg')).toBe('2024-10-15T10:11')

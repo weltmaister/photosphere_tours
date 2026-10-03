@@ -27,7 +27,7 @@ lint:
 appstore: build
 	rm -rf $(build_directory)/artifacts
 	mkdir -p $(build_directory)/artifacts/appstore $(build_directory)/stage/$(app_name)
-	cp -r appinfo lib img COPYING README.md CHANGELOG*.md $(build_directory)/stage/$(app_name)/
+	cp -r appinfo lib img COPYING LICENSES THIRD-PARTY-NOTICES.md README.md CHANGELOG*.md $(build_directory)/stage/$(app_name)/
 	mkdir -p $(build_directory)/stage/$(app_name)/js
 	cp js/*.js js/*.LICENSE.txt $(build_directory)/stage/$(app_name)/js/ 2>/dev/null || true
 	if [ -d l10n ]; then cp -r l10n $(build_directory)/stage/$(app_name)/; fi

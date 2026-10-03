@@ -1,11 +1,11 @@
 # Photosphere Tours
 
-Turn a folder of 360° panoramas into a walkthrough on a floor plan – for site
-documentation, construction progress or facility management, right inside Nextcloud.
-A lean replacement for tools like HoloBuilder, built on
-[Photo Sphere Viewer](https://photo-sphere-viewer.js.org/).
+Turn a folder of 360° panoramas into a walkthrough on a floor plan, right inside
+Nextcloud: see where each picture was taken and move from place to place – for a home,
+an office, a venue, an exhibition or any other place you want to show or keep on
+record. Built on [Photo Sphere Viewer](https://photo-sphere-viewer.js.org/).
 
-![Walkthrough with floor plan, spot list and site visits](screenshots/viewer.jpg)
+![Walkthrough with floor plan, spot list and visits](screenshots/viewer.jpg)
 
 ## Features
 
@@ -22,13 +22,13 @@ A lean replacement for tools like HoloBuilder, built on
 
 ![Editor: floor plan on the left, panorama and spot details on the right](screenshots/editor.jpg)
 
-### Document progress over time
+### See how places change
 
-Add later captures of the same spot. **Site visits** show every spot as it was on a
+Add later captures of the same spot. **Visits** show every spot as it was on a
 given day; spots with several captures let you pick one. Spots that did not exist
 yet on that day are greyed out.
 
-![Site visit in October 2022: the same office as a shell](screenshots/site-visits.jpg)
+![An earlier visit: the same room in October 2022](screenshots/visits.jpg)
 
 ### Walk through it – on any device
 
@@ -61,7 +61,7 @@ reacts to walkthrough files.
 A walkthrough is one file, `360-Rundgang.json`, in a folder of panoramas.
 Clicking it opens the panorama together with a side bar: the floor plan with all
 spots and a list of the spots. Clicking a spot goes there, the view direction is
-kept. *Site visit* at the bottom shows every spot as it was on one day; spots with
+kept. *Visit* at the bottom shows every spot as it was on one day; spots with
 several captures show *n captures* in the list and unfold to pick one. The floor
 plan zooms (buttons, wheel, two fingers) and pans by dragging. The side bar can be
 resized or hidden; on phones it is a bottom sheet.
@@ -115,7 +115,7 @@ share links.
 - **Rename:** the pencil next to a spot in the list renames it and saves right away;
   the spot's image files are renamed too (`2024-08-14_1602_<name>.jpg`). In the
   editor this is a switch under *Spot*.
-- **Keyboard:** Tab through header, plan, spot list and site visits; arrow keys turn
+- **Keyboard:** Tab through header, plan, spot list and visits; arrow keys turn
   the focused panorama (+/− zoom) and move the focused spot in the editor; Escape
   leaves modes, then the editor, then the walkthrough.
 - **Share:** share the folder by link. Guests see the walkthrough read-only.
@@ -151,4 +151,5 @@ The screenshots in `screenshots/` show a demo walkthrough: panoramas from
 
 ## License
 
-AGPL-3.0-or-later, see [COPYING](COPYING).
+AGPL-3.0-or-later, see [COPYING](COPYING). Bundled libraries and their licenses:
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

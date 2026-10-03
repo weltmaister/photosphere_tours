@@ -234,7 +234,7 @@ export function bearing(from, to, planSize) {
 }
 
 /**
- * Capture date from common file name patterns: the HoloBuilder backup
+ * Capture date from common file name patterns: date and time before the name
  * ("001_2024-07-02_1213_Scene.jpg", "2024-10-15_101148_Scene_01.jpg") and
  * camera exports ("IMG_20260930_143012_00_012.jpg").
  *
@@ -278,8 +278,8 @@ export function nameFromFilename(name) {
 		.replace(NAMED_FILE_RE, '')
 }
 
-// "2024-04-18_2007_Zimmer 2.jpg": a file already named after its spot (by the
-// HoloBuilder export or by renamedFile())
+// "2024-04-18_2007_Zimmer 2.jpg": a file already named after its spot (by
+// renamedFile() or an export that names files this way)
 const NAMED_FILE_RE = /^(\d{3}_)?\d{4}-\d{2}-\d{2}_\d{4,6}_/
 
 /**

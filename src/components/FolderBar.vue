@@ -40,10 +40,10 @@ const props = defineProps({
 const secondLine = computed(() => {
 	const state = props.state.value
 	if (state.mode === 'create') {
-		return t('Place them on a floor plan to walk through the building.')
+		return t('Placed on a floor plan, they become a walkthrough.')
 	}
 	return state.readOnly
-		? t('Floor plan, spots and site visits in one view.')
+		? t('Floor plan, spots and visits in one view.')
 		: t('Stored in "360-Rundgang.json" – please do not delete or rename that file.')
 })
 </script>

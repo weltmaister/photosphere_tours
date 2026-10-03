@@ -5,7 +5,7 @@
   later. See the COPYING file.
 
   List of spots. Spots with several captures show "2 captures" and unfold to
-  pick one – the per-spot choice, independent of the site visit. With write
+  pick one – the per-spot choice, independent of the visit. With write
   permission the name can be changed right here.
 -->
 <template>

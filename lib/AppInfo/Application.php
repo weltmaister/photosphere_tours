@@ -8,7 +8,9 @@ declare(strict_types=1);
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the COPYING file.
  *
- * Based on files_photospheres by Robin Windey.
+ * Based on files_photospheres:
+ * @author Robin Windey <ro.windey@gmail.com>
+ * @copyright Robin Windey 2019
  */
 
 namespace OCA\PhotosphereTours\AppInfo;

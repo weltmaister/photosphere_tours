@@ -13,7 +13,7 @@ Gilt für Oberfläche, README und App-Store-Text. Sprachen:
 | **Grundriss** | floor plan | Das Planbild des Rundgangs | „Plan“ |
 | **Standort** | spot | Ein Punkt im Grundriss, an dem fotografiert wurde | „Aufnahmepunkt“, „Punkt“ |
 | **Aufnahme** | capture | Ein 360°-Bild eines Standorts zu einem Zeitpunkt | „Stand“ |
-| **Begehung** | site visit | Alle Aufnahmen eines Tages | „Walkthrough“ in der Zeitachse |
+| **Begehung** | visit | Alle Aufnahmen eines Tages | „Walkthrough“ in der Zeitachse |
 | **Neueste** | latest | Jeder Standort mit seiner jüngsten Aufnahme | „Aktuell“ |
 | **Neue Bilder** | new images | Bilder im Ordner, die noch zu keinem Standort gehören | „Noch nicht verortet“ |
 | **platzieren** | place | Ein neues Bild einem Standort zuordnen | „verorten“ |
@@ -54,7 +54,7 @@ Regeln:
 
 | Stelle | de | de_DE | en |
 |---|---|---|---|
-| Beschriftung | Begehung | = | Site visit |
+| Beschriftung | Begehung | = | Visit |
 | Standardwahl | Neueste | = | Latest |
 | Tooltip Datum | Jeden Standort so zeigen, wie er am {date} war | = | Show every spot as it was on {date} |
 | Tooltip Neueste | Jeden Standort mit seiner neuesten Aufnahme zeigen | = | Show every spot with its latest capture |
