@@ -21,7 +21,7 @@ Gilt für Oberfläche, README und App-Store-Text. Sprachen:
 
 Regeln:
 - **Ein Begriff je Sache.** „Standort“ nie mit „Punkt“ mischen, „Aufnahme“ nie mit „Bild“, außer bei Dateien im Ordner („Neue Bilder“, „Bilddatei“).
-- **Buttons beginnen mit einem Verb** („Speichern“, „Blickrichtung festlegen“). Ausnahmen sind Umschalter und Tabs.
+- **Buttons beginnen mit einem Verb** („Speichern“, „Grundriss wechseln“). Ausnahmen sind Umschalter und Tabs.
 - **Löschen erklärt immer die Folge:** Die Bilddatei bleibt im Ordner.
 - **Fehlermeldungen folgen dem Muster** „Was ist passiert – was tun“.
 
@@ -122,10 +122,10 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Datei | Datei: {file} | = | File: {file} |
 | Abschnitt | Blickrichtung | = | View direction |
 | Erklärung | Zeigt der Blickkegel im Grundriss in die falsche Richtung? Dreh das Bild zu etwas Markantem – Tür, Fenster, Ecke – und leg dann fest, wo das im Grundriss liegt. | Zeigt … ? Drehen Sie … und legen Sie dann fest … | Does the view cone on the floor plan point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – then mark where it is on the floor plan. |
-| Button | Blickrichtung festlegen | = | Set view direction |
+| Hinweis | Zeigt der Blickkegel in die falsche Richtung? Drehen Sie das Bild zu etwas Markantem – Tür, Fenster, Ecke – und klicken Sie im Grundriss auf diese Stelle. Der Kegel dreht sich dorthin. | Dreh … klick … | Does the view cone point the wrong way? … |
 | Während des Festlegens | Klick im Grundriss auf die Stelle, die du gerade im Bild siehst. | Klicken Sie …, die Sie … sehen. | Click the place on the floor plan that you are looking at in the image. |
 | Abbrechen | Abbrechen | = | Cancel |
-| Erfolg | Blickrichtung übernommen – noch nicht gespeichert | = | View direction set – not saved yet |
+| Erfolg | Blickrichtung übernommen – noch nicht gespeichert [Rückgängig] | = | View direction set – not saved yet [Undo] |
 | Entfernen (mehrere Aufnahmen) | Aufnahme entfernen | = | Remove capture |
 | Entfernen (letzte Aufnahme) | Standort entfernen | = | Remove spot |
 | Tooltip Standort im Editor | {name} – ziehen zum Verschieben | = | {name} – drag to move |
@@ -180,7 +180,7 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 ## Hinweise für Übersetzungen
 
 - Datumsangaben immer über `formatDate` (Locale der Nutzerin bzw. des Nutzers), nie im Text zusammenbauen.
-- Deutsche Texte sind rund 30 % länger. Tabs und Buttons müssen „Neue Bilder (12)“ und „Blickrichtung festlegen“ ohne Umbruch fassen.
+- Deutsche Texte sind rund 30 % länger. Tabs und Buttons müssen „Neue Bilder (12)“ und „Standort und Bilder“ ohne Umbruch fassen.
 - „Standort“ ist bewusst kein „Raum“: Mehrere Standorte können in einem Raum liegen.
 
 **Raumnamen aus dem Grundriss sind Vorschläge.** Sie ändern nichts, bis man „Übernehmen“ klickt; danach steht der Name im Feld und lässt sich vor dem Speichern korrigieren. Erst beim Speichern folgen die Bilddateien (Schalter unter „Standort“). Vorgeschlagen wird nur, solange ein Standort noch den Dateinamen der Kamera trägt.

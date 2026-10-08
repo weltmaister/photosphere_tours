@@ -4,8 +4,8 @@
   This file is licensed under the Affero General Public License version 3 or
   later. See the COPYING file.
 
-  Editor tab "Spot": name, which capture is edited, its date and view
-  direction, removal. Removing never deletes files.
+  Editing panel, section "Spot": name, which capture is edited, its date, how to set
+  the view direction (a click on the plan), removal. Removing never deletes files.
 -->
 <template>
 	<div class="pt-form">
@@ -58,14 +58,8 @@
 					{{ t('View direction') }}
 				</h3>
 				<p class="pt-form__hint">
-					{{ t('Does the view cone on the floor plan point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – then mark where it is on the floor plan.') }}
+					{{ t('Does the view cone point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – and click on that place in the floor plan. The cone turns there.') }}
 				</p>
-				<NcButton variant="secondary" :pressed="aligning" @click="$emit('align')">
-					<template #icon>
-						<NcIconSvgWrapper :path="mdiCompassOutline" />
-					</template>
-					{{ t('Set view direction') }}
-				</NcButton>
 			</section>
 
 			<section class="pt-form__section">
@@ -82,7 +76,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { mdiCompassOutline, mdiTrashCanOutline } from '@mdi/js'
+import { mdiTrashCanOutline } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcCheckboxRadioSwitch from '@nextcloud/vue/components/NcCheckboxRadioSwitch'
 import NcDateTimePickerNative from '@nextcloud/vue/components/NcDateTimePickerNative'
@@ -99,10 +93,9 @@ const props = defineProps({
 	suggestion: { type: String, default: null },
 	/** the spot's captures, newest first: [{ value: file, label, checked }] */
 	captures: { type: Array, default: () => [] },
-	aligning: { type: Boolean, default: false },
 	renameFiles: { type: Boolean, default: true },
 })
-const emit = defineEmits(['rename', 'pick', 'accept-suggestion', 'set-date', 'align', 'remove', 'update:renameFiles'])
+const emit = defineEmits(['rename', 'pick', 'accept-suggestion', 'set-date', 'remove', 'update:renameFiles'])
 const nameField = ref(null)
 
 defineExpose({

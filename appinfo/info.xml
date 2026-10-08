@@ -18,7 +18,7 @@ to show or keep on record.
 - Pick an image and click its place on the plan. For PDF plans with text the room name
   from the plan is offered – take it over, correct it or give your own name. The
   capture date comes from the camera.
-- Set the view direction once, so the cone on the plan shows where you are looking.
+- Set the view direction with one click on the plan, so the cone shows where you are looking.
 - Rename spots in the list – the image files can follow the new name.
 
 **See how places change**
@@ -55,7 +55,7 @@ Sie zeigen oder festhalten möchten.
 - Bild wählen und im Grundriss an seine Stelle klicken. Bei PDF-Plänen mit Text schlägt
   die App den Raumnamen aus dem Plan vor – übernehmen, korrigieren oder einen eigenen
   Namen geben. Das Aufnahmedatum kommt aus der Kamera.
-- Einmal die Blickrichtung festlegen, dann zeigt der Kegel im Grundriss, wohin man schaut.
+- Die Blickrichtung mit einem Klick in den Grundriss festlegen, dann zeigt der Kegel, wohin man schaut.
 - Standorte in der Liste umbenennen – die Bilddateien können den neuen Namen übernehmen.
 
 **Veränderungen über die Zeit**
@@ -81,7 +81,7 @@ Braucht einen Browser mit WebGL 2. Läuft neben *Photo Sphere Viewer*
 (files_photospheres), der weiter einzelne Panoramen öffnet. Basiert auf dieser App von
 Robin Windey. Sprachen: Englisch, Deutsch.
     ]]></description>
-    <version>0.4.11</version>
+    <version>0.4.13</version>
     <licence>AGPL-3.0-or-later</licence>
     <author>weltmaister</author>
     <author>Robin Windey (files_photospheres)</author>

@@ -83,7 +83,7 @@ resized or hidden; on phones it is a bottom sheet.
 - `plan` and `file` are relative to the folder of the JSON file.
 - `x`/`y` are normalised plan coordinates (0–1, origin top left).
 - `yaw` (degrees) is the raw panorama direction that looks towards the top of the
-  plan. It is set with *Set view direction* in the editor.
+  plan. It is set in the editor by clicking on the plan beside the selected spot.
 
 There is no database and no server-side code beyond loading the script: the file
 syncs with the desktop client, moves with its folder and works through public
@@ -100,15 +100,19 @@ share links.
 - **Open:** the bar above the file list (*Open walkthrough*), the folder's menu, or a
   click on `360-Rundgang.json`.
 - **Edit** (needs write permission): *Edit* opens the editor – floor plan on the
-  left, panorama and the tabs *Spot* and *New images* on the right.
-  *New images* lists images of the folder that belong to no spot yet; pick one and
-  click on the plan for a new spot, or on a spot to add it as another capture. With
+  left, panorama and one panel with the selected *Spot*, the floor plan file and the
+  *New images* on the right; drag the border between them to share the width. On
+  the plan, dragging pans, a short click on a spot selects it.
+  *New images* lists images of the folder that belong to no spot yet; a picked image
+  shows in the panorama at once – click on the plan for a new spot, or on a spot to
+  add it as another capture. With
   a PDF plan, the room name of the nearest room stamp is offered: *Use it* puts it into
   the name field, where it can still be corrected; *Use all suggestions* does it for
   every spot that still has the camera's file name. Nothing is renamed before that.
   Drag spots to move them (or use the arrow keys).
-  *Set view direction*: turn the panorama towards something you can find on the
-  plan and click it there. Removing only drops images from the walkthrough, files
+  *View direction*: with a spot selected, turn the panorama towards something you can
+  find on the plan and click that place – the cone turns there (*Undo* in the note
+  takes it back). Removing only drops images from the walkthrough, files
   are never deleted. The capture date comes from the file name, else from the
   camera's EXIF data. When a newer floor plan appears in the folder the editor
   offers to switch; *Change floor plan* does it by hand.

@@ -55,6 +55,12 @@
 				<div class="pt-editplan__plan">
 					<FloorPlan v-bind="editPlanProps" v-on="editPlanEvents" />
 				</div>
+				<ResizeHandle v-model="editorColumn"
+					class="pt-editplan__resize"
+					:min="EDITOR_MIN"
+					:max="editorMax"
+					:direction="-1"
+					:label="t('Width of the editing column')" />
 			</div>
 
 			<PanoramaView ref="pano"
@@ -77,44 +83,51 @@
 				</NcEmptyContent>
 			</div>
 
-			<!-- editor: tabs next to (desktop) or below (phone) the panorama -->
+			<!-- editor: everything to edit in one panel beside (desktop) or below (phone)
+			     the panorama; phones switch between it and the floor plan -->
 			<section v-if="editing" class="pt-panel">
-				<TabBar v-model="editorTab"
+				<TabBar v-if="mobile"
+					v-model="editorTab"
 					:tabs="editorTabs"
 					:label="t('Edit walkthrough')"
 					panel-id="pt-editor-panel"
 					id-prefix="pt-editor-tab" />
 				<NoteBar v-if="note && mobile" class="pt-note--panel" :note="note" />
 				<div id="pt-editor-panel"
-					role="tabpanel"
-					:aria-labelledby="`pt-editor-tab-${editorTab}`"
+					:role="mobile ? 'tabpanel' : undefined"
+					:aria-labelledby="mobile ? `pt-editor-tab-${editorTab}` : undefined"
 					class="pt-panel__content"
-					:class="{ 'pt-panel__content--plan': editorTab === 'plan' }">
-					<FloorPlan v-if="editorTab === 'plan'" v-bind="editPlanProps" v-on="editPlanEvents" />
-					<SpotForm v-else-if="editorTab === 'spot'"
-						ref="spotForm"
-						v-model:renameFiles="renameFilesOnSave"
-						:spot="currentSpot"
-						:capture="currentCapture"
-						:captures="spotRows[spotIndex]?.captures ?? []"
-						:aligning="aligning"
-						@rename="rename"
-						@pick="(file) => pickCapture(spotIndex, file)"
-						@set-date="setDate"
-						@align="toggleAlign"
-						:suggestion="currentSpot ? suggestionFor(currentSpot) : null"
-						@accept-suggestion="acceptSuggestion(currentSpot)"
-						@remove="removeCurrent" />
-					<NewImages v-else
-						:images="unplacedImages"
-						:selected="selectedImage"
-						:plan="tour.plan"
-						:previews="!shared"
-						:can-change-plan="!shared"
-						@select="selectImage"
-						:suggestions="pendingSuggestions.length"
-						@accept-all="acceptAllSuggestions"
-						@change-plan="switchPlan()" />
+					:class="{ 'pt-panel__content--plan': mobile && editorTab === 'plan' }">
+					<FloorPlan v-if="mobile && editorTab === 'plan'" v-bind="editPlanProps" v-on="editPlanEvents" />
+					<template v-else>
+						<section v-if="tour.spots.length > 0" ref="spotSection" class="pt-panel__section">
+							<h3 class="pt-panel__heading">
+								{{ t('Spot') }}
+							</h3>
+							<SpotForm ref="spotForm"
+								v-model:renameFiles="renameFilesOnSave"
+								:spot="currentSpot"
+								:capture="currentCapture"
+								:captures="spotRows[spotIndex]?.captures ?? []"
+								:suggestion="currentSpot ? suggestionFor(currentSpot) : null"
+								@rename="rename"
+								@pick="(file) => pickCapture(spotIndex, file)"
+								@accept-suggestion="acceptSuggestion(currentSpot)"
+								@set-date="setDate"
+								@remove="removeCurrent" />
+						</section>
+						<section class="pt-panel__section">
+							<NewImages :images="unplacedImages"
+								:selected="selectedImage"
+								:plan="tour.plan"
+								:previews="!shared"
+								:can-change-plan="!shared"
+								:suggestions="pendingSuggestions.length"
+								@select="selectImage"
+								@accept-all="acceptAllSuggestions"
+								@change-plan="switchPlan()" />
+						</section>
+					</template>
 				</div>
 			</section>
 
@@ -170,12 +183,13 @@ import NewImages from './NewImages.vue'
 import NoteBar from './NoteBar.vue'
 import PanoramaView from './PanoramaView.vue'
 import PhoneSheet from './PhoneSheet.vue'
+import ResizeHandle from './ResizeHandle.vue'
 import SiteVisits from './SiteVisits.vue'
 import SpotForm from './SpotForm.vue'
 import TabBar from './TabBar.vue'
 import TourHeader from './TourHeader.vue'
 import ViewerSidebar from './ViewerSidebar.vue'
-import { stored, useLayout } from '../composables/useLayout.js'
+import { EDITOR_MAX, EDITOR_MIN, EDITOR_PLAN_MIN, stored, useLayout } from '../composables/useLayout.js'
 import { Cancelled, choosePlan } from '../create.js'
 import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readText, urlFor, writeText } from '../dav.js'
 import { exifDate } from '../exif.js'
@@ -225,19 +239,20 @@ const etag = ref(null)
 const planSize = ref({ w: 1, h: 1 })
 const planUrl = ref('')
 
-const { mobile, sidebarOpen, sidebarWidth, sheetOpen, sheetTab } = useLayout()
+const { mobile, sidebarOpen, sidebarWidth, sheetOpen, sheetTab, editorColumn } = useLayout()
 
 const editing = ref(false)
 const dirty = ref(false)
 const saving = ref(false)
-const aligning = ref(false)
 const selectedImage = ref(null)
 const images = ref([])
-const editorTab = ref('spot')
+/** phones only: 'plan' or 'edit' */
+const editorTab = ref('edit')
 const status = ref(null)
 
 const pano = ref(null)
 const spotForm = ref(null)
+const spotSection = ref(null)
 const heading = ref(0)
 const spotIndex = ref(0)
 /** 'latest' or YYYY-MM-DD */
@@ -298,14 +313,26 @@ const layoutClass = computed(() => ({
 	'pt-app--mobile': mobile.value,
 	'pt-app--editing': editing.value,
 }))
-const bodyStyle = computed(() => (!editing.value && !mobile.value && sidebarOpen.value)
-	? { gridTemplateColumns: `${sidebarWidth.value}px minmax(0, 1fr)` }
-	: {})
+const bodyStyle = computed(() => {
+	if (mobile.value) {
+		return {}
+	}
+	if (editing.value) {
+		return { '--pt-editor-column': `${editorColumn.value}px` }
+	}
+	return sidebarOpen.value ? { gridTemplateColumns: `${sidebarWidth.value}px minmax(0, 1fr)` } : {}
+})
+
+// the editor's right column may grow until the floor plan beside it gets too small
+const viewportWidth = ref(window.innerWidth)
+const onResize = () => { viewportWidth.value = window.innerWidth }
+window.addEventListener('resize', onResize)
+const editorMax = computed(() => Math.max(EDITOR_MIN, Math.min(EDITOR_MAX, viewportWidth.value - EDITOR_PLAN_MIN)))
 
 // a phone turned to landscape gets the desktop editor, which has no plan tab
 watch(mobile, (isMobile) => {
 	if (!isMobile && editorTab.value === 'plan') {
-		editorTab.value = 'spot'
+		editorTab.value = 'edit'
 	}
 })
 
@@ -325,11 +352,28 @@ const currentCapture = computed(() => {
 	// a spot first captured after the chosen visit shows its earliest capture
 	return spot ? (shownCapture(spot) ?? firstCapture(spot)) : null
 })
-const panoramaUrl = computed(() => currentCapture.value ? fileUrl(currentCapture.value.file) : null)
-const panoramaLabel = computed(() => currentCapture.value
-	? t('360° panorama: {name}, {date}. Use the arrow keys to look around.', { name: currentSpot.value.name, date: displayDate(currentCapture.value.date) })
-	: '')
-const correction = computed(() => currentCapture.value ? sphereCorrection(currentCapture.value) : null)
+// an image picked under "New images" is shown right away, before it is placed
+const previewing = computed(() => editing.value && !!selectedImage.value)
+const panoramaUrl = computed(() => {
+	if (previewing.value) {
+		return fileUrl(selectedImage.value)
+	}
+	return currentCapture.value ? fileUrl(currentCapture.value.file) : null
+})
+const panoramaLabel = computed(() => {
+	if (previewing.value) {
+		return t('{file} selected – now click on the floor plan.', { file: selectedImage.value })
+	}
+	return currentCapture.value
+		? t('360° panorama: {name}, {date}. Use the arrow keys to look around.', { name: currentSpot.value.name, date: displayDate(currentCapture.value.date) })
+		: ''
+})
+const correction = computed(() => {
+	if (previewing.value) {
+		return { pan: 0 }
+	}
+	return currentCapture.value ? sphereCorrection(currentCapture.value) : null
+})
 
 const visits = computed(() => tour.value
 	? [
@@ -383,10 +427,10 @@ const planProps = computed(() => ({
 }))
 const editPlanProps = computed(() => ({
 	...planProps.value,
+	// the cone belongs to the selected spot, not to an image being previewed
+	heading: previewing.value ? null : heading.value,
 	editable: true,
-	crosshair: aligning.value || !!selectedImage.value,
-	// while setting a view direction a click next to the spot is a direction
-	snap: !aligning.value,
+	crosshair: !!selectedImage.value,
 }))
 const editPlanEvents = { select: onPlanSelect, move: onPlanMove, place: onPlanPlace }
 
@@ -440,16 +484,13 @@ const unplacedImages = computed(() => {
 	return images.value.filter(i => free.has(i.path) && !pending.has(i.path))
 })
 
+// phones only: the floor plan and the editing panel do not fit side by side
 const editorTabs = computed(() => [
-	...(mobile.value ? [{ id: 'plan', label: t('Floor plan') }] : []),
-	{ id: 'spot', label: t('Spot') },
-	{ id: 'new', label: mobile.value ? t('New ({count})', { count: unplacedImages.value.length }) : t('New images ({count})', { count: unplacedImages.value.length }) },
+	{ id: 'plan', label: t('Floor plan') },
+	{ id: 'edit', label: t('Spot and images') },
 ])
 
 const note = computed(() => {
-	if (aligning.value) {
-		return { type: 'info', text: t('Click the place on the floor plan that you are looking at in the image.'), action: t('Cancel'), onAction: () => { aligning.value = false } }
-	}
 	if (selectedImage.value) {
 		return { type: 'info', text: t('{file} selected – now click on the floor plan.', { file: selectedImage.value }), action: t('Deselect'), onAction: () => { selectedImage.value = null } }
 	}
@@ -537,7 +578,7 @@ function startEditing() {
 	editing.value = true
 	hint.value = ''
 	// an empty walkthrough starts with its images
-	editorTab.value = tour.value.spots.length === 0 ? 'new' : (mobile.value ? 'plan' : 'spot')
+	editorTab.value = tour.value.spots.length > 0 && mobile.value ? 'plan' : 'edit'
 	loadImages()
 }
 
@@ -568,7 +609,6 @@ async function stopEditing({ closing = false } = {}) {
 		}
 	}
 	editing.value = false
-	aligning.value = false
 	selectedImage.value = null
 	status.value = null
 	// the focused editor control is gone: keep keyboard users inside the walkthrough
@@ -619,31 +659,35 @@ async function fallbackDate(path) {
 
 function selectImage(path) {
 	selectedImage.value = path
-	aligning.value = false
 	if (path && mobile.value) {
 		editorTab.value = 'plan'
 	}
 }
 
-function toggleAlign() {
-	aligning.value = !aligning.value
-	selectedImage.value = null
-	if (aligning.value && mobile.value) {
-		editorTab.value = 'plan'
-	}
-}
-
-async function alignTo(target) {
+/**
+ * A click on the plan beside the selected spot: what the panorama shows right
+ * now lies in that direction. The cone turns there, the picture stays still.
+ */
+async function setDirection(target) {
 	const spot = currentSpot.value
 	const capture = currentCapture.value
+	const before = capture.yaw
 	capture.yaw = alignYaw(capture, pano.value.yaw(), spot, target, planSize.value)
-	aligning.value = false
 	changed()
-	// the thing the user looks at now lies at the clicked bearing: turn the
-	// view with it so the picture does not jump
 	await nextTick()
 	pano.value.lookAt(bearing(spot, target, planSize.value))
-	setStatus('success', t('View direction set – not saved yet'))
+	setStatus('success', t('View direction set – not saved yet'), t('Undo'), () => undoDirection(capture, before), 10000)
+}
+
+async function undoDirection(capture, before) {
+	// keep the picture still: the view moves by the same angle as the correction
+	const view = pano.value.yaw() * 180 / Math.PI
+	const delta = capture.yaw - before
+	capture.yaw = before
+	changed()
+	status.value = null
+	await nextTick()
+	pano.value.lookAt(view + delta)
 }
 
 /**
@@ -699,12 +743,15 @@ async function placeSelected(task) {
 	}
 }
 
+/**
+ * A short click on a free place of the plan: places the picked image there,
+ * otherwise turns the selected spot's view direction towards it.
+ */
 async function onPlanPlace(point) {
-	if (aligning.value) {
-		alignTo(point)
-		return
-	}
 	if (!selectedImage.value) {
+		if (currentSpot.value) {
+			setDirection(point)
+		}
 		return
 	}
 	await placeSelected((file, date) => addSpot(tour.value, { ...point, file, fallbackDate: date }))
@@ -742,7 +789,7 @@ async function acceptSuggestion(spot) {
 	changed()
 	status.value = null
 	spotIndex.value = tour.value.spots.indexOf(spot)
-	editorTab.value = 'spot'
+	editorTab.value = 'edit'
 	await nextTick()
 	spotForm.value?.focusName()
 }
@@ -759,21 +806,22 @@ function acceptAllSuggestions() {
 
 async function onPlanSelect(index) {
 	const spot = tour.value.spots[index]
-	if (aligning.value) {
-		// the spot itself gives no direction
-		if (index !== spotIndex.value) {
-			alignTo({ x: spot.x, y: spot.y })
-		}
-		return
-	}
 	if (selectedImage.value) {
 		const capture = await placeSelected((file, date) => addCapture(spot, { file, fallbackDate: date }))
 		picked.set(spot, capture.file)
 		changed()
 		// a click just beside a spot lands here too: say so and offer the way back
 		setStatus('info', t('Added as another capture of "{name}".', { name: spot.name }), t('Undo'), () => undoCapture(spot, capture.file), 10000)
+		spotIndex.value = index
+		return
 	}
 	spotIndex.value = index
+	// a spot picked on the plan: show its form even when the panel was scrolled
+	// down to the images (not while placing images, that would lose the place)
+	if (!mobile.value) {
+		await nextTick()
+		spotSection.value?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+	}
 }
 
 function undoCapture(spot, file) {
@@ -948,9 +996,7 @@ function onKeyDown(e) {
 		return
 	}
 	e.preventDefault()
-	if (aligning.value) {
-		aligning.value = false
-	} else if (selectedImage.value) {
+	if (selectedImage.value) {
 		selectedImage.value = null
 	} else if (editing.value) {
 		stopEditing()
@@ -974,6 +1020,7 @@ window.addEventListener('beforeunload', onBeforeUnload)
 onBeforeUnmount(() => {
 	document.removeEventListener('keydown', onKeyDown)
 	window.removeEventListener('beforeunload', onBeforeUnload)
+	window.removeEventListener('resize', onResize)
 })
 </script>
 
@@ -1066,6 +1113,28 @@ onBeforeUnmount(() => {
 .pt-editplan__plan {
 	flex-grow: 1;
 	min-height: 0;
+}
+
+.pt-editplan__resize {
+	inset-inline-end: -4px;
+}
+
+@media (pointer: coarse) {
+	.pt-editplan__resize {
+		inset-inline-end: -12px;
+	}
+}
+
+.pt-panel__section + .pt-panel__section {
+	margin-top: calc(var(--default-grid-baseline) * 6);
+	padding-top: calc(var(--default-grid-baseline) * 4);
+	border-top: 1px solid var(--color-border);
+}
+
+.pt-panel__heading {
+	margin: 0 0 calc(var(--default-grid-baseline) * 3);
+	font-size: var(--default-font-size);
+	font-weight: 600;
 }
 
 .pt-note--panel {

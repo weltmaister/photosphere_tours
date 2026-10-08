@@ -4,8 +4,9 @@
   This file is licensed under the Affero General Public License version 3 or
   later. See the COPYING file.
 
-  Editor tab "New images": images of the folder that belong to no spot yet.
-  Pick one, then click on the floor plan.
+  Part of the editing panel: the floor plan file, room name proposals and the
+  images of the folder that belong to no spot yet (pick one, then click on the
+  floor plan).
 -->
 <template>
 	<div class="pt-new">
@@ -39,13 +40,12 @@
 			</NcButton>
 		</section>
 
-		<NcEmptyContent v-if="images.length === 0"
-			:name="t('No new images')"
-			:description="t('Copy new 360° images into this folder and they will show up here.')">
-			<template #icon>
-				<NcIconSvgWrapper :path="mdiImagePlusOutline" />
-			</template>
-		</NcEmptyContent>
+		<h3 class="pt-new__heading pt-new__heading--images">
+			{{ t('New images ({count})', { count: images.length }) }}
+		</h3>
+		<p v-if="images.length === 0" class="pt-new__hint">
+			{{ t('Copy new 360° images into this folder and they will show up here.') }}
+		</p>
 		<template v-else>
 			<p class="pt-new__hint">
 				{{ t('Images in this folder that do not belong to a spot yet.') }}
@@ -72,15 +72,13 @@
 				</li>
 			</ul>
 		</template>
-
 	</div>
 </template>
 
 <script setup>
 import { generateUrl } from '@nextcloud/router'
-import { mdiFloorPlan, mdiFormatListChecks, mdiImagePlusOutline } from '@mdi/js'
+import { mdiFloorPlan, mdiFormatListChecks } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
-import NcEmptyContent from '@nextcloud/vue/components/NcEmptyContent'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
 import { n, t } from '../l10n.js'
@@ -135,6 +133,10 @@ const thumbnail = (fileid) => generateUrl('/core/preview?fileId={id}&x=320&y=160
 	margin: 0;
 	font-size: var(--default-font-size);
 	font-weight: 600;
+}
+
+.pt-new__heading--images {
+	margin-top: calc(var(--default-grid-baseline) * 2);
 }
 
 .pt-new__hint {

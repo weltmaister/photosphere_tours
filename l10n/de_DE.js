@@ -4,7 +4,6 @@ OC.L10N.register(
 		"Open 360° walkthrough": "360°-Rundgang öffnen",
 		"360° walkthrough": "360°-Rundgang",
 		"The 360° viewer needs WebGL 2. Use a current browser or enable WebGL in its settings.": "Der 360°-Viewer braucht WebGL 2. Nutzen Sie einen aktuellen Browser oder aktivieren Sie WebGL in den Einstellungen.",
-		"This folder already has a walkthrough ({file}).": "In diesem Ordner gibt es schon einen Rundgang ({file}).",
 		"Choose the floor plan for this walkthrough": "Grundriss für diesen Rundgang wählen",
 		"The walkthrough could not be created: {error}": "Der Rundgang konnte nicht angelegt werden: {error}",
 		"Edit": "Bearbeiten",
@@ -42,16 +41,11 @@ OC.L10N.register(
 		"No spots have been placed in this walkthrough yet.": "In diesem Rundgang ist noch kein Standort platziert.",
 		"Spot": "Standort",
 		"New images ({count})": "Neue Bilder ({count})",
-		"New ({count})": "Neu ({count})",
 		"Click a spot on the floor plan to edit it.": "Klicken Sie im Grundriss auf einen Standort, um ihn zu bearbeiten.",
 		"Name": "Name",
 		"Captured on": "Aufgenommen am",
 		"File: {file}": "Datei: {file}",
 		"View direction": "Blickrichtung",
-		"Does the view cone on the floor plan point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – then mark where it is on the floor plan.": "Zeigt der Blickkegel im Grundriss in die falsche Richtung? Drehen Sie das Bild zu etwas Markantem – Tür, Fenster, Ecke – und legen Sie dann fest, wo das im Grundriss liegt.",
-		"Set view direction": "Blickrichtung festlegen",
-		"Click the place on the floor plan that you are looking at in the image.": "Klicken Sie im Grundriss auf die Stelle, die Sie gerade im Bild sehen.",
-		"Cancel": "Abbrechen",
 		"View direction set – not saved yet": "Blickrichtung übernommen – noch nicht gespeichert",
 		"Remove capture": "Aufnahme entfernen",
 		"Remove spot": "Standort entfernen",
@@ -61,7 +55,6 @@ OC.L10N.register(
 		"Click on the floor plan – on an empty area for a new spot, or on a spot to add the image as another capture.": "Im Grundriss klicken – auf eine freie Stelle für einen neuen Standort oder auf einen Standort, um das Bild als weitere Aufnahme hinzuzufügen.",
 		"{file} selected – now click on the floor plan.": "{file} ausgewählt – klicken Sie jetzt im Grundriss.",
 		"Deselect": "Auswahl aufheben",
-		"No new images": "Keine neuen Bilder",
 		"Copy new 360° images into this folder and they will show up here.": "Kopieren Sie neue 360°-Bilder in diesen Ordner, dann erscheinen sie hier.",
 		"The images in this folder could not be loaded: {error}": "Die Bilder dieses Ordners konnten nicht geladen werden: {error}",
 		"Walkthrough saved": "Rundgang gespeichert",
@@ -134,6 +127,9 @@ OC.L10N.register(
 		"_{count} name taken from the floor plan – check it under \"Spot\" before saving._::_{count} names taken from the floor plan – check them under \"Spot\" before saving._": [
 			"{count} Name aus dem Grundriss übernommen – bitte vor dem Speichern unter „Standort“ prüfen.",
 			"{count} Namen aus dem Grundriss übernommen – bitte vor dem Speichern unter „Standort“ prüfen."
-		]
+		],
+		"Width of the editing column": "Breite der Bearbeitungsspalte",
+		"Spot and images": "Standort und Bilder",
+		"Does the view cone point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – and click on that place in the floor plan. The cone turns there.": "Zeigt der Blickkegel in die falsche Richtung? Drehen Sie das Bild zu etwas Markantem – Tür, Fenster, Ecke – und klicken Sie im Grundriss auf diese Stelle. Der Kegel dreht sich dorthin."
 	},
 	"nplurals=2; plural=(n != 1);");

@@ -13,6 +13,7 @@
  * script runs on every Files page.
  */
 import './public-path.js'
+import { subscribe } from '@nextcloud/event-bus'
 import {
 	DefaultType,
 	FileType,
@@ -173,23 +174,19 @@ addNewFileMenuEntry({
 	category: NewMenuEntryCategory.CreateNew,
 	order: 90,
 	enabled: canCreateIn,
-	handler: async (folder, content) => {
-		if (content.some(node => node.basename === TOUR_FILENAME)) {
-			const { showError } = await import('@nextcloud/dialogs')
-			showError(t('This folder already has a walkthrough ({file}).', { file: TOUR_FILENAME }))
-			return
-		}
-		await openFolder(folder)
-	},
+	// creates the walkthrough, or opens the one the folder already has
+	handler: (folder) => openFolder(folder),
 })
 
 // Hint bar above the file list. The folder is checked with one small
 // PROPFIND; the bar's code is only loaded where there is something to show.
 let bar = null
 let barEl = null
+let barFolder = null
 let request = 0
 
 async function updateBar(folder) {
+	barFolder = folder
 	const current = ++request
 	try {
 		const [{ listFolder }, { classifyFolder }] = await folderModules()
@@ -224,3 +221,19 @@ registerFileListHeader({
 	},
 	updated: (folder) => updateBar(folder),
 })
+
+// The header is only re-rendered when the folder changes. When files are added,
+// removed or renamed in the folder on screen, check again – otherwise the bar
+// would still offer "Create" right after creating the walkthrough. Bundled, so
+// an upload of fifty images causes one check, not fifty.
+let recheck = null
+const onNodeChange = (node) => {
+	if (!barFolder || node?.dirname !== barFolder.path) {
+		return
+	}
+	clearTimeout(recheck)
+	recheck = setTimeout(() => updateBar(barFolder), 500)
+}
+subscribe('files:node:created', onNodeChange)
+subscribe('files:node:deleted', onNodeChange)
+subscribe('files:node:renamed', onNodeChange)

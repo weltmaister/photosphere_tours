@@ -48,13 +48,13 @@ Nur Komponenten aus `@nextcloud/vue`. Eigene Bausteine gibt es nur dort, wo Next
 | Zweck | Baustein | Regel |
 |---|---|---|
 | Hauptaktion | `NcButton variant="primary"` | Genau eine je Bereich: „Speichern“ im Editor, „Bearbeiten“ im Viewer |
-| Weitere Aktionen | `NcButton variant="secondary"` | z. B. „Blickrichtung festlegen“, „Rückgängig“ in einer Meldung |
+| Weitere Aktionen | `NcButton variant="secondary"` | z. B. „Grundriss wechseln“, „Rückgängig“ in einer Meldung |
 | Symbolaktion | `NcButton variant="tertiary"` mit `aria-label` und Tooltip | Schließen, Seitenleiste ein/aus, Zoom |
 | Entfernen | im Formular `tertiary` mit Fehlerfarbe, bestätigt über `showConfirmation` | Immer mit Rückfrage |
 | Eingabe | `NcTextField`, `NcDateTimePickerNative type="datetime-local"` | Beschriftung als Label, nicht als Platzhalter |
 | Auswahl der Aufnahme | `NcCheckboxRadioSwitch type="radio"` im Editor, aufklappbare Liste in der Standortliste | – |
 | Begehungen | `SiteVisits.vue`: Segmentgruppe in der Fußleiste bzw. im Handy-Blatt | erst ab zwei Begehungen |
-| Tabs | `TabBar.vue` (ARIA-Tabs, Pfeiltasten) | „Standort“, „Neue Bilder (n)“; auf dem Handy auch „Grundriss“ |
+| Tabs | `TabBar.vue` (ARIA-Tabs, Pfeiltasten) | nur auf dem Handy: „Grundriss“ / „Standort und Bilder“ und im Viewer-Blatt |
 | Meldung in der Fläche | `NoteBar.vue` = `NcNoteCard` + optionale Aktion | Ersetzt Toasts, die hinter dem Vollbild verschwinden; im Editor schwebt sie über dem Grundriss, damit er sich nicht verschiebt |
 | Leerzustand | `NcEmptyContent` mit Icon, Titel und Text | „Keine neuen Bilder“, „Noch keine Standorte“ |
 | Dialog | `showConfirmation` aus `@nextcloud/dialogs` | Buttons nach [texte.md](texte.md) („Entfernen / Behalten“) |
@@ -80,7 +80,7 @@ Größen: Alle Buttons und Felder haben die Höhe `--default-clickable-area`, au
 
 - **Keine schwebenden Leisten über dem Bild.** Kopf- und Fußleiste sind feste Flächen. Das Panorama liegt dazwischen und wird nie verdeckt.
 - **Die PSV-Navbar entfällt** (`navbar: false`). Zoom und Vollbild sitzen in der Fußleiste, die Wahl einer Aufnahme in der Standortliste.
-- **Editor:** Grundriss groß links; rechts eine Spalte von 520 px mit Panorama (292 px hoch) und den Tabs.
+- **Editor:** Grundriss groß links; rechts eine Spalte (Standard 520 px, per Griff 360–960 px) mit Panorama (292 px hoch) und einer Fläche: Standort, Grundriss-Datei, Neue Bilder. Im Grundriss: Ziehen verschiebt, kurzer Klick auf einen Standort wählt ihn, auf eine freie Stelle setzt er das gewählte Bild oder dreht die Blickrichtung.
 - **Schmal (< 768 px):** Der Viewer zeigt die Seitenleiste als unteres Blatt (50 % der Höhe) mit den Tabs „Grundriss“ und „Standorte“; die Begehungen bleiben darunter sichtbar. Der Editor hat drei Tabs unter dem Panorama.
 
 ## Grundriss und Panorama
