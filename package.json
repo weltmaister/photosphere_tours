@@ -27,7 +27,7 @@
     "@nextcloud/router": "^3.2.0",
     "@nextcloud/vue": "^9.13.1",
     "@photo-sphere-viewer/core": "^5.15.1",
-    "pdfjs-dist": "^5.7.284",
+    "pdfjs-dist": "^6.2.108",
     "vue": "^3.5.43"
   },
   "devDependencies": {
