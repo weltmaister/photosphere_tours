@@ -5,7 +5,7 @@
   later. See the COPYING file.
 
   List of spots. Spots with several captures show "2 captures" and unfold to
-  pick one – the per-spot choice, independent of the visit. With write
+  pick one (only under "All": a visit shows one capture per spot). With write
   permission the name can be changed right here.
 -->
 <template>
@@ -23,7 +23,6 @@
 				<button v-else
 					type="button"
 					class="pt-spots__main"
-					:class="{ 'pt-spots__main--missing': row.state === 'missing' }"
 					:aria-current="row.state === 'current' ? 'true' : undefined"
 					@click="$emit('select', index)">
 					<span class="pt-spots__dot" aria-hidden="true" />
@@ -156,10 +155,6 @@ function commit(index) {
 	cursor: pointer;
 }
 
-.pt-spots__main--missing {
-	color: var(--color-text-maxcontrast);
-}
-
 .pt-spots__dot {
 	flex-shrink: 0;
 	width: 10px;
@@ -170,10 +165,6 @@ function commit(index) {
 
 .pt-spots__row--current .pt-spots__dot {
 	background: var(--color-primary-element);
-}
-
-.pt-spots__main--missing .pt-spots__dot {
-	background: var(--color-border-maxcontrast);
 }
 
 .pt-spots__text {

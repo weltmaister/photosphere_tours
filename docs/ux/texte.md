@@ -55,14 +55,15 @@ Regeln:
 | Stelle | de | de_DE | en |
 |---|---|---|---|
 | Beschriftung | Begehung | = | Visit |
-| Standardwahl | Neueste | = | Latest |
-| Tooltip Datum | Jeden Standort so zeigen, wie er am {date} war | = | Show every spot as it was on {date} |
-| Tooltip Neueste | Jeden Standort mit seiner neuesten Aufnahme zeigen | = | Show every spot with its latest capture |
-| Hinweis abweichend | Am {day} gibt es hier keine Aufnahme – gezeigt wird die vom {date}. | = | No capture here on {day} – showing the one from {date}. |
+| Standardwahl (erste Schaltfläche) | Alle | = | All |
+| Tooltip Datum | Nur die Standorte, die am {date} aufgenommen wurden | = | Only the spots captured on {date} |
+| Tooltip Alle | Alle Standorte mit ihrer neuesten Aufnahme; weitere Aufnahmen in der Liste wählen | = | All spots with their latest capture; pick other captures in the list |
+
+Ein Datum zeigt in Liste und Grundriss nur die Standorte, die an dem Tag aufgenommen wurden, je mit dieser Aufnahme und ohne Aufnahmenauswahl. „Alle“ zeigt jeden Standort mit seiner neuesten Aufnahme; dort lässt sich eine andere wählen.
 
 ### Seitenleiste „Grundriss und Standorte“ (neu)
 
-Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie steckt in der Standortliste: Einträge mit mehreren Aufnahmen zeigen „{n} Aufnahmen“ und lassen sich aufklappen; im Editor wählt man die Aufnahme unter „Standort“.
+Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie steckt in der Standortliste: Unter „Alle“ zeigen Einträge mit mehreren Aufnahmen „{n} Aufnahmen“ und lassen sich aufklappen; im Editor wählt man die Aufnahme unter „Standort“.
 
 | Stelle | de | de_DE | en |
 |---|---|---|---|
@@ -70,7 +71,6 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Abschnitt 1 | Grundriss | = | Floor plan |
 | Abschnitt 2 | Standorte ({count}) | = | Spots ({count}) |
 | Listeneintrag Datum | {date} | = | {date} |
-| Listeneintrag grau | erst ab {date} | = | from {date} on |
 | Markierung (Tooltip) | {count} Aufnahmen von {name} | = | {count} captures of {name} |
 | Eintrag neueste | {date} (neueste) | = | {date} (latest) |
 | Rand ziehen | Ziehen, um die Breite zu ändern | = | Drag to change the width |
@@ -83,8 +83,6 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Stelle | de | de_DE | en |
 |---|---|---|---|
 | Tooltip Standort | {name} · {date} | = | {name} · {date} |
-| Tooltip Standort grau | {name} · erst ab {date} | = | {name} · from {date} on |
-| Klick auf grauen Standort | Am {day} gibt es hier keine Aufnahme – gezeigt wird die vom {date}. | = | No capture here on {day} – showing the one from {date}. |
 | Karte vergrößern / verkleinern | Grundriss vergrößern / Grundriss verkleinern | = | Enlarge / shrink floor plan |
 | Karte zurücksetzen | Auf aktuellen Standort zentrieren | = | Center on current spot |
 | Zoom | Vergrößern / Verkleinern | = | Zoom in / Zoom out |

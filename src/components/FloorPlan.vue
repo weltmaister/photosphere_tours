@@ -85,7 +85,7 @@ import { t } from '../l10n.js'
 const props = defineProps({
 	src: { type: String, required: true },
 	size: { type: Object, required: true },
-	/** [{ x, y, label, state: 'normal' | 'current' | 'missing' }] */
+	/** [{ x, y, label, state: 'normal' | 'current' }] */
 	spots: { type: Array, required: true },
 	/** view direction of the current spot in degrees, null hides the cone */
 	heading: { type: Number, default: null },
@@ -435,11 +435,6 @@ watch(() => [props.src, props.size.w, props.size.h], () => fit())
 	width: 22px;
 	height: 22px;
 	background: var(--color-primary-element);
-}
-
-.pt-pin--missing .pt-pin__dot {
-	border-color: #8a8a8a;
-	background: #d0d0d0;
 }
 
 .pt-pin:focus-visible {

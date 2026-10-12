@@ -4,7 +4,7 @@
   This file is licensed under the Affero General Public License version 3 or
   later. See the COPYING file.
 
-  Visit switch: show every spot as it was on one day, or the latest.
+  Visit switch: all spots, or only the spots captured on one day.
 -->
 <template>
 	<div class="pt-visits">
@@ -30,7 +30,7 @@ import NcRadioGroup from '@nextcloud/vue/components/NcRadioGroup'
 import NcRadioGroupButton from '@nextcloud/vue/components/NcRadioGroupButton'
 
 defineProps({
-	/** [{ value, label, title }] – value 'latest' or YYYY-MM-DD */
+	/** [{ value, label, title }] – value 'all' or YYYY-MM-DD */
 	visits: { type: Array, required: true },
 	modelValue: { type: String, required: true },
 })

@@ -24,9 +24,9 @@ record. Built on [Photo Sphere Viewer](https://photo-sphere-viewer.js.org/).
 
 ### See how places change
 
-Add later captures of the same spot. **Visits** show every spot as it was on a
-given day; spots with several captures let you pick one. Spots that did not exist
-yet on that day are greyed out.
+Add later captures of the same spot. A **visit** shows only the spots captured on
+that day; *All* shows every spot with its latest capture, and spots with several
+captures let you pick one.
 
 ![An earlier visit: the same room in October 2022](screenshots/visits.jpg)
 
@@ -63,8 +63,9 @@ folder per floor, holding its floor plan and all its 360° images, whenever they
 taken.
 Clicking it opens the panorama together with a side bar: the floor plan with all
 spots and a list of the spots. Clicking a spot goes there, the view direction is
-kept. *Visit* at the bottom shows every spot as it was on one day; spots with
-several captures show *n captures* in the list and unfold to pick one. The floor
+kept. *Visit* at the bottom shows only the spots captured on one day, with that
+day's capture; under *All* spots with several captures show *n captures* in the
+list and unfold to pick one. The floor
 plan zooms (buttons, wheel, two fingers) and pans by dragging. The side bar can be
 resized or hidden; on phones it is a bottom sheet.
 

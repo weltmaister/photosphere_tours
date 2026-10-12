@@ -85,7 +85,7 @@ Größen: Alle Buttons und Felder haben die Höhe `--default-clickable-area`, au
 
 ## Grundriss und Panorama
 
-Der Grundriss liegt immer auf Weiß, weil Pläne schwarz auf weiß gezeichnet sind – auch im dunklen Theme. Deshalb haben Punkte und Blickkegel feste Farben mit hohem Kontrast zum Plan statt Theme-Farben: Punkt weiß mit dunklem Rand, aktueller Punkt in `--color-primary-element`, ausgegraut grau. Punkte sind 34 px groß, auf Touch-Geräten 48 px.
+Der Grundriss liegt immer auf Weiß, weil Pläne schwarz auf weiß gezeichnet sind – auch im dunklen Theme. Deshalb haben Punkte und Blickkegel feste Farben mit hohem Kontrast zum Plan statt Theme-Farben: Punkt weiß mit dunklem Rand, aktueller Punkt in `--color-primary-element`. Punkte sind 34 px groß, auf Touch-Geräten 48 px.
 
 Bedienung: Mausrad und zwei Finger zoomen, Ziehen verschiebt, Buttons unten rechts (+, −, ganzer Plan). In der Seitenleiste scrollt das Mausrad die Leiste, gezoomt wird dort mit Strg.
 

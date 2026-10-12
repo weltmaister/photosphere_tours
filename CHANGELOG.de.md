@@ -9,6 +9,10 @@ Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Ein Grundriss aus einem anderen Ordner wird in den Ordner des Rundgangs kopiert und
   dort verwendet; ein PDF zusammen mit seinem PNG, damit auch die Raumnamen greifen.
   Überschrieben wird nichts: Ein belegter Name wird zu „Plan (2)“.
+- Eine Begehung zeigt nur die Standorte, die an dem Tag aufgenommen wurden, jeweils
+  mit dieser Aufnahme und ohne Aufnahmenauswahl. Die erste Schaltfläche *Alle*
+  (bisher *Neueste*) zeigt jeden Standort mit seiner neuesten Aufnahme; dort lässt
+  sich in der Liste eine andere wählen.
 
 ## 0.4.15 – 2026-10-12
 

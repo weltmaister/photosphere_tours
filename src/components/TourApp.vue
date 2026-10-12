@@ -43,11 +43,11 @@
 			<ViewerSidebar v-if="!editing && !mobile && sidebarOpen"
 				v-model:width="sidebarWidth"
 				:plan="planProps"
-				:rows="spotRows"
+				:rows="viewerRows"
 				:editable="canEdit"
-				@select="selectSpot"
-				@rename="renameFromList"
-				@pick-capture="pickCapture" />
+				@select="(i) => selectSpot(visibleSpots[i])"
+				@rename="(i, name) => renameFromList(visibleSpots[i], name)"
+				@pick-capture="(i, file) => pickCapture(visibleSpots[i], file)" />
 
 			<!-- editor, desktop: the floor plan is the work area -->
 			<div v-if="editing && !mobile" class="pt-editplan">
@@ -136,11 +136,11 @@
 				v-model:open="sheetOpen"
 				v-model:tab="sheetTab"
 				:plan="planProps"
-				:rows="spotRows"
+				:rows="viewerRows"
 				:editable="canEdit"
-				@select="selectSpot"
-				@rename="renameFromList"
-				@pick-capture="pickCapture">
+				@select="(i) => selectSpot(visibleSpots[i])"
+				@rename="(i, name) => renameFromList(visibleSpots[i], name)"
+				@pick-capture="(i, file) => pickCapture(visibleSpots[i], file)">
 				<SiteVisits v-if="showVisits" v-model="visit" :visits="visits" />
 			</PhoneSheet>
 		</div>
@@ -254,8 +254,8 @@ const spotForm = ref(null)
 const spotSection = ref(null)
 const heading = ref(0)
 const spotIndex = ref(0)
-/** 'latest' or YYYY-MM-DD */
-const visit = ref('latest')
+/** 'all' or YYYY-MM-DD */
+const visit = ref('all')
 /** spot -> capture file picked in the spot list; keyed by the spot, so removing another spot changes nothing */
 const picked = reactive(new Map())
 /** viewer message in the header's second line */
@@ -338,19 +338,18 @@ watch(mobile, (isMobile) => {
 // ---- what is shown -------------------------------------------------------
 
 const title = computed(() => tour.value?.title || props.node.dirname.split('/').pop())
-const visitDay = computed(() => visit.value === 'latest' ? null : visit.value)
+const visitDay = computed(() => visit.value === 'all' ? null : visit.value)
 
 function shownCapture(spot) {
 	const file = picked.get(spot)
 	return (file && spot.captures.find(c => c.file === file)) || captureAt(spot, visitDay.value)
 }
 
+// a spot first captured after the chosen visit (hidden then) falls back to its earliest capture
+const displayedCapture = (spot) => shownCapture(spot) ?? firstCapture(spot)
+
 const currentSpot = computed(() => tour.value?.spots[spotIndex.value] ?? null)
-const currentCapture = computed(() => {
-	const spot = currentSpot.value
-	// a spot first captured after the chosen visit shows its earliest capture
-	return spot ? (shownCapture(spot) ?? firstCapture(spot)) : null
-})
+const currentCapture = computed(() => currentSpot.value ? displayedCapture(currentSpot.value) : null)
 // an image picked under "New images" is shown right away, before it is placed
 const previewing = computed(() => editing.value && !!selectedImage.value)
 const panoramaUrl = computed(() => {
@@ -376,39 +375,33 @@ const correction = computed(() => {
 
 const visits = computed(() => tour.value
 	? [
+		{ value: 'all', label: t('All'), title: t('All spots with their latest capture; pick other captures in the list') },
 		...captureDays(tour.value).map(day => ({
 			value: day,
 			label: displayDate(day, false),
-			title: t('Show every spot as it was on {date}', { date: displayDate(day, false) }),
+			title: t('Only the spots captured on {date}', { date: displayDate(day, false) }),
 		})),
-		{ value: 'latest', label: t('Latest'), title: t('Show every spot with its latest capture') },
 	]
 	: [])
-// one visit and "Latest" would show the same
+// one visit and "All" would show the same
 const showVisits = computed(() => visits.value.length > 2)
 
-const spotState = (index, shown) => index === spotIndex.value ? 'current' : (shown ? 'normal' : 'missing')
+const spotState = (index) => index === spotIndex.value ? 'current' : 'normal'
 
 const planSpots = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
-	const shown = editing.value ? true : shownCapture(spot)
-	let label
-	if (editing.value) {
-		label = t('{name} – drag to move', { name: spot.name })
-	} else if (shown) {
-		label = `${spot.name} · ${displayDate(shown.date, false)}`
-	} else {
-		label = t('{name} · from {date} on', { name: spot.name, date: displayDate(firstCapture(spot).date, false) })
-	}
-	return { x: spot.x, y: spot.y, label, state: spotState(index, shown) }
+	const label = editing.value
+		? t('{name} – drag to move', { name: spot.name })
+		: `${spot.name} · ${displayDate(displayedCapture(spot).date, false)}`
+	return { x: spot.x, y: spot.y, label, state: spotState(index) }
 }))
 
 const spotRows = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
-	const shown = shownCapture(spot)
+	const shown = displayedCapture(spot)
 	const sorted = capturesNewestFirst(spot)
 	return {
 		name: spot.name,
-		date: shown ? displayDate(shown.date) : t('from {date} on', { date: displayDate(sorted.at(-1).date, false) }),
-		state: spotState(index, shown),
+		date: displayDate(shown.date),
+		state: spotState(index),
 		capturesLabel: t('{count} captures of {name}', { count: spot.captures.length, name: spot.name }),
 		captures: sorted.map((capture, i) => ({
 			value: capture.file,
@@ -418,14 +411,24 @@ const spotRows = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
 	}
 }))
 
+// a visit shows only the spots captured that day, each with that day's capture
+const onVisit = (spot) => !visitDay.value || spot.captures.some(c => c.date.slice(0, 10) === visitDay.value)
+const visibleSpots = computed(() => (tour.value?.spots ?? [])
+	.map((spot, index) => onVisit(spot) ? index : -1)
+	.filter(index => index >= 0))
+const viewerRows = computed(() => visibleSpots.value.map(index => visitDay.value
+	? { ...spotRows.value[index], captures: [] }
+	: spotRows.value[index]))
+
 const planProps = computed(() => ({
 	src: planUrl.value,
 	size: planSize.value,
-	spots: planSpots.value,
+	spots: visibleSpots.value.map(index => planSpots.value[index]),
 	heading: heading.value,
 }))
 const editPlanProps = computed(() => ({
 	...planProps.value,
+	spots: planSpots.value,
 	// the cone belongs to the selected spot, not to an image being previewed
 	heading: previewing.value ? null : heading.value,
 	editable: true,
@@ -448,9 +451,6 @@ const subline = computed(() => {
 	if (!spot || !capture) {
 		return ''
 	}
-	if (visitDay.value && capture.date.slice(0, 10) !== visitDay.value && !picked.has(spot)) {
-		return t('No capture here on {day} – showing the one from {date}.', { day: displayDate(visitDay.value, false), date: displayDate(capture.date, false) })
-	}
 	return `${spot.name} · ${displayDate(capture.date)}`
 })
 
@@ -468,6 +468,10 @@ function pickCapture(index, file) {
 watch(visit, () => {
 	picked.clear()
 	hint.value = ''
+	// the spot in view was not captured on this visit: go to the first one that was
+	if (!visibleSpots.value.includes(spotIndex.value) && visibleSpots.value.length) {
+		spotIndex.value = visibleSpots.value[0]
+	}
 })
 
 // ---- editing -------------------------------------------------------------

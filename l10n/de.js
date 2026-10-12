@@ -16,15 +16,9 @@ OC.L10N.register(
 		"No unsaved changes": "Keine ungespeicherten Änderungen",
 		"{title} · unsaved changes": "{title} · ungespeicherte Änderungen",
 		"Visit": "Begehung",
-		"Latest": "Neueste",
-		"Show every spot as it was on {date}": "Jeden Standort so zeigen, wie er am {date} war",
-		"Show every spot with its latest capture": "Jeden Standort mit seiner neuesten Aufnahme zeigen",
-		"No capture here on {day} – showing the one from {date}.": "Am {day} gibt es hier keine Aufnahme – gezeigt wird die vom {date}.",
 		"Floor plan": "Grundriss",
 		"Floor plan and spots": "Grundriss und Standorte",
 		"Spots ({count})": "Standorte ({count})",
-		"from {date} on": "erst ab {date}",
-		"{name} · from {date} on": "{name} · erst ab {date}",
 		"{count} captures of {name}": "{count} Aufnahmen von {name}",
 		"{date} (latest)": "{date} (neueste)",
 		"Drag to change the width": "Ziehen, um die Breite zu ändern",
@@ -131,6 +125,9 @@ OC.L10N.register(
 		"Width of the editing column": "Breite der Bearbeitungsspalte",
 		"Spot and images": "Standort und Bilder",
 		"Does the view cone point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – and click on that place in the floor plan. The cone turns there.": "Zeigt der Blickkegel in die falsche Richtung? Dreh das Bild zu etwas Markantem – Tür, Fenster, Ecke – und klick im Grundriss auf diese Stelle. Der Kegel dreht sich dorthin.",
-		"There is no free file name for the floor plan in this folder.": "Für den Grundriss gibt es in diesem Ordner keinen freien Dateinamen."
+		"There is no free file name for the floor plan in this folder.": "Für den Grundriss gibt es in diesem Ordner keinen freien Dateinamen.",
+		"All": "Alle",
+		"All spots with their latest capture; pick other captures in the list": "Alle Standorte mit ihrer neuesten Aufnahme; weitere Aufnahmen in der Liste wählen",
+		"Only the spots captured on {date}": "Nur die Standorte, die am {date} aufgenommen wurden"
 	},
 	"nplurals=2; plural=(n != 1);");
