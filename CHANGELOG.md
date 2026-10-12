@@ -3,7 +3,7 @@
 All notable changes to this app are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## 0.5.0 – 2026-10-12
 
 ### Changed
 - A floor plan chosen from another folder is copied into the walkthrough's folder and
@@ -19,8 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   action instead of disappearing after ten seconds.
 
 ### Fixed
-- A click on the plan just beside another spot set the view direction of the
-  selected spot again instead of jumping to the neighbour.
+- A click on the plan just beside another spot turns the selected spot's view
+  direction again, instead of jumping to that spot.
 - Placing an image no longer flashes the previous spot's panorama.
 - A floor plan picked in the root folder is no longer copied next to itself.
 - Keyboard focus on plan spots is visible in the dark theme; Escape works while a

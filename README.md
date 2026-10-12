@@ -46,10 +46,11 @@ folder and is versioned like any other file. Removing a spot never deletes an im
 
 ## Installation
 
-The first release for the Nextcloud App Store is being prepared; once it is out,
-install **Photosphere Tours** under *Apps → Multimedia*. Until then, build the tarball
-with `make appstore` and unpack it into `custom_apps/`. Requires Nextcloud 33 or 34
-and a browser with WebGL 2. Languages: English, German.
+Install **Photosphere Tours** from the
+[Nextcloud App Store](https://apps.nextcloud.com/apps/photosphere_tours) under
+*Apps → Multimedia*, or build the tarball with `make appstore` and unpack it into
+`custom_apps/`. Requires Nextcloud 33 or 34 and a browser with WebGL 2. Languages:
+English, German.
 
 Fork of [files_photospheres](https://github.com/nextcloud/files_photospheres) by
 Robin Windey, reduced to walkthroughs. Both apps can run side by side: single
