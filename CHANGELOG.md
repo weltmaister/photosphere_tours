@@ -3,7 +3,7 @@
 All notable changes to this app are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## 0.4.14 – 2026-10-12
 
 ### Changed
 - The capture date of a newly placed image comes from the camera's EXIF data first,
