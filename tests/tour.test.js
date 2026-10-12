@@ -7,6 +7,7 @@ import {
 	bearing,
 	captureAt,
 	captureDays,
+	captureDate,
 	capturesNewestFirst,
 	dateFromFilename,
 	emptyTour,
@@ -258,9 +259,21 @@ describe('editing', () => {
 		const spot = addSpot(tour, { x: 0.1, y: 0.2, file: '019_2026-10-01_0900_Neu.jpg' })
 		expect(spot.name).toBe('Neu')
 		expect(spot.captures[0].date).toBe('2026-10-01T09:00')
-		addCapture(spot, { file: 'R0010042.JPG', fallbackDate: '2026-10-02T08:00' })
+		addCapture(spot, { file: 'R0010042.JPG', date: '2026-10-02T08:00' })
 		expect(spot.captures[1].date).toBe('2026-10-02T08:00')
 		expect(parseTour(serializeTour(tour)).spots[0].captures).toHaveLength(2)
+	})
+})
+
+describe('captureDate', () => {
+	it('prefers the camera date to a date in the file name', () => {
+		expect(captureDate({ exif: '2023-07-24T15:00', file: '2024-01-01_0800_Flur.jpg' })).toBe('2023-07-24T15:00')
+	})
+
+	it('falls back to the file name, then to the file time', () => {
+		expect(captureDate({ file: '2024-01-01_0800_Flur.jpg', mtime: new Date(2026, 0, 2, 3, 4) })).toBe('2024-01-01T08:00')
+		expect(captureDate({ file: 'R0010101.jpg', mtime: new Date(2026, 0, 2, 3, 4) })).toBe('2026-01-02T03:04')
+		expect(captureDate({ file: 'R0010101.jpg' })).toBeNull()
 	})
 })
 

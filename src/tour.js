@@ -310,20 +310,32 @@ export function emptyTour(title, plan) {
 	return { version: TOUR_VERSION, title, plan, spots: [] }
 }
 
-function newCapture(file, fallbackDate) {
-	return { file, date: dateFromFilename(file) ?? fallbackDate, yaw: 0 }
+/**
+ * When an image was taken: the camera's EXIF date first – it is the moment of
+ * the shot, while a date in the file name may come from an export or a copy –
+ * then a date in the file name, then the file's modification time.
+ *
+ * @param {{ exif?: string|null, file: string, mtime?: Date|null }} sources
+ * @return {string|null} YYYY-MM-DDTHH:MM
+ */
+export function captureDate({ exif = null, file, mtime = null }) {
+	return exif ?? dateFromFilename(file) ?? (mtime ? formatDate(mtime) : null)
 }
 
-/** Place an image as a new spot. */
-export function addSpot(tour, { x, y, file, fallbackDate }) {
-	const spot = { name: nameFromFilename(file), x, y, captures: [newCapture(file, fallbackDate)] }
+function newCapture(file, date) {
+	return { file, date: date ?? captureDate({ file, mtime: new Date() }), yaw: 0 }
+}
+
+/** Place an image as a new spot. `date` from captureDate(). */
+export function addSpot(tour, { x, y, file, date = null }) {
+	const spot = { name: nameFromFilename(file), x, y, captures: [newCapture(file, date)] }
 	tour.spots.push(spot)
 	return spot
 }
 
 /** Add an image as a further capture of an existing spot. */
-export function addCapture(spot, { file, fallbackDate }) {
-	const capture = newCapture(file, fallbackDate)
+export function addCapture(spot, { file, date = null }) {
+	const capture = newCapture(file, date)
 	spot.captures.push(capture)
 	return capture
 }

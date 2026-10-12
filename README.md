@@ -58,7 +58,9 @@ reacts to walkthrough files.
 
 ## How it works
 
-A walkthrough is one file, `360-Rundgang.json`, in a folder of panoramas.
+A walkthrough is one file, `360-Rundgang.json`, in a folder of panoramas – one
+folder per floor, holding its floor plan and all its 360° images, whenever they were
+taken.
 Clicking it opens the panorama together with a side bar: the floor plan with all
 spots and a list of the spots. Clicking a spot goes there, the view direction is
 kept. *Visit* at the bottom shows every spot as it was on one day; spots with
@@ -70,20 +72,24 @@ resized or hidden; on phones it is a bottom sheet.
 {
   "version": 1,
   "title": "Ground floor",
-  "plan": "../Floor plans/Ground floor.png",
+  "plan": "Ground floor.png",
   "spots": [
     { "name": "Hall", "x": 0.41, "y": 0.29,
       "captures": [
-        { "file": "001_2024-08-14_1602_Hall.jpg", "date": "2024-08-14T16:02", "yaw": 0 },
-        { "file": "later/2025-09-24_1031_Hall.jpg", "date": "2025-09-24T10:31", "yaw": 12.5 } ] }
+        { "file": "2024-08-14_1602_Hall.jpg", "date": "2024-08-14T16:02", "yaw": 0 },
+        { "file": "2025-09-24_1031_Hall.jpg", "date": "2025-09-24T10:31", "yaw": 12.5 } ] }
   ]
 }
 ```
 
+- A later capture of the same place is one more entry in `captures`: in the editor,
+  pick the image and click on the spot. The visits at the bottom are simply the days
+  that have captures – nothing else to keep.
 - `plan` and `file` are relative to the folder of the JSON file.
 - `x`/`y` are normalised plan coordinates (0–1, origin top left).
 - `yaw` (degrees) is the raw panorama direction that looks towards the top of the
-  plan. It is set in the editor by clicking on the plan beside the selected spot.
+  plan – per capture, since the camera is turned differently for every shot. It is set
+  in the editor: pick the spot and its capture, then click on the plan beside it.
 
 There is no database and no server-side code beyond loading the script: the file
 syncs with the desktop client, moves with its folder and works through public
@@ -113,8 +119,8 @@ share links.
   *View direction*: with a spot selected, turn the panorama towards something you can
   find on the plan and click that place – the cone turns there (*Undo* in the note
   takes it back). Removing only drops images from the walkthrough, files
-  are never deleted. The capture date comes from the file name, else from the
-  camera's EXIF data. When a newer floor plan appears in the folder the editor
+  are never deleted. The capture date comes from the camera's EXIF data, else
+  from a date in the file name, else from the file time. When a newer floor plan appears in the folder the editor
   offers to switch; *Change floor plan* does it by hand.
 - **Rename:** the pencil next to a spot in the list renames it and saves right away;
   the spot's image files are renamed too (`2024-08-14_1602_<name>.jpg`). In the

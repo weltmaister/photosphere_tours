@@ -204,11 +204,10 @@ import {
 	alignYaw,
 	bearing,
 	captureAt,
+	captureDate,
 	captureDays,
 	capturesNewestFirst,
-	dateFromFilename,
 	firstCapture,
-	formatDate,
 	hasCameraName,
 	parseTour,
 	resolvePath,
@@ -637,24 +636,16 @@ async function reload() {
 	return true
 }
 
-/**
- * Capture date when the file name has none: the camera's EXIF date (read
- * from the first 64 KB), else the file's modification time.
- */
-async function fallbackDate(path) {
-	if (dateFromFilename(path)) {
-		return null
-	}
+/** When an image was taken (see captureDate); EXIF is read from its first 64 KB. */
+async function imageDate(path) {
+	let exif = null
 	try {
-		const date = exifDate(await readStart(fileUrl(path)))
-		if (date) {
-			return date
-		}
+		exif = exifDate(await readStart(fileUrl(path)))
 	} catch {
-		// no range support or no EXIF: use the file time
+		// no range support or no EXIF: file name or file time then
 	}
 	const image = images.value.find(i => i.path === path)
-	return formatDate(image?.mtime ?? new Date())
+	return captureDate({ exif, file: path, mtime: image?.mtime ?? new Date() })
 }
 
 function selectImage(path) {
@@ -737,7 +728,7 @@ async function placeSelected(task) {
 	selectedImage.value = null
 	pending.add(file)
 	try {
-		return await task(file, await fallbackDate(file))
+		return await task(file, await imageDate(file))
 	} finally {
 		pending.delete(file)
 	}
@@ -754,7 +745,7 @@ async function onPlanPlace(point) {
 		}
 		return
 	}
-	await placeSelected((file, date) => addSpot(tour.value, { ...point, file, fallbackDate: date }))
+	await placeSelected((file, date) => addSpot(tour.value, { ...point, file, date }))
 	spotIndex.value = tour.value.spots.length - 1
 	const spot = currentSpot.value
 	const room = suggestionFor(spot)
@@ -807,7 +798,7 @@ function acceptAllSuggestions() {
 async function onPlanSelect(index) {
 	const spot = tour.value.spots[index]
 	if (selectedImage.value) {
-		const capture = await placeSelected((file, date) => addCapture(spot, { file, fallbackDate: date }))
+		const capture = await placeSelected((file, date) => addCapture(spot, { file, date }))
 		picked.set(spot, capture.file)
 		changed()
 		// a click just beside a spot lands here too: say so and offer the way back

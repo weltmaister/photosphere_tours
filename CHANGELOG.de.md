@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen dieser App stehen in dieser Datei.
 Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
+## [Unreleased]
+
+### Geändert
+- Das Aufnahmedatum eines neu platzierten Bildes kommt zuerst aus den EXIF-Daten der
+  Kamera, dann aus einem Datum im Dateinamen, dann aus dem Dateidatum.
+
 ## 0.4.13 – 2026-10-08
 
 ### Geändert
