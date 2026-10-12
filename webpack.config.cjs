@@ -24,7 +24,8 @@ module.exports = (env, argv) => ({
 			},
 			{
 				test: /\.css$/,
-				use: ['style-loader', 'css-loader'],
+				// no CSS source maps in production: each would inline the whole .vue file
+				use: ['style-loader', { loader: 'css-loader', options: { sourceMap: argv.mode === 'development' } }],
 			},
 			{
 				// pdf.js worker (new URL(…, import.meta.url)): ship it as .js so

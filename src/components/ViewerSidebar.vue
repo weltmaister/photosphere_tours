@@ -17,7 +17,7 @@
 				<FloorPlan v-bind="plan" auto-height @select="$emit('select', $event)" />
 			</div>
 			<h3 class="pt-section">
-				{{ t('Spots ({count})', { count: rows.length }) }}
+				{{ listTitle }}
 			</h3>
 			<SpotList class="pt-side__list"
 				:rows="rows"
@@ -46,6 +46,8 @@ defineProps({
 	/** props for FloorPlan: src, size, spots, heading */
 	plan: { type: Object, required: true },
 	rows: { type: Array, required: true },
+	/** heading of the list: "Spots (3)", or with the date of the chosen visit */
+	listTitle: { type: String, required: true },
 	editable: { type: Boolean, default: false },
 	width: { type: Number, required: true },
 })

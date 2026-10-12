@@ -14,7 +14,6 @@ import {
 	hasCameraName,
 	parseTour,
 	rawYaw,
-	relativePath,
 	renamedFile,
 	resolvePath,
 	serializeTour,
@@ -108,21 +107,6 @@ describe('resolvePath', () => {
 
 	it('refuses to climb above the root', () => {
 		expect(() => resolvePath('/a', '../../x.png')).toThrow(TourError)
-	})
-})
-
-describe('relativePath', () => {
-	it('points from the tour folder to the plan', () => {
-		expect(relativePath('/Projekt/360/EG', '/Projekt/360/Grundrisse/EG.png')).toBe('../Grundrisse/EG.png')
-		expect(relativePath('/Projekt/360/EG', '/Projekt/360/EG/plan.png')).toBe('plan.png')
-		expect(relativePath('/', '/plan.png')).toBe('plan.png')
-		expect(relativePath('/a/b', '/c/d.png')).toBe('../../c/d.png')
-	})
-
-	it('round-trips through resolvePath', () => {
-		const dir = '/Projekt/360/2.HH, EG - Verkauf'
-		const plan = '/Projekt/Pläne/EG.png'
-		expect(resolvePath(dir, relativePath(dir, plan))).toBe(plan)
 	})
 })
 

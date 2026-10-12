@@ -12,6 +12,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A visit shows only the spots captured on that day, each with that day's capture
   and without the capture menu. The first button, *All* (formerly *Latest*), shows
   every spot with its latest capture and lets you pick another one in the list.
+  The list heading and the header line say which day is shown.
+- Opening the editor switches back to *All*, so the capture being edited is the one
+  in view and the viewer never ends up with an empty or stale visit afterwards.
+- *Undo* after setting a view direction or adding a capture stays until the next
+  action instead of disappearing after ten seconds.
+
+### Fixed
+- A click on the plan just beside another spot set the view direction of the
+  selected spot again instead of jumping to the neighbour.
+- Placing an image no longer flashes the previous spot's panorama.
+- A floor plan picked in the root folder is no longer copied next to itself.
+- Keyboard focus on plan spots is visible in the dark theme; Escape works while a
+  radio button or switch has the focus; error notes are announced once.
+- Zoom buttons on the plan have full touch size on touch screens.
+- Smaller download: the viewer no longer carries CSS source maps (about 190 kB).
 
 ## 0.4.15 – 2026-10-12
 

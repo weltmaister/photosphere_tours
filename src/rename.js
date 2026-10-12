@@ -36,8 +36,8 @@ async function moveToFreeName(current, wanted, move) {
  * locked, no permission) keeps its name; that does not stop the others.
  *
  * @param {Array} spots the walkthrough's spots
- * @param {Set} renamed spots whose files should follow their name (the same
- *   objects as in `spots`)
+ * @param {{has: Function}} renamed spots whose files should follow their name
+ *   (a Set, or anything with `has(spot)` for the objects in `spots`)
  * @param {Move} move
  * @return {Promise<{ moves: Array<{ capture: object, from: string, to: string }>, failed: string[] }>}
  */

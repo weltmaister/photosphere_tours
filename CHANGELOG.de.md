@@ -12,7 +12,23 @@ Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Eine Begehung zeigt nur die Standorte, die an dem Tag aufgenommen wurden, jeweils
   mit dieser Aufnahme und ohne Aufnahmenauswahl. Die erste Schaltfläche *Alle*
   (bisher *Neueste*) zeigt jeden Standort mit seiner neuesten Aufnahme; dort lässt
-  sich in der Liste eine andere wählen.
+  sich in der Liste eine andere wählen. Listenüberschrift und Kopfzeile nennen den
+  gezeigten Tag.
+- Der Editor schaltet beim Öffnen auf *Alle*, damit die bearbeitete Aufnahme die
+  angezeigte ist und der Viewer danach nie mit einer leeren Begehung dasteht.
+- *Rückgängig* nach dem Setzen einer Blickrichtung oder einer weiteren Aufnahme
+  bleibt bis zur nächsten Aktion stehen statt nach zehn Sekunden zu verschwinden.
+
+### Behoben
+- Ein Klick im Grundriss knapp neben einem anderen Standort dreht wieder die
+  Blickrichtung des gewählten Standorts, statt zum Nachbarn zu springen.
+- Beim Platzieren eines Bildes blitzt nicht mehr das Panorama des vorigen Standorts auf.
+- Ein im Stammordner gewählter Grundriss wird nicht mehr neben sich selbst kopiert.
+- Der Tastaturfokus auf Standorten im Grundriss ist im dunklen Design sichtbar;
+  Escape wirkt auch, wenn ein Auswahlknopf oder Schalter den Fokus hat;
+  Fehlermeldungen werden nur einmal vorgelesen.
+- Die Zoom-Knöpfe am Grundriss haben auf Touch-Geräten volle Größe.
+- Kleinerer Download: Der Viewer enthält keine CSS-Source-Maps mehr (etwa 190 kB).
 
 ## 0.4.15 – 2026-10-12
 

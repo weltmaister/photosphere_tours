@@ -14,7 +14,7 @@ Gilt für Oberfläche, README und App-Store-Text. Sprachen:
 | **Standort** | spot | Ein Punkt im Grundriss, an dem fotografiert wurde | „Aufnahmepunkt“, „Punkt“ |
 | **Aufnahme** | capture | Ein 360°-Bild eines Standorts zu einem Zeitpunkt | „Stand“ |
 | **Begehung** | visit | Alle Aufnahmen eines Tages | „Walkthrough“ in der Zeitachse |
-| **Neueste** | latest | Jeder Standort mit seiner jüngsten Aufnahme | „Aktuell“ |
+| **Alle** | All | Jeder Standort mit seiner jüngsten Aufnahme (Gegenstück zu einer Begehung) | „Neueste“, „Aktuell“ |
 | **Neue Bilder** | new images | Bilder im Ordner, die noch zu keinem Standort gehören | „Noch nicht verortet“ |
 | **platzieren** | place | Ein neues Bild einem Standort zuordnen | „verorten“ |
 | **Blickrichtung festlegen** | set view direction | Bild und Grundriss in Übereinstimmung bringen | „Richtung ausrichten“ |
@@ -70,13 +70,14 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Tooltip Umschalter | Grundriss und Standorte ein- oder ausblenden | = | Show or hide floor plan and spots |
 | Abschnitt 1 | Grundriss | = | Floor plan |
 | Abschnitt 2 | Standorte ({count}) | = | Spots ({count}) |
+| Abschnitt 2, Begehung gewählt | Standorte am {date} ({count}) | = | Spots on {date} ({count}) |
+| Kopfzeile nach Wahl einer Begehung | {count} Standort(e) am {date} aufgenommen | = | {count} spot(s) captured on {date} |
 | Listeneintrag Datum | {date} | = | {date} |
 | Markierung (Tooltip) | {count} Aufnahmen von {name} | = | {count} captures of {name} |
 | Eintrag neueste | {date} (neueste) | = | {date} (latest) |
-| Rand ziehen | Ziehen, um die Breite zu ändern | = | Drag to change the width |
+| Rand ziehen | Ziehen oder Pfeiltasten benutzen, um die Breite zu ändern | = | Drag or use the arrow keys to change the width |
 | Handy: Blatt öffnen | Grundriss und Standorte | = | Floor plan and spots |
 | Handy: Blatt schließen | Einklappen | = | Collapse |
-| Handy: Tab „Neue Bilder“ | Neu ({count}) | = | New ({count}) |
 
 ### Grundriss im Viewer
 
@@ -107,8 +108,8 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Speichern | Speichern | = | Save |
 | Tooltip Speichern, deaktiviert | Keine ungespeicherten Änderungen | = | No unsaved changes |
 | Beenden | Bearbeiten beenden | = | Stop editing |
-| Tab 1 | Standort | = | Spot |
-| Tab 2 | Neue Bilder ({count}) | = | New images ({count}) |
+| Handy: Tab 1 | Grundriss | = | Floor plan |
+| Handy: Tab 2 | Standort und Bilder | = | Spot and images |
 
 ### Editor: Tab „Standort“
 
@@ -126,7 +127,7 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Erfolg | Blickrichtung übernommen – noch nicht gespeichert [Rückgängig] | = | View direction set – not saved yet [Undo] |
 | Entfernen (mehrere Aufnahmen) | Aufnahme entfernen | = | Remove capture |
 | Entfernen (letzte Aufnahme) | Standort entfernen | = | Remove spot |
-| Tooltip Standort im Editor | {name} – ziehen zum Verschieben | = | {name} – drag to move |
+| Tooltip Standort im Editor | {name} – ziehen oder mit den Pfeiltasten verschieben | = | {name} – drag or move with the arrow keys |
 
 ### Editor: Tab „Neue Bilder“
 

@@ -142,23 +142,6 @@ export function resolvePath(dir, relative) {
 	return '/' + parts.join('/')
 }
 
-/**
- * Path from a folder to a file, e.g. to store the plan relative to the tour.
- *
- * @param {string} dir absolute folder path
- * @param {string} target absolute file path
- * @return {string}
- */
-export function relativePath(dir, target) {
-	const from = dir.split('/').filter(Boolean)
-	const to = target.split('/').filter(Boolean)
-	let common = 0
-	while (common < from.length && common < to.length - 1 && from[common] === to[common]) {
-		common++
-	}
-	return [...from.slice(common).map(() => '..'), ...to.slice(common)].join('/')
-}
-
 /** Distinct capture days (YYYY-MM-DD), oldest first. */
 export function captureDays(tour) {
 	const days = new Set()

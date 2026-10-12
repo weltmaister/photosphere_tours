@@ -44,7 +44,7 @@
 		<!-- zoom is also on the wheel and two fingers; the buttons make it visible -->
 		<div class="pt-plan__controls" @pointerdown.stop>
 			<NcButton variant="secondary"
-				size="small"
+				:size="controlSize"
 				:aria-label="t('Zoom in')"
 				:title="t('Zoom in')"
 				@click="zoomBy(1.5)">
@@ -53,7 +53,7 @@
 				</template>
 			</NcButton>
 			<NcButton variant="secondary"
-				size="small"
+				:size="controlSize"
 				:aria-label="t('Zoom out')"
 				:title="t('Zoom out')"
 				@click="zoomBy(1 / 1.5)">
@@ -62,7 +62,7 @@
 				</template>
 			</NcButton>
 			<NcButton variant="secondary"
-				size="small"
+				:size="controlSize"
 				:aria-label="t('Show the whole floor plan')"
 				:title="t('Show the whole floor plan')"
 				@click="fit">
@@ -85,7 +85,8 @@ import { t } from '../l10n.js'
 const props = defineProps({
 	src: { type: String, required: true },
 	size: { type: Object, required: true },
-	/** [{ x, y, label, state: 'normal' | 'current' }] */
+	/** [{ key, x, y, label, state: 'normal' | 'current' }] – key: the spot's index
+	 *  in the walkthrough (the plan may show only some spots), carried by 'select' */
 	spots: { type: Array, required: true },
 	/** view direction of the current spot in degrees, null hides the cone */
 	heading: { type: Number, default: null },
@@ -99,6 +100,8 @@ const props = defineProps({
 const emit = defineEmits(['select', 'move', 'place'])
 
 const CLICK_TOLERANCE = 5
+// zoom buttons: small over the plan, but a full touch target on touch screens
+const controlSize = window.matchMedia?.('(pointer: coarse)').matches ? 'large' : 'small'
 const root = ref(null)
 const scale = ref(1)
 const offset = ref({ x: 0, y: 0 })
@@ -246,7 +249,7 @@ function onPointerUp(e) {
 	}
 	const index = g.index ?? (props.snap ? nearestSpot(e.clientX, e.clientY) : null)
 	if (index !== null) {
-		emit('select', index)
+		emit('select', props.spots[index].key)
 	} else {
 		emit('place', toPlan(e.clientX, e.clientY))
 	}
@@ -275,7 +278,7 @@ function nearestSpot(clientX, clientY) {
 // keyboard: Enter/Space come in as a click with detail 0, arrows move a pin
 function onPinClick(e, index) {
 	if (e.detail === 0) {
-		emit('select', index)
+		emit('select', props.spots[index].key)
 	}
 }
 
@@ -376,7 +379,7 @@ watch(() => [props.src, props.size.w, props.size.h], () => fit())
 }
 
 .pt-plan__controls :deep(.button-vue) {
-	box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 0 4px var(--color-box-shadow);
 }
 
 .pt-plan__cone {
@@ -438,7 +441,9 @@ watch(() => [props.src, props.size.w, props.size.h], () => fit())
 }
 
 .pt-pin:focus-visible {
-	outline: 2px solid var(--color-main-text);
+	/* the plan is always white: a dark ring with a white halo, in every theme */
+	outline: 2px solid #222;
 	border-radius: 50%;
+	box-shadow: 0 0 0 4px #fff;
 }
 </style>

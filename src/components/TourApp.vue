@@ -44,10 +44,11 @@
 				v-model:width="sidebarWidth"
 				:plan="planProps"
 				:rows="viewerRows"
+				:list-title="listTitle"
 				:editable="canEdit"
-				@select="(i) => selectSpot(visibleSpots[i])"
-				@rename="(i, name) => renameFromList(visibleSpots[i], name)"
-				@pick-capture="(i, file) => pickCapture(visibleSpots[i], file)" />
+				@select="selectSpot"
+				@rename="renameFromList"
+				@pick-capture="pickCapture" />
 
 			<!-- editor, desktop: the floor plan is the work area -->
 			<div v-if="editing && !mobile" class="pt-editplan">
@@ -138,9 +139,9 @@
 				:plan="planProps"
 				:rows="viewerRows"
 				:editable="canEdit"
-				@select="(i) => selectSpot(visibleSpots[i])"
-				@rename="(i, name) => renameFromList(visibleSpots[i], name)"
-				@pick-capture="(i, file) => pickCapture(visibleSpots[i], file)">
+				@select="selectSpot"
+				@rename="renameFromList"
+				@pick-capture="pickCapture">
 				<SiteVisits v-if="showVisits" v-model="visit" :visits="visits" />
 			</PhoneSheet>
 		</div>
@@ -351,16 +352,19 @@ const displayedCapture = (spot) => shownCapture(spot) ?? firstCapture(spot)
 const currentSpot = computed(() => tour.value?.spots[spotIndex.value] ?? null)
 const currentCapture = computed(() => currentSpot.value ? displayedCapture(currentSpot.value) : null)
 // an image picked under "New images" is shown right away, before it is placed
-const previewing = computed(() => editing.value && !!selectedImage.value)
+// an image being placed stays in view until its spot is shown
+const placing = ref(null)
+const previewImage = computed(() => selectedImage.value ?? placing.value)
+const previewing = computed(() => editing.value && !!previewImage.value)
 const panoramaUrl = computed(() => {
 	if (previewing.value) {
-		return fileUrl(selectedImage.value)
+		return fileUrl(previewImage.value)
 	}
 	return currentCapture.value ? fileUrl(currentCapture.value.file) : null
 })
 const panoramaLabel = computed(() => {
 	if (previewing.value) {
-		return t('{file} selected – now click on the floor plan.', { file: selectedImage.value })
+		return t('{file} selected – now click on the floor plan.', { file: previewImage.value })
 	}
 	return currentCapture.value
 		? t('360° panorama: {name}, {date}. Use the arrow keys to look around.', { name: currentSpot.value.name, date: displayDate(currentCapture.value.date) })
@@ -390,9 +394,9 @@ const spotState = (index) => index === spotIndex.value ? 'current' : 'normal'
 
 const planSpots = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
 	const label = editing.value
-		? t('{name} – drag to move', { name: spot.name })
+		? t('{name} – drag or move with the arrow keys', { name: spot.name })
 		: `${spot.name} · ${displayDate(displayedCapture(spot).date, false)}`
-	return { x: spot.x, y: spot.y, label, state: spotState(index) }
+	return { key: index, x: spot.x, y: spot.y, label, state: spotState(index) }
 }))
 
 const spotRows = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
@@ -416,9 +420,15 @@ const onVisit = (spot) => !visitDay.value || spot.captures.some(c => c.date.slic
 const visibleSpots = computed(() => (tour.value?.spots ?? [])
 	.map((spot, index) => onVisit(spot) ? index : -1)
 	.filter(index => index >= 0))
-const viewerRows = computed(() => visibleSpots.value.map(index => visitDay.value
-	? { ...spotRows.value[index], captures: [] }
-	: spotRows.value[index]))
+// key: the real spot index, so per-row state in the list survives filtering
+const viewerRows = computed(() => visibleSpots.value.map(index => ({
+	...spotRows.value[index],
+	key: index,
+	...(visitDay.value ? { captures: [] } : {}),
+})))
+const listTitle = computed(() => visitDay.value
+	? t('Spots on {date} ({count})', { date: displayDate(visitDay.value, false), count: viewerRows.value.length })
+	: t('Spots ({count})', { count: viewerRows.value.length }))
 
 const planProps = computed(() => ({
 	src: planUrl.value,
@@ -433,6 +443,9 @@ const editPlanProps = computed(() => ({
 	heading: previewing.value ? null : heading.value,
 	editable: true,
 	crosshair: !!selectedImage.value,
+	// a click just beside a spot adds the picked image there; without an image
+	// it turns the selected spot's view direction, even next to another spot
+	snap: !!selectedImage.value || !currentSpot.value,
 }))
 const editPlanEvents = { select: onPlanSelect, move: onPlanMove, place: onPlanPlace }
 
@@ -465,9 +478,18 @@ function pickCapture(index, file) {
 	spotIndex.value = index
 }
 
+// a day whose last capture was removed or redated: back to all spots
+watch(visits, (list) => {
+	if (!showVisits.value || !list.some(v => v.value === visit.value)) {
+		visit.value = 'all'
+	}
+})
+
 watch(visit, () => {
 	picked.clear()
-	hint.value = ''
+	hint.value = visitDay.value
+		? n('{count} spot captured on {date}', '{count} spots captured on {date}', visibleSpots.value.length, { date: displayDate(visitDay.value, false) })
+		: ''
 	// the spot in view was not captured on this visit: go to the first one that was
 	if (!visibleSpots.value.includes(spotIndex.value) && visibleSpots.value.length) {
 		spotIndex.value = visibleSpots.value[0]
@@ -500,7 +522,10 @@ const note = computed(() => {
 	return status.value
 })
 // the editor's notes, in the viewer the second header line (spot, date, hints)
-const liveText = computed(() => editing.value ? (note.value?.text ?? '') : subline.value)
+// error notes announce themselves (role="alert"), they are not read twice
+const liveText = computed(() => editing.value
+	? (note.value?.type === 'error' ? '' : (note.value?.text ?? ''))
+	: subline.value)
 
 /**
  * Show a note in the editor. Success and plain info notes go away by
@@ -580,6 +605,9 @@ const emptyText = computed(() => editing.value
 function startEditing() {
 	editing.value = true
 	hint.value = ''
+	// the editor shows every spot and has no visit bar: a hidden day would
+	// pick the capture that is edited and filter the viewer afterwards
+	visit.value = 'all'
 	// an empty walkthrough starts with its images
 	editorTab.value = tour.value.spots.length > 0 && mobile.value ? 'plan' : 'edit'
 	loadImages()
@@ -671,7 +699,7 @@ async function setDirection(target) {
 	changed()
 	await nextTick()
 	pano.value.lookAt(bearing(spot, target, planSize.value))
-	setStatus('success', t('View direction set – not saved yet'), t('Undo'), () => undoDirection(capture, before), 10000)
+	setStatus('success', t('View direction set – not saved yet'), t('Undo'), () => undoDirection(capture, before))
 }
 
 async function undoDirection(capture, before) {
@@ -727,14 +755,20 @@ function pdfSourceOf(plan) {
 }
 
 /** Run `task` with the selected image taken out of "New images" until it is placed. */
+/**
+ * Place the picked image. The task adds it and selects its spot; the preview
+ * stays until then, so the panorama does not flip back to the previous spot.
+ */
 async function placeSelected(task) {
 	const file = selectedImage.value
 	selectedImage.value = null
+	placing.value = file
 	pending.add(file)
 	try {
 		return await task(file, await imageDate(file))
 	} finally {
 		pending.delete(file)
+		placing.value = null
 	}
 }
 
@@ -749,8 +783,10 @@ async function onPlanPlace(point) {
 		}
 		return
 	}
-	await placeSelected((file, date) => addSpot(tour.value, { ...point, file, date }))
-	spotIndex.value = tour.value.spots.length - 1
+	await placeSelected((file, date) => {
+		addSpot(tour.value, { ...point, file, date })
+		spotIndex.value = tour.value.spots.length - 1
+	})
 	const spot = currentSpot.value
 	const room = suggestionFor(spot)
 	if (room) {
@@ -802,12 +838,15 @@ function acceptAllSuggestions() {
 async function onPlanSelect(index) {
 	const spot = tour.value.spots[index]
 	if (selectedImage.value) {
-		const capture = await placeSelected((file, date) => addCapture(spot, { file, date }))
-		picked.set(spot, capture.file)
+		const capture = await placeSelected((file, date) => {
+			const added = addCapture(spot, { file, date })
+			picked.set(spot, added.file)
+			spotIndex.value = index
+			return added
+		})
 		changed()
 		// a click just beside a spot lands here too: say so and offer the way back
-		setStatus('info', t('Added as another capture of "{name}".', { name: spot.name }), t('Undo'), () => undoCapture(spot, capture.file), 10000)
-		spotIndex.value = index
+		setStatus('info', t('Added as another capture of "{name}".', { name: spot.name }), t('Undo'), () => undoCapture(spot, capture.file))
 		return
 	}
 	spotIndex.value = index
@@ -987,7 +1026,8 @@ function onKeyDown(e) {
 	if (otherDialog) {
 		return
 	}
-	if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+	// text fields use Escape themselves; radios and switches do not
+	if (e.target.matches?.('input:not([type="radio"], [type="checkbox"]), textarea')) {
 		return
 	}
 	e.preventDefault()

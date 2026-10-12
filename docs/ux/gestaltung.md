@@ -74,14 +74,14 @@ Größen: Alle Buttons und Felder haben die Höhe `--default-clickable-area`, au
 │ Standorte (n) │                                                │  Breite ziehbar, ausblendbar
 │ • Büro 1  2 ▾ │                                                │
 ├───────────────┴────────────────────────────────────────────────┤
-│ Begehung [18.04.24][16.10.24][Neueste]                [− + ⛶]  │  Fußleiste
+│ Begehung [Alle][18.04.24][16.10.24]                    [− + ⛶]  │  Fußleiste
 └────────────────────────────────────────────────────────────────┘
 ```
 
 - **Keine schwebenden Leisten über dem Bild.** Kopf- und Fußleiste sind feste Flächen. Das Panorama liegt dazwischen und wird nie verdeckt.
 - **Die PSV-Navbar entfällt** (`navbar: false`). Zoom und Vollbild sitzen in der Fußleiste, die Wahl einer Aufnahme in der Standortliste.
 - **Editor:** Grundriss groß links; rechts eine Spalte (Standard 520 px, per Griff 360–960 px) mit Panorama (292 px hoch) und einer Fläche: Standort, Grundriss-Datei, Neue Bilder. Im Grundriss: Ziehen verschiebt, kurzer Klick auf einen Standort wählt ihn, auf eine freie Stelle setzt er das gewählte Bild oder dreht die Blickrichtung.
-- **Schmal (< 768 px):** Der Viewer zeigt die Seitenleiste als unteres Blatt (50 % der Höhe) mit den Tabs „Grundriss“ und „Standorte“; die Begehungen bleiben darunter sichtbar. Der Editor hat drei Tabs unter dem Panorama.
+- **Schmal (< 768 px):** Der Viewer zeigt die Seitenleiste als unteres Blatt (50 % der Höhe) mit den Tabs „Grundriss“ und „Standorte“; die Begehungen bleiben darunter sichtbar. Der Editor wechselt mit zwei Tabs zwischen „Grundriss“ und „Standort und Bilder“.
 
 ## Grundriss und Panorama
 
@@ -105,7 +105,7 @@ PSV bringt keine CSS-Variablen mit. Angepasst werden nur die Schrift des Contain
 
 - Jeder Symbolbutton hat `aria-label` und Tooltip mit demselben Text.
 - Standorte im Editor sind per Tastatur erreichbar (Tab) und verschiebbar (Pfeiltasten, mit Umschalt in größeren Schritten).
-- Escape schließt erst Menüs und Dialoge, dann den Blickrichtungs-Modus bzw. die Bildauswahl, dann den Editor, zuletzt den Rundgang.
+- Escape schließt erst Menüs und Dialoge, dann die Bildauswahl, dann den Editor, zuletzt den Rundgang.
 - Tabs folgen dem ARIA-Muster (Pfeiltasten, Pos1/Ende); Meldungen werden zusätzlich über eine `aria-live`-Region vorgelesen.
 - Kontrast: Text auf Glas-Hintergrund mindestens 4,5 : 1, in Hell und Dunkel prüfen.
 

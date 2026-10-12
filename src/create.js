@@ -25,7 +25,7 @@ export class Cancelled extends Error {}
 export function tourNode(folder, id = undefined) {
 	return new File({
 		id,
-		source: `${folder.source}/${TOUR_FILENAME}`,
+		source: `${folderBase(folder).source}/${TOUR_FILENAME}`,
 		root: folder.root,
 		owner: folder.owner,
 		mime: 'application/json',
@@ -37,10 +37,20 @@ export function tourNode(folder, id = undefined) {
 const MIME = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', svg: 'image/svg+xml' }
 
 /** A file just written into the folder, announced to the file list. */
+/**
+ * WebDAV root and folder path without a trailing slash ("" for the root
+ * folder, whose path is "/"), so `${dir}/${name}` never doubles a slash.
+ */
+function folderBase(folder) {
+	const dir = folder.path.replace(/\/$/, '')
+	const source = folder.source.replace(/\/$/, '')
+	return { rootUrl: source.slice(0, source.length - dir.length), dir, source }
+}
+
 async function announceFile(folder, name, url) {
 	announce(new File({
 		id: await getFileId(url).catch(() => null) ?? undefined,
-		source: `${folder.source}/${name}`,
+		source: `${folderBase(folder).source}/${name}`,
 		root: folder.root,
 		owner: folder.owner,
 		mime: MIME[name.split('.').pop().toLowerCase()] ?? 'application/octet-stream',
@@ -53,12 +63,13 @@ async function announceFile(folder, name, url) {
  * Copy a floor plan from elsewhere into the folder of the walkthrough, under a
  * name that overwrites nothing; returns that name.
  */
-async function copyIntoFolder(rootUrl, folder, entries, absolute) {
+async function copyIntoFolder(folder, entries, absolute) {
+	const { rootUrl, dir } = folderBase(folder)
 	const names = entries.map(e => e.name)
 	const fileName = absolute.split('/').pop()
 	for (let tries = 0; tries < 20; tries++) {
 		const name = freePlanName(names, fileName)
-		const target = urlFor(rootUrl, `${folder.path}/${name}`)
+		const target = urlFor(rootUrl, `${dir}/${name}`)
 		if (await copyFile(urlFor(rootUrl, absolute), target)) {
 			await announceFile(folder, name, target)
 			return name
@@ -82,6 +93,7 @@ async function copyIntoFolder(rootUrl, folder, entries, absolute) {
  * @return {Promise<string>}
  */
 export async function choosePlan(folder, entries, { auto = true, file = null, onWork = null } = {}) {
+	const { rootUrl, dir } = folderBase(folder)
 	const candidates = classifyFolder(entries).plans
 	let name = file
 	let absolute = null
@@ -99,16 +111,15 @@ export async function choosePlan(folder, entries, { auto = true, file = null, on
 		} catch {
 			throw new Cancelled()
 		}
-		const inFolder = absolute.startsWith(`${folder.path}/`) && !absolute.slice(folder.path.length + 1).includes('/')
+		const inFolder = absolute.startsWith(`${dir}/`) && !absolute.slice(dir.length + 1).includes('/')
 		if (inFolder) {
-			name = absolute.slice(folder.path.length + 1)
+			name = absolute.slice(dir.length + 1)
 		}
 	}
 
-	const rootUrl = folder.source.slice(0, folder.source.length - folder.path.length)
 	if (!name) {
 		onWork?.()
-		name = await copyIntoFolder(rootUrl, folder, entries, absolute)
+		name = await copyIntoFolder(folder, entries, absolute)
 	}
 	if (!/\.pdf$/i.test(name)) {
 		return name
@@ -123,8 +134,8 @@ export async function choosePlan(folder, entries, { auto = true, file = null, on
 	}
 	onWork?.()
 	const { pdfToPng } = await import(/* webpackChunkName: "pdf" */ './pdf.js')
-	const blob = await pdfToPng(urlFor(rootUrl, `${folder.path}/${name}`))
-	const pngUrl = urlFor(rootUrl, `${folder.path}/${png}`)
+	const blob = await pdfToPng(urlFor(rootUrl, `${dir}/${name}`))
+	const pngUrl = urlFor(rootUrl, `${dir}/${png}`)
 	await writeBlob(pngUrl, blob)
 	await announceFile(folder, png, pngUrl)
 	return png

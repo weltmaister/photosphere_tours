@@ -16,7 +16,7 @@
 		:aria-valuenow="modelValue"
 		:aria-valuemin="min"
 		:aria-valuemax="max"
-		:title="t('Drag to change the width')"
+		:title="t('Drag or use the arrow keys to change the width')"
 		@pointerdown="start"
 		@keydown.left.prevent="set(modelValue - STEP * direction)"
 		@keydown.right.prevent="set(modelValue + STEP * direction)" />

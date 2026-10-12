@@ -10,46 +10,46 @@
 -->
 <template>
 	<ul ref="list" class="pt-spots">
-		<li v-for="(row, index) in rows" :key="index" class="pt-spots__item">
+		<li v-for="row in rows" :key="row.key" class="pt-spots__item">
 			<div class="pt-spots__row" :class="{ 'pt-spots__row--current': row.state === 'current' }">
-				<form v-if="renaming === index" class="pt-spots__rename" @submit.prevent="commit(index)">
+				<form v-if="renaming === row.key" class="pt-spots__rename" @submit.prevent="commit(row.key)">
 					<input ref="field"
 						v-model="draft"
 						class="pt-spots__input"
 						:aria-label="t('Name of the spot')"
 						@keydown.esc.stop.prevent="renaming = null"
-						@blur="commit(index)">
+						@blur="commit(row.key)">
 				</form>
 				<button v-else
 					type="button"
 					class="pt-spots__main"
 					:aria-current="row.state === 'current' ? 'true' : undefined"
-					@click="$emit('select', index)">
+					@click="$emit('select', row.key)">
 					<span class="pt-spots__dot" aria-hidden="true" />
 					<span class="pt-spots__text">
 						<span class="pt-spots__name">{{ row.name }}</span>
 						<span class="pt-spots__date">{{ row.date }}</span>
 					</span>
 				</button>
-				<button v-if="editable && renaming !== index"
+				<button v-if="editable && renaming !== row.key"
 					type="button"
 					class="pt-spots__icon"
 					:aria-label="t('Rename {name}', { name: row.name })"
 					:title="t('Rename {name}', { name: row.name })"
-					@click="startRename(index, row.name)">
+					@click="startRename(row.key, row.name)">
 					<NcIconSvgWrapper :path="mdiPencilOutline" :size="18" />
 				</button>
 				<button v-if="row.captures.length > 1"
 					type="button"
 					class="pt-spots__captures-toggle"
-					:aria-expanded="expanded === index ? 'true' : 'false'"
+					:aria-expanded="expanded === row.key ? 'true' : 'false'"
 					:title="row.capturesLabel"
-					@click="expanded = expanded === index ? null : index">
+					@click="expanded = expanded === row.key ? null : row.key">
 					{{ t('{count} captures', { count: row.captures.length }) }}
-					<NcIconSvgWrapper :path="expanded === index ? mdiChevronUp : mdiChevronDown" :size="18" />
+					<NcIconSvgWrapper :path="expanded === row.key ? mdiChevronUp : mdiChevronDown" :size="18" />
 				</button>
 			</div>
-			<div v-if="expanded === index"
+			<div v-if="expanded === row.key && row.captures.length > 1"
 				class="pt-spots__captures"
 				role="radiogroup"
 				:aria-label="row.capturesLabel">
@@ -59,7 +59,7 @@
 					role="radio"
 					class="pt-spots__capture"
 					:aria-checked="capture.checked ? 'true' : 'false'"
-					@click="$emit('pick-capture', index, capture.value)">
+					@click="$emit('pick-capture', row.key, capture.value)">
 					<span class="pt-spots__radio" :class="{ 'pt-spots__radio--on': capture.checked }" aria-hidden="true" />
 					{{ capture.label }}
 				</button>
@@ -76,7 +76,8 @@ import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 import { t } from '../l10n.js'
 
 const props = defineProps({
-	/** [{ name, date, state, capturesLabel, captures: [{ label, value, checked }] }] */
+	/** [{ key, name, date, state, capturesLabel, captures: [{ label, value, checked }] }]
+	 *  key: the spot's index in the walkthrough, also what the events carry */
 	rows: { type: Array, required: true },
 	/** show the rename button (write permission) */
 	editable: { type: Boolean, default: false },

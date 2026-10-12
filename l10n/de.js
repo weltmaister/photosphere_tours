@@ -21,7 +21,6 @@ OC.L10N.register(
 		"Spots ({count})": "Standorte ({count})",
 		"{count} captures of {name}": "{count} Aufnahmen von {name}",
 		"{date} (latest)": "{date} (neueste)",
-		"Drag to change the width": "Ziehen, um die Breite zu ändern",
 		"Collapse": "Einklappen",
 		"Loading …": "Wird geladen …",
 		"The image could not be loaded.": "Das Bild konnte nicht geladen werden.",
@@ -43,7 +42,6 @@ OC.L10N.register(
 		"View direction set – not saved yet": "Blickrichtung übernommen – noch nicht gespeichert",
 		"Remove capture": "Aufnahme entfernen",
 		"Remove spot": "Standort entfernen",
-		"{name} – drag to move": "{name} – ziehen zum Verschieben",
 		"Images in this folder that do not belong to a spot yet.": "Bilder aus diesem Ordner, die noch zu keinem Standort gehören.",
 		"Pick an image.": "Bild wählen.",
 		"Click on the floor plan – on an empty area for a new spot, or on a spot to add the image as another capture.": "Im Grundriss klicken – auf eine freie Stelle für einen neuen Standort oder auf einen Standort, um das Bild als weitere Aufnahme hinzuzufügen.",
@@ -128,6 +126,13 @@ OC.L10N.register(
 		"There is no free file name for the floor plan in this folder.": "Für den Grundriss gibt es in diesem Ordner keinen freien Dateinamen.",
 		"All": "Alle",
 		"All spots with their latest capture; pick other captures in the list": "Alle Standorte mit ihrer neuesten Aufnahme; weitere Aufnahmen in der Liste wählen",
-		"Only the spots captured on {date}": "Nur die Standorte, die am {date} aufgenommen wurden"
+		"Only the spots captured on {date}": "Nur die Standorte, die am {date} aufgenommen wurden",
+		"Drag or use the arrow keys to change the width": "Ziehen oder Pfeiltasten benutzen, um die Breite zu ändern",
+		"{name} – drag or move with the arrow keys": "{name} – ziehen oder mit den Pfeiltasten verschieben",
+		"Spots on {date} ({count})": "Standorte am {date} ({count})",
+		"_{count} spot captured on {date}_::_{count} spots captured on {date}_": [
+			"{count} Standort am {date} aufgenommen",
+			"{count} Standorte am {date} aufgenommen"
+		]
 	},
 	"nplurals=2; plural=(n != 1);");
