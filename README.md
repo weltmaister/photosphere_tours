@@ -101,8 +101,9 @@ share links.
   one folder. A bar above the file list offers *Create 360° walkthrough* (also in the
   folder's menu: *Open as 360° walkthrough*, and under *New*). With one floor plan
   in the folder it is taken right away, otherwise you pick it. A PDF plan is turned
-  into a PNG next to it. Only the folder itself counts – subfolders (for example
-  compressed copies) are ignored.
+  into a PNG next to it. A plan picked from another folder is copied into this one
+  first, so everything a walkthrough uses lies next to it. Only the folder itself
+  counts – subfolders (for example compressed copies) are ignored.
 - **Open:** the bar above the file list (*Open walkthrough*), the folder's menu, or a
   click on `360-Rundgang.json`.
 - **Edit** (needs write permission): *Edit* opens the editor – floor plan on the

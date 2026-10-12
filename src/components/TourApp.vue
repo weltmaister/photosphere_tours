@@ -190,7 +190,7 @@ import TabBar from './TabBar.vue'
 import TourHeader from './TourHeader.vue'
 import ViewerSidebar from './ViewerSidebar.vue'
 import { EDITOR_MAX, EDITOR_MIN, EDITOR_PLAN_MIN, stored, useLayout } from '../composables/useLayout.js'
-import { Cancelled, choosePlan } from '../create.js'
+import { Cancelled, choosePlan, copyPlanIntoFolder } from '../create.js'
 import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readText, urlFor, writeText } from '../dav.js'
 import { exifDate } from '../exif.js'
 import { classifyFolder, newerPlan, pngNameFor } from '../folder.js'
@@ -542,9 +542,14 @@ async function loadImages() {
 			.filter(e => panoramas.has(e.name))
 			.map(e => ({ path: e.name, fileid: e.fileid, mtime: e.mtime }))
 			.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true }))
-		const newer = newerPlan(folderEntries, tour.value.plan)
-		if (newer) {
-			setStatus('info', t('There is a newer floor plan in the folder: {file}', { file: newer }), t('Use it'), () => switchPlan(newer))
+		if (tour.value.plan.includes('/') && !shared) {
+			// everything a walkthrough uses belongs next to it
+			setStatus('info', t('The floor plan lies outside this folder: {file}', { file: tour.value.plan }), t('Copy it here'), adoptPlan)
+		} else {
+			const newer = newerPlan(folderEntries, tour.value.plan)
+			if (newer) {
+				setStatus('info', t('There is a newer floor plan in the folder: {file}', { file: newer }), t('Use it'), () => switchPlan(newer))
+			}
 		}
 		loadRooms()
 	} catch (e) {
@@ -566,6 +571,21 @@ async function switchPlan(file = null) {
 		if (!(e instanceof Cancelled)) {
 			setStatus('error', t('The floor plan could not be changed: {error}', { error: errorText(e) }))
 		}
+	}
+}
+
+/** Copy a floor plan that lies outside the folder into it and use the copy. */
+async function adoptPlan() {
+	try {
+		const name = await copyPlanIntoFolder(folder, folderEntries, resolvePath(location.dir, tour.value.plan))
+		await setPlan(name, true)
+		tour.value.plan = name
+		folderEntries = await listFolder(folderUrl)
+		loadRooms()
+		changed()
+		setStatus('success', t('Floor plan copied into this folder – not saved yet.'))
+	} catch (e) {
+		setStatus('error', t('The floor plan could not be copied: {error}', { error: errorText(e) }))
 	}
 }
 

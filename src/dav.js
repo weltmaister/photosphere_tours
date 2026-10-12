@@ -172,15 +172,10 @@ export async function writeBlob(url, blob) {
 	await axios.put(url, blob, { headers: { 'Content-Type': blob.type || 'application/octet-stream' } })
 }
 
-/**
- * Rename or move a file without overwriting anything.
- *
- * @return {Promise<boolean>} false if the target already exists
- */
-export async function moveFile(fromUrl, toUrl) {
+async function transfer(method, fromUrl, toUrl) {
 	try {
 		await axios.request({
-			method: 'MOVE',
+			method,
 			url: fromUrl,
 			headers: { Destination: new URL(toUrl, window.location.href).href, Overwrite: 'F' },
 		})
@@ -191,4 +186,22 @@ export async function moveFile(fromUrl, toUrl) {
 		}
 		throw e
 	}
+}
+
+/**
+ * Rename or move a file without overwriting anything.
+ *
+ * @return {Promise<boolean>} false if the target already exists
+ */
+export function moveFile(fromUrl, toUrl) {
+	return transfer('MOVE', fromUrl, toUrl)
+}
+
+/**
+ * Copy a file without overwriting anything.
+ *
+ * @return {Promise<boolean>} false if the target already exists
+ */
+export function copyFile(fromUrl, toUrl) {
+	return transfer('COPY', fromUrl, toUrl)
 }

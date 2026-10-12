@@ -12,10 +12,10 @@ import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs'
 import { emit } from '@nextcloud/event-bus'
 import { File } from '@nextcloud/files'
 
-import { getFileId, listFolder, urlFor, writeBlob, writeText } from './dav.js'
-import { classifyFolder, pngNameFor } from './folder.js'
+import { copyFile, getFileId, listFolder, urlFor, writeBlob, writeText } from './dav.js'
+import { classifyFolder, freePlanName, pngNameFor } from './folder.js'
 import { t } from './l10n.js'
-import { TOUR_FILENAME, emptyTour, relativePath, serializeTour } from './tour.js'
+import { TOUR_FILENAME, emptyTour, serializeTour } from './tour.js'
 
 const PLAN_MIMES = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']
 
@@ -34,9 +34,58 @@ export function tourNode(folder, id = undefined) {
 	})
 }
 
+const MIME = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', svg: 'image/svg+xml' }
+
+/** A file just written into the folder, announced to the file list. */
+async function announceFile(folder, name, url) {
+	announce(new File({
+		id: await getFileId(url).catch(() => null) ?? undefined,
+		source: `${folder.source}/${name}`,
+		root: folder.root,
+		owner: folder.owner,
+		mime: MIME[name.split('.').pop().toLowerCase()] ?? 'application/octet-stream',
+		permissions: folder.permissions,
+		mtime: new Date(),
+	}))
+}
+
 /**
- * Pick the floor plan for a folder and return its path relative to the
- * folder. A PDF is converted to `<name>.png` in the folder.
+ * Copy a floor plan from elsewhere into the folder of the walkthrough, under a
+ * name that overwrites nothing; returns that name.
+ */
+async function copyIntoFolder(rootUrl, folder, entries, absolute) {
+	const names = entries.map(e => e.name)
+	const fileName = absolute.split('/').pop()
+	for (let tries = 0; tries < 20; tries++) {
+		const name = freePlanName(names, fileName)
+		const target = urlFor(rootUrl, `${folder.path}/${name}`)
+		if (await copyFile(urlFor(rootUrl, absolute), target)) {
+			await announceFile(folder, name, target)
+			return name
+		}
+		// created by someone else in the meantime
+		names.push(name)
+	}
+	throw new Error(t('There is no free file name for the floor plan in this folder.'))
+}
+
+/**
+ * Bring a walkthrough's floor plan that lies elsewhere into its folder.
+ *
+ * @param {object} folder the walkthrough's folder (as for choosePlan)
+ * @param {Array} entries listFolder() of the folder
+ * @param {string} absolute path of the plan below the user's or share's root
+ * @return {Promise<string>} the plan's file name in the folder
+ */
+export function copyPlanIntoFolder(folder, entries, absolute) {
+	const rootUrl = folder.source.slice(0, folder.source.length - folder.path.length)
+	return copyIntoFolder(rootUrl, folder, entries, absolute)
+}
+
+/**
+ * Pick the floor plan for a folder and return its file name. A plan chosen
+ * from elsewhere is copied into the folder first, so everything a
+ * walkthrough uses lies next to it. A PDF is converted to `<name>.png`.
  *
  * @param {object} folder Files node or { source, path, root, owner } of the folder
  * @param {Array} entries listFolder() of the folder
@@ -69,33 +118,28 @@ export async function choosePlan(folder, entries, { auto = true, file = null, on
 		}
 	}
 
-	const path = absolute ?? `${folder.path}/${name}`
-	if (!/\.pdf$/i.test(path)) {
-		return name ?? relativePath(folder.path, absolute)
+	const rootUrl = folder.source.slice(0, folder.source.length - folder.path.length)
+	if (!name) {
+		onWork?.()
+		name = await copyIntoFolder(rootUrl, folder, entries, absolute)
+	}
+	if (!/\.pdf$/i.test(name)) {
+		return name
 	}
 
 	// PDF: convert page 1 once, unless a newer PNG of the same name exists
-	const png = pngNameFor(path.split('/').pop())
-	const pdfEntry = name ? entries.find(e => e.name === name) : null
+	const png = pngNameFor(name)
+	const pdfEntry = entries.find(e => e.name === name)
 	const pngEntry = entries.find(e => e.name === png)
 	if (pngEntry && pdfEntry && pngEntry.mtime >= pdfEntry.mtime) {
 		return png
 	}
 	onWork?.()
-	const rootUrl = folder.source.slice(0, folder.source.length - folder.path.length)
 	const { pdfToPng } = await import(/* webpackChunkName: "pdf" */ './pdf.js')
-	const blob = await pdfToPng(urlFor(rootUrl, path))
+	const blob = await pdfToPng(urlFor(rootUrl, `${folder.path}/${name}`))
 	const pngUrl = urlFor(rootUrl, `${folder.path}/${png}`)
 	await writeBlob(pngUrl, blob)
-	announce(new File({
-		id: await getFileId(pngUrl).catch(() => null) ?? undefined,
-		source: `${folder.source}/${png}`,
-		root: folder.root,
-		owner: folder.owner,
-		mime: 'image/png',
-		permissions: folder.permissions,
-		mtime: new Date(),
-	}))
+	await announceFile(folder, png, pngUrl)
 	return png
 }
 

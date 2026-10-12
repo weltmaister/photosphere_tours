@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { classifyFolder, newerPlan, pngNameFor } from '../src/folder.js'
+import { classifyFolder, freePlanName, newerPlan, pngNameFor } from '../src/folder.js'
 
 const d = (s) => new Date(s)
 
@@ -98,5 +98,20 @@ describe('newerPlan', () => {
 
 	it('returns null when the current plan lives elsewhere and nothing is newer', () => {
 		expect(newerPlan(entries.slice(2), '../Grundrisse/EG.png')).toBeNull()
+	})
+})
+
+describe('freePlanName', () => {
+	it('keeps the name when it is free', () => {
+		expect(freePlanName(['a.jpg'], 'EG.png')).toBe('EG.png')
+	})
+
+	it('numbers the name when it is taken', () => {
+		expect(freePlanName(['EG.png', 'EG (2).png'], 'EG.png')).toBe('EG (3).png')
+	})
+
+	it('keeps a PDF and its PNG together', () => {
+		// EG.pdf is free, but EG.png is not: the converted PNG would clash
+		expect(freePlanName(['EG.png'], 'EG.pdf')).toBe('EG (2).pdf')
 	})
 })

@@ -23,6 +23,27 @@ export function pngNameFor(pdfName) {
 }
 
 /**
+ * Name for a floor plan copied into the folder that clashes with nothing there.
+ * For a PDF its PNG name must be free too, so the pair stays recognisable
+ * ("Plan.pdf" + "Plan.png"), else both become "Plan (2)".
+ *
+ * @param {string[]} names file names in the folder
+ * @param {string} fileName name of the plan where it comes from
+ */
+export function freePlanName(names, fileName) {
+	const taken = new Set(names)
+	const dot = fileName.lastIndexOf('.')
+	const base = dot > 0 ? fileName.slice(0, dot) : fileName
+	const ext = dot > 0 ? fileName.slice(dot) : ''
+	for (let n = 1; ; n++) {
+		const candidate = n === 1 ? base : `${base} (${n})`
+		if (!taken.has(candidate + ext) && !(isPdf(fileName) && taken.has(`${candidate}.png`))) {
+			return candidate + ext
+		}
+	}
+}
+
+/**
  * @param {Array<{name: string, isFolder: boolean, mtime?: Date, panorama?: boolean|null}>} entries
  *   direct children of the folder; `panorama` is true/false when the
  *   files_photospheres app reported it, null when unknown

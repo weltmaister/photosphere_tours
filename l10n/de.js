@@ -130,6 +130,11 @@ OC.L10N.register(
 		],
 		"Width of the editing column": "Breite der Bearbeitungsspalte",
 		"Spot and images": "Standort und Bilder",
-		"Does the view cone point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – and click on that place in the floor plan. The cone turns there.": "Zeigt der Blickkegel in die falsche Richtung? Dreh das Bild zu etwas Markantem – Tür, Fenster, Ecke – und klick im Grundriss auf diese Stelle. Der Kegel dreht sich dorthin."
+		"Does the view cone point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – and click on that place in the floor plan. The cone turns there.": "Zeigt der Blickkegel in die falsche Richtung? Dreh das Bild zu etwas Markantem – Tür, Fenster, Ecke – und klick im Grundriss auf diese Stelle. Der Kegel dreht sich dorthin.",
+		"There is no free file name for the floor plan in this folder.": "Für den Grundriss gibt es in diesem Ordner keinen freien Dateinamen.",
+		"The floor plan lies outside this folder: {file}": "Der Grundriss liegt außerhalb dieses Ordners: {file}",
+		"Copy it here": "Hierher kopieren",
+		"Floor plan copied into this folder – not saved yet.": "Grundriss in diesen Ordner kopiert – noch nicht gespeichert.",
+		"The floor plan could not be copied: {error}": "Der Grundriss konnte nicht kopiert werden: {error}"
 	},
 	"nplurals=2; plural=(n != 1);");
