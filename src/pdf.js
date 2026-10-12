@@ -19,17 +19,29 @@ const LONG_SIDE = 6000
 const MAX_PIXELS = 16e6
 
 /**
+ * Load a PDF, run `use` on its first page and free the worker again, also when
+ * `use` fails. The loading task owns the document since pdf.js 6.
+ */
+async function withFirstPage(url, use) {
+	const { data } = await axios.get(url, { responseType: 'arraybuffer' })
+	const task = getDocument({ data })
+	try {
+		const doc = await task.promise
+		return await use(await doc.getPage(1))
+	} finally {
+		await task.destroy()
+	}
+}
+
+/**
  * Text of page 1 with positions normalised to the page (0–1, y downwards) –
  * the same frame as the PNG made by pdfToPng().
  *
  * @param {string} url WebDAV URL of the PDF
  * @return {Promise<Array<{str: string, x: number, y: number}>>}
  */
-export async function pdfText(url) {
-	const { data } = await axios.get(url, { responseType: 'arraybuffer' })
-	const doc = await getDocument({ data }).promise
-	try {
-		const page = await doc.getPage(1)
+export function pdfText(url) {
+	return withFirstPage(url, async (page) => {
 		const viewport = page.getViewport({ scale: 1 })
 		const { items } = await page.getTextContent()
 		return items
@@ -38,20 +50,15 @@ export async function pdfText(url) {
 				const [x, y] = viewport.convertToViewportPoint(item.transform[4], item.transform[5])
 				return { str: item.str, x: x / viewport.width, y: y / viewport.height }
 			})
-	} finally {
-		doc.destroy()
-	}
+	})
 }
 
 /**
  * @param {string} url WebDAV URL of the PDF
  * @return {Promise<Blob>} PNG of page 1 on white
  */
-export async function pdfToPng(url) {
-	const { data } = await axios.get(url, { responseType: 'arraybuffer' })
-	const doc = await getDocument({ data }).promise
-	try {
-		const page = await doc.getPage(1)
+export function pdfToPng(url) {
+	return withFirstPage(url, async (page) => {
 		const base = page.getViewport({ scale: 1 })
 		const scale = Math.min(LONG_SIDE / Math.max(base.width, base.height), Math.sqrt(MAX_PIXELS / (base.width * base.height)))
 		const viewport = page.getViewport({ scale })
@@ -66,7 +73,5 @@ export async function pdfToPng(url) {
 			(blob) => blob ? resolve(blob) : reject(new Error('PNG export failed')),
 			'image/png',
 		))
-	} finally {
-		doc.destroy()
-	}
+	})
 }

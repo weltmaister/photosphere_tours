@@ -3,6 +3,16 @@
 All notable changes to this app are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.4.15 – 2026-10-12
+
+### Security
+- PDF.js updated to 6.4.299 (GHSA-hq66-cqwq-w95j: script execution from a crafted
+  PDF). The app only renders and reads floor plans, but any PDF in a shared folder
+  could be one.
+
+### Fixed
+- The PDF worker is freed even when converting a floor plan fails.
+
 ## 0.4.14 – 2026-10-12
 
 ### Changed

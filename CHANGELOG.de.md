@@ -3,6 +3,17 @@
 Alle wichtigen Änderungen dieser App stehen in dieser Datei.
 Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
+## 0.4.15 – 2026-10-12
+
+### Sicherheit
+- PDF.js auf 6.4.299 aktualisiert (GHSA-hq66-cqwq-w95j: Skriptausführung durch ein
+  präpariertes PDF). Die App zeichnet und liest Grundrisse nur, aber jedes PDF in einem
+  geteilten Ordner könnte eines sein.
+
+### Behoben
+- Der PDF-Worker wird auch dann freigegeben, wenn das Umwandeln eines Grundrisses
+  fehlschlägt.
+
 ## 0.4.14 – 2026-10-12
 
 ### Geändert
