@@ -70,19 +70,6 @@ async function copyIntoFolder(rootUrl, folder, entries, absolute) {
 }
 
 /**
- * Bring a walkthrough's floor plan that lies elsewhere into its folder.
- *
- * @param {object} folder the walkthrough's folder (as for choosePlan)
- * @param {Array} entries listFolder() of the folder
- * @param {string} absolute path of the plan below the user's or share's root
- * @return {Promise<string>} the plan's file name in the folder
- */
-export function copyPlanIntoFolder(folder, entries, absolute) {
-	const rootUrl = folder.source.slice(0, folder.source.length - folder.path.length)
-	return copyIntoFolder(rootUrl, folder, entries, absolute)
-}
-
-/**
  * Pick the floor plan for a folder and return its file name. A plan chosen
  * from elsewhere is copied into the folder first, so everything a
  * walkthrough uses lies next to it. A PDF is converted to `<name>.png`.

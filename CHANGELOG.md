@@ -9,8 +9,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - A floor plan chosen from another folder is copied into the walkthrough's folder and
   used there; a PDF is copied together with its PNG, so room names work too. Nothing
   is overwritten: a taken name becomes "Plan (2)".
-- The editor offers to copy a floor plan that still lies outside the folder
-  (*Copy it here*).
 
 ## 0.4.15 – 2026-10-12
 

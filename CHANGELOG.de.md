@@ -9,8 +9,6 @@ Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Ein Grundriss aus einem anderen Ordner wird in den Ordner des Rundgangs kopiert und
   dort verwendet; ein PDF zusammen mit seinem PNG, damit auch die Raumnamen greifen.
   Überschrieben wird nichts: Ein belegter Name wird zu „Plan (2)“.
-- Der Editor bietet an, einen Grundriss, der noch außerhalb des Ordners liegt, zu
-  kopieren (*Hierher kopieren*).
 
 ## 0.4.15 – 2026-10-12
 
