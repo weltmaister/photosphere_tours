@@ -26,6 +26,13 @@ to show or keep on record.
 Add later captures of the same spot. A **visit** shows only the spots captured on
 that day; *All* shows every spot, and spots with several captures let you pick one.
 
+**Notes and photos with markers**
+
+A marker is a short text and/or a photo that belongs to a capture. Place it in the
+panorama and click its icon to see the photo large, or keep photos without a place
+under *Photos at this spot*. If the images carry a GPS position, a link opens the
+location in OpenStreetMap in a new tab – no map is loaded by the app itself.
+
 **Walk through it**
 
 Panorama next to the floor plan and the spot list. The plan zooms and pans, the side
@@ -63,6 +70,13 @@ Sie zeigen oder festhalten möchten.
 Spätere Aufnahmen desselben Standorts hinzufügen. Eine **Begehung** zeigt nur die
 Standorte, die an dem Tag aufgenommen wurden; *Alle* zeigt jeden Standort, bei mehreren
 Aufnahmen lässt sich eine auswählen.
+
+**Notizen und Fotos mit Markierungen**
+
+Eine Markierung ist ein kurzer Text und/oder ein Foto zu einer Aufnahme. Sie lässt sich im
+Panorama setzen und über ihr Symbol anklicken, um das Foto groß zu sehen; Fotos ohne Stelle
+stehen unter *Fotos an diesem Standort*. Tragen die Bilder eine GPS-Position, öffnet ein
+Link den Ort in OpenStreetMap in einem neuen Tab – die App selbst lädt keine Karte.
 
 **Begehen**
 

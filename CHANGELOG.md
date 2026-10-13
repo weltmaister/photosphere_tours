@@ -3,6 +3,28 @@
 All notable changes to this app are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **Markers:** a text and/or a photo per capture, optionally placed in the panorama.
+  Placed markers show as icons (camera with a photo, speech bubble without); a click
+  opens the photo large with the text and pages through all markers of the capture.
+  The button *Photos at this spot (n)* does the same, also for markers without a place
+  and with keyboard or screen reader. The spot list marks captures that have markers.
+  Stored per capture as `markers` in `360-Rundgang.json`; existing files stay valid.
+- **Editor:** a *Markers* section: *Place marker* and *Move in the panorama* (click
+  the place), text, *Choose photo* (a photo from elsewhere is copied into `2D-Bilder/`,
+  never overwritten), *Remove photo*, *Remove marker* with *Undo* instead of a question
+  (image files are never deleted), and *New photos* from `2D-Bilder/`. Placing is by
+  mouse or touch; on share pages *Choose photo* is hidden.
+- **Resizable dividers:** between floor plan and spot list in the viewer side bar and
+  between panorama and editing panel in the editor, by dragging or arrow keys. The
+  sizes are remembered per browser.
+- **Location:** a walkthrough can have a `location` (latitude, longitude). It is taken
+  from the GPS position of the first image placed in a walkthrough without one; the
+  header then offers *Open in OpenStreetMap* (new tab, no map embedded, no requests
+  from the app itself).
+
 ## 0.5.0 – 2026-10-12
 
 ### Changed

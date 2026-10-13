@@ -16,6 +16,7 @@ Gilt für Oberfläche, README und App-Store-Text. Sprachen:
 | **Begehung** | visit | Alle Aufnahmen eines Tages | „Walkthrough“ in der Zeitachse |
 | **Alle** | All | Jeder Standort mit seiner jüngsten Aufnahme (Gegenstück zu einer Begehung) | „Neueste“, „Aktuell“ |
 | **Neue Bilder** | new images | Bilder im Ordner, die noch zu keinem Standort gehören | „Noch nicht verortet“ |
+| **Markierung** | marker | Ein Text und/oder Foto zu einer Aufnahme, auf Wunsch an einer Stelle im Panorama. Ein Begriff für alle drei Fälle (Foto an einer Stelle, Kommentar, Foto ohne Stelle); die ohne Stelle heißen „Fotos an diesem Standort“ | „Notiz“, „Pin“, „Hotspot“ |
 | **platzieren** | place | Ein neues Bild einem Standort zuordnen | „verorten“ |
 | **Blickrichtung festlegen** | set view direction | Bild und Grundriss in Übereinstimmung bringen | „Richtung ausrichten“ |
 
@@ -49,6 +50,7 @@ Regeln:
 | Tooltip Bearbeiten | Standorte platzieren, verschieben und Blickrichtung festlegen | = | Place and move spots, set view directions |
 | Tooltip Grundriss | Grundriss ein- oder ausblenden | = | Show or hide floor plan |
 | Tooltip Schließen | Rundgang schließen (Esc) | = | Close walkthrough (Esc) |
+| Button und Tooltip Karte (nur mit bekanntem Ort) | In OpenStreetMap öffnen | = | Open in OpenStreetMap |
 
 ### Fußleiste: Zeitachse (neu)
 
@@ -73,9 +75,12 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Abschnitt 2, Begehung gewählt | Standorte am {date} ({count}) | = | Spots on {date} ({count}) |
 | Kopfzeile nach Wahl einer Begehung | {count} Standort(e) am {date} aufgenommen | = | {count} spot(s) captured on {date} |
 | Listeneintrag Datum | {date} | = | {date} |
-| Markierung (Tooltip) | {count} Aufnahmen von {name} | = | {count} captures of {name} |
+| Zähler (Tooltip) | {count} Aufnahmen von {name} | = | {count} captures of {name} |
 | Eintrag neueste | {date} (neueste) | = | {date} (latest) |
 | Rand ziehen | Ziehen oder Pfeiltasten benutzen, um die Breite zu ändern | = | Drag or use the arrow keys to change the width |
+| Trennlinie Grundriss / Liste (Beschriftung) | Höhe des Grundrisses | = | Height of the floor plan |
+| Trennlinie, Tooltip | Ziehen oder Pfeiltasten benutzen, um die Höhe zu ändern | = | Drag or use the arrow keys to change the height |
+| Markierungen im Eintrag (Tooltip) | {count} Markierung(en) | = | {count} marker(s) |
 | Handy: Blatt öffnen | Grundriss und Standorte | = | Floor plan and spots |
 | Handy: Blatt schließen | Einklappen | = | Collapse |
 
@@ -87,6 +92,12 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Karte vergrößern / verkleinern | Grundriss vergrößern / Grundriss verkleinern | = | Enlarge / shrink floor plan |
 | Karte zurücksetzen | Auf aktuellen Standort zentrieren | = | Center on current spot |
 | Zoom | Vergrößern / Verkleinern | = | Zoom in / Zoom out |
+| Markierungen, Button (mit Fotos ohne Stelle) | Foto an diesem Standort ({count}) / Fotos an diesem Standort ({count}) | = | Photo at this spot ({count}) / Photos at this spot ({count}) |
+| Markierungen, Button (sonst) | {count} Markierung / {count} Markierungen | = | {count} marker / {count} markers |
+| Markierung, Dialog: Titel | erste Textzeile, sonst Dateiname | = | first line of the text, else file name |
+| Markierung, Dialog: Foto fehlt | Foto nicht gefunden: {file} | = | Photo not found: {file} |
+| Markierung, Dialog: Blättern | Zurück / Weiter | = | Previous / Next |
+| Markierung, Dialog: Zähler | {n} von {count} | = | {n} of {count} |
 
 ### Viewer allgemein
 
@@ -128,6 +139,39 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Entfernen (mehrere Aufnahmen) | Aufnahme entfernen | = | Remove capture |
 | Entfernen (letzte Aufnahme) | Standort entfernen | = | Remove spot |
 | Tooltip Standort im Editor | {name} – ziehen oder mit den Pfeiltasten verschieben | = | {name} – drag or move with the arrow keys |
+
+### Editor: Markierungen
+
+Abschnitt „Markierungen ({count})“ unter dem Standort, für die gewählte Aufnahme; darunter „Neue Fotos“. Fotos liegen im Unterordner `2D-Bilder`. Auf Freigabeseiten fehlt „Foto wählen“ (keine Dateiauswahl ohne Anmeldung).
+
+| Stelle | de | de_DE | en |
+|---|---|---|---|
+| Überschrift | Markierungen ({count}) | = | Markers ({count}) |
+| Eintrag ohne Text und Foto | Neue Markierung | = | New marker |
+| Eintrag: Ort | gesetzt / ohne Ort | = | Placed / No place |
+| Button, neue Markierung | Markierung setzen | = | Place marker |
+| Hinweis im Setzen-Modus | Klick ins Panorama – Esc bricht ab. | Klicken Sie ins Panorama – Esc bricht ab. | Click in the panorama – Esc cancels. |
+| Abbrechen | Abbrechen | = | Cancel |
+| Feld | Text | = | Text |
+| Datei | Datei: {file} | = | File: {file} |
+| Hinweis ohne Text und Foto | Eine Markierung ohne Text und Foto wird nicht gespeichert. | = | A marker without text or photo is not saved. |
+| Foto | Foto wählen / Anderes Foto / Foto entfernen | = | Choose photo / Other photo / Remove photo |
+| Ort | Im Panorama verschieben / Im Panorama setzen | = | Move in the panorama / Place in the panorama |
+| Entfernen | Markierung entfernen | = | Remove marker |
+| Abschnitt neue Fotos | Neue Fotos ({count}) | = | New photos ({count}) |
+| Leer | Kopier Fotos in den Ordner „{folder}“, dann erscheinen sie hier. | Kopieren Sie Fotos in den Ordner „{folder}“, dann erscheinen sie hier. | Copy photos into the folder {folder} and they will show up here. |
+| Einleitung | Fotos aus dem Ordner „{folder}“, die noch keine Markierung nutzt. | = | Photos in the folder {folder} that no marker uses yet. |
+| Foto zuordnen | Zu dieser Aufnahme hinzufügen | = | Add to this capture |
+| Gesetzt | Markierung gesetzt – noch nicht gespeichert [Rückgängig] | = | Marker placed – not saved yet [Undo] |
+| Verschoben | Markierung verschoben – noch nicht gespeichert [Rückgängig] | = | Marker moved – not saved yet [Undo] |
+| Entfernt | Markierung entfernt – noch nicht gespeichert [Rückgängig] | = | Marker removed – not saved yet [Undo] |
+| Foto entfernt, nichts übrig | Eine Markierung braucht einen Text oder ein Foto. | = | A marker needs a text or a photo. |
+| Auswahl fehlgeschlagen | Das Foto konnte nicht gewählt werden: {error} | = | The photo could not be chosen: {error} |
+| Kopieren fehlgeschlagen | Das Foto konnte nicht in den Ordner „{folder}“ kopiert werden: {error} | = | The photo could not be copied into the folder {folder}: {error} |
+| Kein freier Name | Für das Foto gibt es in diesem Ordner keinen freien Dateinamen. | = | There is no free file name for the photo in this folder. |
+| Liste fehlgeschlagen | Die Fotos aus dem Ordner „{folder}“ konnten nicht geladen werden: {error} | = | The photos in the folder {folder} could not be loaded: {error} |
+
+Das Entfernen einer Markierung fragt nicht nach, sondern bietet „Rückgängig“ an (Ausnahme, Begründung in [gestaltung.md](gestaltung.md)). Die Bilddatei bleibt im Ordner, das steht deshalb nicht in der Meldung.
 
 ### Editor: Tab „Neue Bilder“
 
@@ -175,6 +219,10 @@ Die Auswahl einer bestimmten Aufnahme sitzt nicht mehr in der Fußleiste. Sie st
 | Koordinate | Standort {n}: „{axis}“ muss zwischen 0 und 1 liegen. | Spot {n}: "{axis}" must be between 0 and 1. |
 | Pfad | Standort {n}, Aufnahme {m}: „file“ muss im Ordner des Rundgangs liegen. | Spot {n}, capture {m}: "file" must be inside the walkthrough folder. |
 | Datum | Standort {n}, Aufnahme {m}: „date“ muss wie 2024-08-14T16:02 aussehen. | Spot {n}, capture {m}: "date" must look like 2024-08-14T16:02. |
+| Markierungen | – | Spot {n}, capture {m}: "markers" must be a list. |
+| Markierung ohne Inhalt | – | Spot {n}, capture {m}, marker {k}: needs a text or a photo. |
+| Stelle | – | Spot {n}, capture {m}, marker {k}: "yaw" and "pitch" go together. |
+| Ort | – | "location" must be { "lat": -90…90, "lon": -180…180 }. |
 
 ## Hinweise für Übersetzungen
 

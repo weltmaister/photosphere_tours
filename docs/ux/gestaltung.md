@@ -50,7 +50,7 @@ Nur Komponenten aus `@nextcloud/vue`. Eigene Bausteine gibt es nur dort, wo Next
 | Hauptaktion | `NcButton variant="primary"` | Genau eine je Bereich: „Speichern“ im Editor, „Bearbeiten“ im Viewer |
 | Weitere Aktionen | `NcButton variant="secondary"` | z. B. „Grundriss wechseln“, „Rückgängig“ in einer Meldung |
 | Symbolaktion | `NcButton variant="tertiary"` mit `aria-label` und Tooltip | Schließen, Seitenleiste ein/aus, Zoom |
-| Entfernen | im Formular `tertiary` mit Fehlerfarbe, bestätigt über `showConfirmation` | Immer mit Rückfrage |
+| Entfernen | im Formular `tertiary` mit Fehlerfarbe, bestätigt über `showConfirmation` | Immer mit Rückfrage. Einzige Ausnahme: Markierungen, siehe unten |
 | Eingabe | `NcTextField`, `NcDateTimePickerNative type="datetime-local"` | Beschriftung als Label, nicht als Platzhalter |
 | Auswahl der Aufnahme | `NcCheckboxRadioSwitch type="radio"` im Editor, aufklappbare Liste in der Standortliste | – |
 | Begehungen | `SiteVisits.vue`: Segmentgruppe in der Fußleiste bzw. im Handy-Blatt | erst ab zwei Begehungen |
@@ -59,6 +59,8 @@ Nur Komponenten aus `@nextcloud/vue`. Eigene Bausteine gibt es nur dort, wo Next
 | Leerzustand | `NcEmptyContent` mit Icon, Titel und Text | „Keine neuen Bilder“, „Noch keine Standorte“ |
 | Dialog | `showConfirmation` aus `@nextcloud/dialogs` | Buttons nach [texte.md](texte.md) („Entfernen / Behalten“) |
 | Icons | `NcIconSvgWrapper` mit Pfaden aus `@mdi/js` | 20 px, kleine Symbole in Listen 18 px |
+| Markierungen | `MarkerSection.vue` (Editor), `MarkerDialog.vue` (`NcDialog`), `MarkerButton.vue` (Fußleiste, Handy-Blatt) | siehe „Markierungen“ |
+| Trennlinie | `ResizeHandle.vue`, `orientation="vertical"` (Spalte) oder `"horizontal"` (Zeile) | siehe „Trennlinien“ |
 | Grundriss | `FloorPlan.vue` (eigener Baustein, kein PSV-Plugin) | siehe unten |
 
 Größen: Alle Buttons und Felder haben die Höhe `--default-clickable-area`, auf Touch-Geräten `--clickable-area-large`. Symbolbuttons sind quadratisch.
@@ -80,8 +82,30 @@ Größen: Alle Buttons und Felder haben die Höhe `--default-clickable-area`, au
 
 - **Keine schwebenden Leisten über dem Bild.** Kopf- und Fußleiste sind feste Flächen. Das Panorama liegt dazwischen und wird nie verdeckt.
 - **Die PSV-Navbar entfällt** (`navbar: false`). Zoom und Vollbild sitzen in der Fußleiste, die Wahl einer Aufnahme in der Standortliste.
-- **Editor:** Grundriss groß links; rechts eine Spalte (Standard 520 px, per Griff 360–960 px) mit Panorama (292 px hoch) und einer Fläche: Standort, Grundriss-Datei, Neue Bilder. Im Grundriss: Ziehen verschiebt, kurzer Klick auf einen Standort wählt ihn, auf eine freie Stelle setzt er das gewählte Bild oder dreht die Blickrichtung.
+- **Editor:** Grundriss groß links; rechts eine Spalte (Standard 520 px, per Griff 360–960 px) mit Panorama (Standard 292 px hoch, per Griff ab 160 px) und einer Fläche: Standort, Markierungen, Grundriss-Datei, Neue Bilder. Im Grundriss: Ziehen verschiebt, kurzer Klick auf einen Standort wählt ihn, auf eine freie Stelle setzt er das gewählte Bild oder dreht die Blickrichtung.
 - **Schmal (< 768 px):** Der Viewer zeigt die Seitenleiste als unteres Blatt (50 % der Höhe) mit den Tabs „Grundriss“ und „Standorte“; die Begehungen bleiben darunter sichtbar. Der Editor wechselt mit zwei Tabs zwischen „Grundriss“ und „Standort und Bilder“.
+
+## Trennlinien
+
+Alle Ränder, die man ziehen kann, sind `ResizeHandle.vue` und verhalten sich gleich: Der Griff liegt auf der Kante, der Mauszeiger wird zum Größenzeiger, die Linie wird bei Hover und beim Ziehen in `--color-primary-element` gezeichnet, der Fokus ist der Nextcloud-Standard; auf Touch-Geräten ist der Griff 24 px breit. Mit der Maus ziehen oder per Tastatur: Pfeil links/rechts bei der Spaltenkante, Pfeil auf/ab bei der Zeilenkante (16 px je Taste). Der Griff hat `role="separator"`, `aria-orientation` und eine Beschriftung („Höhe des Grundrisses“).
+
+| Trennlinie | Richtung | Grenzen | Gespeichert als |
+|---|---|---|---|
+| Seitenleiste | Spalte, Breite | 240–560 px | `sidebarWidth` |
+| Editor, Grundriss / rechte Spalte | Spalte, Breite | 360–960 px | `editorColumn` |
+| Viewer, Grundriss / Standortliste | Zeile, Höhe | ab 120 px, die Liste behält mindestens 160 px | `sidebarPlanHeight` |
+| Editor, Panorama / Fläche | Zeile, Höhe | ab 160 px | `editorPanoramaHeight` |
+
+Die Größen gelten pro Browser. Passt eine gespeicherte Höhe nicht ins Fenster, wird sie nur begrenzt angezeigt; gespeichert wird erst, wenn man selbst zieht. Auf dem Handy gibt es keine Trennlinien, dort bleiben die Tabs.
+
+## Markierungen
+
+- **Symbol im Panorama:** Kamera (`mdiCameraOutline`) bei Markierungen mit Foto, Sprechblase (`mdiCommentTextOutline`) ohne. Ein runder Knopf in `--color-primary-element` mit `--color-primary-element-text`, 36 px, mit 2 px Rand in `--color-primary-element-text`; der Tooltip zeigt die erste Textzeile (als Text, nie als HTML). Das Panorama bleibt die einzige Fläche mit festen Farben.
+- **Symbol in Liste und Aufnahmenauswahl:** `mdiMapMarkerOutline`, 16 px, `--color-text-maxcontrast`, Tooltip „{count} Markierungen“. Die Fußleisten-Schaltfläche (`tertiary`) nimmt `mdiImageMultipleOutline`, wenn es Fotos ohne Stelle gibt, sonst `mdiMapMarkerOutline`.
+- **Dialog:** `NcDialog` groß; das Foto gefüllt bis 70 % der Fensterhöhe, darunter der Text mit Zeilenumbrüchen. „Zurück / Weiter“ nur bei mehreren Markierungen. Fehlt das Foto, steht dort „Foto nicht gefunden“.
+- **Editor-Abschnitt:** Listeneintrag mit Vorschaubild (40 px) oder Symbol, erste Zeile und „gesetzt / ohne Ort“; geöffnet mit Rahmen `--color-border-maxcontrast`, die Markierung, deren Ort gerade gewählt wird, mit `--color-primary-element`.
+- **Entfernen ohne Rückfrage (Ausnahme):** Der Grundsatz „Entfernen fragt immer nach“ gilt nicht für Markierungen. Sie sind klein und werden oft einzeln gesetzt und wieder verworfen, „Rückgängig“ in der Meldung (`NoteBar`) ist schneller als ein Dialog, und die Bilddatei wird nie gelöscht. Dasselbe „Rückgängig“ gibt es beim Setzen und Verschieben.
+- **Setzen und Verschieben** geschehen nur mit Maus oder Touch: „Markierung setzen“ bzw. „Im Panorama verschieben“, dann auf die neue Stelle klicken (kein Ziehen); Esc bricht ab. Tastatur und Screenreader erreichen alle Markierungen über die Fußleisten-Schaltfläche und den Dialog; Fotos lassen sich im Editor auch ohne Maus über „Zu dieser Aufnahme hinzufügen“ ergänzen. Deshalb brauchen die Symbole im Panorama keinen eigenen Fokus.
 
 ## Grundriss und Panorama
 
@@ -104,7 +128,7 @@ PSV bringt keine CSS-Variablen mit. Angepasst werden nur die Schrift des Contain
 ## Barrierefreiheit
 
 - Jeder Symbolbutton hat `aria-label` und Tooltip mit demselben Text.
-- Standorte im Editor sind per Tastatur erreichbar (Tab) und verschiebbar (Pfeiltasten, mit Umschalt in größeren Schritten).
+- Standorte im Editor sind per Tastatur erreichbar (Tab) und verschiebbar (Pfeiltasten, mit Umschalt in größeren Schritten). Markierungen lassen sich nur mit Maus oder Touch an eine Stelle im Panorama setzen; alles andere an ihnen geht auch per Tastatur.
 - Escape schließt erst Menüs und Dialoge, dann die Bildauswahl, dann den Editor, zuletzt den Rundgang.
 - Tabs folgen dem ARIA-Muster (Pfeiltasten, Pos1/Ende); Meldungen werden zusätzlich über eine `aria-live`-Region vorgelesen.
 - Kontrast: Text auf Glas-Hintergrund mindestens 4,5 : 1, in Hell und Dunkel prüfen.

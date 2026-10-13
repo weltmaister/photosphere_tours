@@ -41,7 +41,15 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   `PanoramaView` for all layouts. Parts: `TourHeader`, `ViewerSidebar` (plan + list,
   resizable), `PhoneSheet`, `TabBar` (ARIA tabs), `NoteBar` (note + action), `SpotForm`,
   `NewImages`, `SpotList`, `SiteVisits`, `FloorPlan` (zoom, pan, pinch, pin drag, arrow
-  keys); `src/composables/useLayout.js` (phone query, stored settings)
+  keys); `src/composables/useLayout.js` (phone query, stored settings, divider sizes)
+- Markers (text and/or photo per capture, `capture.markers`, optionally placed in the panorama):
+  `src/markers.js` – pure helpers (raw yaw/pitch ↔ texture coordinates, titles, counts,
+  unused photos in `2D-Bilder/`, saving without empty markers);
+  `src/composables/useMarkerEditing.js` – editor logic (place/move mode, texts, photos,
+  remove with undo; markers are tracked by object identity, never by index);
+  `src/composables/clamp.js` – `clampSize` for stored sizes;
+  `MarkerSection.vue` – editor section; `MarkerDialog.vue` – viewer dialog;
+  `MarkerButton.vue` – "Photos at this spot" button (footer, phone sheet)
 - Spots are objects in a reactive tour: keep per-spot state in a `reactive(Map)` keyed by
   the spot or in a `Set` of `toRaw(spot)` – never by index, never mix raw and proxy.
 - `src/tour.js`, `folder.js`, `exif.js`, `rooms.js`, `rename.js` – pure logic, unit-tested
