@@ -43,6 +43,20 @@ export function freePlanName(names, fileName) {
 	}
 }
 
+/** A free name for a photo copied into the photo folder: "a.jpg", else "a (2).jpg", … */
+export function freePhotoName(names, fileName) {
+	const taken = new Set(names)
+	const dot = fileName.lastIndexOf('.')
+	const base = dot > 0 ? fileName.slice(0, dot) : fileName
+	const ext = dot > 0 ? fileName.slice(dot) : ''
+	for (let n = 1; ; n++) {
+		const candidate = n === 1 ? fileName : `${base} (${n})${ext}`
+		if (!taken.has(candidate)) {
+			return candidate
+		}
+	}
+}
+
 /**
  * @param {Array<{name: string, isFolder: boolean, mtime?: Date, panorama?: boolean|null}>} entries
  *   direct children of the folder; `panorama` is true/false when the

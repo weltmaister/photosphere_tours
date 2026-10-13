@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { classifyFolder, freePlanName, newerPlan, pngNameFor } from '../src/folder.js'
+import { classifyFolder, freePhotoName, freePlanName, newerPlan, pngNameFor } from '../src/folder.js'
 
 const d = (s) => new Date(s)
 
@@ -113,5 +113,12 @@ describe('freePlanName', () => {
 	it('keeps a PDF and its PNG together', () => {
 		// EG.pdf is free, but EG.png is not: the converted PNG would clash
 		expect(freePlanName(['EG.png'], 'EG.pdf')).toBe('EG (2).pdf')
+	})
+})
+
+describe('freePhotoName', () => {
+	it('numbers a taken name and keeps the extension', () => {
+		expect(freePhotoName(['a.jpg'], 'b.jpg')).toBe('b.jpg')
+		expect(freePhotoName(['a.jpg', 'a (2).jpg'], 'a.jpg')).toBe('a (3).jpg')
 	})
 })

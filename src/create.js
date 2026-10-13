@@ -12,8 +12,9 @@ import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs'
 import { emit } from '@nextcloud/event-bus'
 import { File } from '@nextcloud/files'
 
-import { copyFile, getFileId, listFolder, urlFor, writeBlob, writeText } from './dav.js'
-import { classifyFolder, freePlanName, pngNameFor } from './folder.js'
+import { copyFile, ensureFolder, getFileId, listFolder, urlFor, writeBlob, writeText } from './dav.js'
+import { classifyFolder, freePhotoName, freePlanName, pngNameFor } from './folder.js'
+import { PHOTO_FOLDER } from './markers.js'
 import { t } from './l10n.js'
 import { TOUR_FILENAME, emptyTour, serializeTour } from './tour.js'
 
@@ -78,6 +79,31 @@ async function copyIntoFolder(folder, entries, absolute) {
 		names.push(name)
 	}
 	throw new Error(t('There is no free file name for the floor plan in this folder.'))
+}
+
+/**
+ * Copy a photo from elsewhere into the walkthrough's photo folder; returns its
+ * path relative to the walkthrough folder.
+ *
+ * @param {object} folder Files node or { source, path, root, owner } of the walkthrough folder
+ * @param {string[]} photoNames names already in the photo folder
+ * @param {string} absolute path of the photo below the root of the user or share
+ * @return {Promise<string>}
+ */
+export async function copyPhotoIntoFolder(folder, photoNames, absolute) {
+	const { rootUrl, dir } = folderBase(folder)
+	await ensureFolder(urlFor(rootUrl, `${dir}/${PHOTO_FOLDER}`))
+	const names = [...photoNames]
+	const fileName = absolute.split('/').pop()
+	for (let tries = 0; tries < 20; tries++) {
+		const name = freePhotoName(names, fileName)
+		if (await copyFile(urlFor(rootUrl, absolute), urlFor(rootUrl, `${dir}/${PHOTO_FOLDER}/${name}`))) {
+			return `${PHOTO_FOLDER}/${name}`
+		}
+		// created by someone else in the meantime
+		names.push(name)
+	}
+	throw new Error(t('There is no free file name for the photo in this folder.'))
 }
 
 /**

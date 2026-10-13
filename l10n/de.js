@@ -126,6 +126,7 @@ OC.L10N.register(
 		"Spot and images": "Standort und Bilder",
 		"Does the view cone point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – and click on that place in the floor plan. The cone turns there.": "Zeigt der Blickkegel in die falsche Richtung? Dreh das Bild zu etwas Markantem – Tür, Fenster, Ecke – und klick im Grundriss auf diese Stelle. Der Kegel dreht sich dorthin.",
 		"There is no free file name for the floor plan in this folder.": "Für den Grundriss gibt es in diesem Ordner keinen freien Dateinamen.",
+		"There is no free file name for the photo in this folder.": "Für das Foto gibt es in diesem Ordner keinen freien Dateinamen.",
 		"All": "Alle",
 		"All spots with their latest capture; pick other captures in the list": "Alle Standorte mit ihrer neuesten Aufnahme; weitere Aufnahmen in der Liste wählen",
 		"Only the spots captured on {date}": "Nur die Standorte, die am {date} aufgenommen wurden",

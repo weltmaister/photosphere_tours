@@ -197,6 +197,17 @@ export function moveFile(fromUrl, toUrl) {
 	return transfer('MOVE', fromUrl, toUrl)
 }
 
+/** Create a folder; an existing one (405) is fine. */
+export async function ensureFolder(url) {
+	try {
+		await axios.request({ method: 'MKCOL', url })
+	} catch (e) {
+		if (e.response?.status !== 405) {
+			throw e
+		}
+	}
+}
+
 /**
  * Copy a file without overwriting anything.
  *
