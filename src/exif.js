@@ -42,16 +42,26 @@ export function exifGps(buffer) {
 		const gps = readIfd(u32(pointer.value))
 		const lat = degrees(rationals(gps.get(GPS_LAT), 3), ascii(gps.get(GPS_LAT_REF)), 'S')
 		const lon = degrees(rationals(gps.get(GPS_LON), 3), ascii(gps.get(GPS_LON_REF)), 'W')
-		return lat === null || lon === null ? null : { lat, lon }
+		if (lat === null || lon === null || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+			return null
+		}
+		// 0/0 is what devices without a fix write: no position
+		if (lat === 0 && lon === 0) {
+			return null
+		}
+		return { lat, lon }
 	})
 }
 
-/** Degrees, minutes, seconds to a signed decimal; null when anything is missing. */
+/**
+ * Degrees, minutes, seconds to a signed decimal rounded to 5 places (as in the
+ * walkthrough file); null when anything is missing or out of range.
+ */
 function degrees(parts, ref, negative) {
-	if (!parts || !ref) {
+	if (!parts || !ref || parts.some(p => !Number.isFinite(p) || p < 0) || parts[1] >= 60 || parts[2] >= 60) {
 		return null
 	}
-	const value = parts[0] + parts[1] / 60 + parts[2] / 3600
+	const value = Math.round((parts[0] + parts[1] / 60 + parts[2] / 3600) * 1e5) / 1e5
 	return ref.toUpperCase() === negative ? -value : value
 }
 
