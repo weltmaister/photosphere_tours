@@ -212,6 +212,19 @@ defineExpose({
 	yaw: () => viewer?.getPosition().yaw ?? 0,
 	/** turn the view to a direction on the plan (degrees, clockwise from up) */
 	lookAt: (deg) => viewer?.rotate({ yaw: deg * Math.PI / 180, pitch: viewer.getPosition().pitch }),
+	/** turn the view to a placed marker (index in `markers`); nothing while it is not on screen yet */
+	showMarker(index) {
+		const plugin = viewer?.getPlugin(MarkersPlugin)
+		const marker = props.markers[index]
+		if (!plugin || !applied || !marker || !isPlaced(marker)) {
+			return
+		}
+		try {
+			plugin.gotoMarker(String(index), '10rpm')
+		} catch {
+			// not set (yet): the markers follow once the image is shown
+		}
+	},
 	zoomIn: () => viewer?.zoomIn(),
 	zoomOut: () => viewer?.zoomOut(),
 	toggleFullscreen: () => viewer?.toggleFullscreen(),

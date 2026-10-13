@@ -141,7 +141,7 @@
 								:opened="openedMarker"
 								:url-for="fileUrl"
 								:can-choose-photo="!shared"
-								@open="openMarkerEditor"
+								@open="onMarkerListOpen"
 								@place-new="placeMarker"
 								@move="moveMarker"
 								@cancel-place="cancelMarkerPlace"
@@ -247,7 +247,7 @@ import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readTe
 import { exifDate, exifGps } from '../exif.js'
 import { classifyFolder, newerPlan, pngNameFor } from '../folder.js'
 import { displayDate, errorText, n, t } from '../l10n.js'
-import { isPlaced, markerCount, markersOf, removeEmptyMarkers, withoutEmptyMarkers } from '../markers.js'
+import { isPlaced, markersOf, removeEmptyMarkers, withoutEmptyMarkers } from '../markers.js'
 import { renameSpotFiles, undoMoves } from '../rename.js'
 import { roomLabels, suggestName } from '../rooms.js'
 import {
@@ -489,7 +489,8 @@ const spotRows = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
 	return {
 		name: spot.name,
 		date: displayDate(shown.date),
-		markers: markerCount(spot),
+		// those of the shown capture, as in the panorama (the capture menu counts each)
+		markers: markersOf(shown).length,
 		state: spotState(index),
 		capturesLabel: t('{count} captures of {name}', { count: spot.captures.length, name: spot.name }),
 		captures: sorted.map((capture, i) => ({
@@ -689,6 +690,14 @@ async function onMarkerPick(place) {
 		editorTab.value = 'edit'
 		await nextTick()
 		markerSection.value?.focusText()
+	}
+}
+
+// a marker opened in the list: the panorama turns to it (a click in the panorama already looks there)
+function onMarkerListOpen(index) {
+	openMarkerEditor(index)
+	if (index >= 0) {
+		pano.value?.showMarker(index)
 	}
 }
 

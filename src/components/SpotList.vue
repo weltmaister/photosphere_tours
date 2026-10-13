@@ -89,7 +89,7 @@ import { n, t } from '../l10n.js'
 
 const props = defineProps({
 	/** [{ key, name, date, markers, state, capturesLabel, captures: [{ label, value, checked, markers }] }]
-	 *  markers: how many markers the spot (all captures) / the capture has
+	 *  markers: how many markers the shown capture / each capture has
 	 *  key: the spot's index in the walkthrough, also what the events carry */
 	rows: { type: Array, required: true },
 	/** show the rename button (write permission) */
