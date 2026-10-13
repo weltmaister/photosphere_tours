@@ -135,6 +135,22 @@
 		"_{count} spot captured on {date}_::_{count} spots captured on {date}_": [
 			"{count} Standort am {date} aufgenommen",
 			"{count} Standorte am {date} aufgenommen"
+		],
+		"Photo not found: {file}": "Foto nicht gefunden: {file}",
+		"Previous": "Zurück",
+		"Next": "Weiter",
+		"{n} of {count}": "{n} von {count}",
+		"_Photo at this spot ({count})_::_Photos at this spot ({count})_": [
+			"Foto an diesem Standort ({count})",
+			"Fotos an diesem Standort ({count})"
+		],
+		"_{count} marker_::_{count} markers_": [
+			"{count} Markierung",
+			"{count} Markierungen"
+		],
+		"_Markers here ({count})_::_Markers here ({count})_": [
+			"Markierungen hier ({count})",
+			"Markierungen hier ({count})"
 		]
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"

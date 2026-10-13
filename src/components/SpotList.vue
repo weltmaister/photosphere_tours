@@ -30,6 +30,12 @@
 						<span class="pt-spots__name">{{ row.name }}</span>
 						<span class="pt-spots__date">{{ row.date }}</span>
 					</span>
+					<NcIconSvgWrapper v-if="row.markers"
+						class="pt-spots__markers"
+						:path="mdiMapMarkerOutline"
+						:size="16"
+						:name="markersLabel(row.markers)"
+						:title="markersLabel(row.markers)" />
 				</button>
 				<button v-if="editable && renaming !== row.key"
 					type="button"
@@ -62,6 +68,12 @@
 					@click="$emit('pick-capture', row.key, capture.value)">
 					<span class="pt-spots__radio" :class="{ 'pt-spots__radio--on': capture.checked }" aria-hidden="true" />
 					{{ capture.label }}
+					<NcIconSvgWrapper v-if="capture.markers"
+						class="pt-spots__markers"
+						:path="mdiMapMarkerOutline"
+						:size="16"
+						:name="markersLabel(capture.markers)"
+						:title="markersLabel(capture.markers)" />
 				</button>
 			</div>
 		</li>
@@ -70,19 +82,22 @@
 
 <script setup>
 import { nextTick, ref, watch } from 'vue'
-import { mdiChevronDown, mdiChevronUp, mdiPencilOutline } from '@mdi/js'
+import { mdiChevronDown, mdiChevronUp, mdiMapMarkerOutline, mdiPencilOutline } from '@mdi/js'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
-import { t } from '../l10n.js'
+import { n, t } from '../l10n.js'
 
 const props = defineProps({
-	/** [{ key, name, date, state, capturesLabel, captures: [{ label, value, checked }] }]
+	/** [{ key, name, date, markers, state, capturesLabel, captures: [{ label, value, checked, markers }] }]
+	 *  markers: how many markers the spot (all captures) / the capture has
 	 *  key: the spot's index in the walkthrough, also what the events carry */
 	rows: { type: Array, required: true },
 	/** show the rename button (write permission) */
 	editable: { type: Boolean, default: false },
 })
 const emit = defineEmits(['select', 'pick-capture', 'rename'])
+
+const markersLabel = (count) => n('{count} marker', '{count} markers', count)
 
 const expanded = ref(null)
 const renaming = ref(null)
@@ -183,6 +198,11 @@ function commit(index) {
 
 .pt-spots__row--current .pt-spots__name {
 	font-weight: 600;
+}
+
+.pt-spots__markers {
+	flex-shrink: 0;
+	color: var(--color-text-maxcontrast);
 }
 
 .pt-spots__date {

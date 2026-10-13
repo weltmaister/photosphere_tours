@@ -70,7 +70,8 @@
 				:url="panoramaUrl"
 				:correction="correction"
 				:label="panoramaLabel"
-				:markers="currentCapture?.markers ?? []"
+				:markers="shownMarkers"
+				@marker-click="openMarker"
 				@heading="heading = $event" />
 			<!-- editor, desktop: divider on the panorama's lower edge (zero-height anchor in the panorama cell) -->
 			<div v-if="editing && !mobile" class="pt-pano-rows">
@@ -154,6 +155,10 @@
 				@select="selectSpot"
 				@rename="renameFromList"
 				@pick-capture="pickCapture">
+				<MarkerButton v-if="shownMarkers.length > 0"
+					:count="shownMarkers.length"
+					:unplaced="unplacedCount"
+					@open="openGallery" />
 				<SiteVisits v-if="showVisits" v-model="visit" :visits="visits" />
 			</PhoneSheet>
 		</div>
@@ -161,6 +166,10 @@
 		<footer v-if="ready && !editing && !mobile" class="pt-footer">
 			<SiteVisits v-if="showVisits" v-model="visit" :visits="visits" />
 			<div class="pt-footer__tools">
+				<MarkerButton v-if="shownMarkers.length > 0"
+					:count="shownMarkers.length"
+					:unplaced="unplacedCount"
+					@open="openGallery" />
 				<NcButton variant="tertiary" :aria-label="t('Zoom out')" :title="t('Zoom out')" @click="pano?.zoomOut()">
 					<template #icon>
 						<NcIconSvgWrapper :path="mdiMinus" />
@@ -178,6 +187,11 @@
 				</NcButton>
 			</div>
 		</footer>
+
+		<MarkerDialog v-model:open="markerOpen"
+			v-model:index="markerIndex"
+			:markers="shownMarkers"
+			:url-for="fileUrl" />
 	</div>
 </template>
 
@@ -192,6 +206,8 @@ import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 
 import FloorPlan from './FloorPlan.vue'
+import MarkerButton from './MarkerButton.vue'
+import MarkerDialog from './MarkerDialog.vue'
 import NewImages from './NewImages.vue'
 import NoteBar from './NoteBar.vue'
 import PanoramaView from './PanoramaView.vue'
@@ -208,6 +224,7 @@ import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readTe
 import { exifDate } from '../exif.js'
 import { classifyFolder, newerPlan, pngNameFor } from '../folder.js'
 import { displayDate, errorText, n, t } from '../l10n.js'
+import { isPlaced, markerCount, markersOf } from '../markers.js'
 import { renameSpotFiles, undoMoves } from '../rename.js'
 import { roomLabels, suggestName } from '../rooms.js'
 import {
@@ -400,6 +417,26 @@ const correction = computed(() => {
 	return currentCapture.value ? sphereCorrection(currentCapture.value) : null
 })
 
+// markers of the shown capture; none while the editor previews a picked image.
+// One shared empty array: a new [] per evaluation would reset the panorama's markers on every render.
+const NO_MARKERS = []
+const shownMarkers = computed(() => {
+	const list = previewing.value ? NO_MARKERS : markersOf(currentCapture.value)
+	return list.length > 0 ? list : NO_MARKERS
+})
+const unplacedCount = computed(() => shownMarkers.value.filter(m => !isPlaced(m)).length)
+const markerOpen = ref(false)
+const markerIndex = ref(0)
+function openMarker(index) {
+	markerIndex.value = index
+	markerOpen.value = true
+}
+// photos that belong to the whole spot first, otherwise the first marker
+function openGallery() {
+	openMarker(Math.max(0, shownMarkers.value.findIndex(m => !isPlaced(m))))
+}
+watch([currentCapture, previewing], () => { markerOpen.value = false })
+
 const visits = computed(() => tour.value
 	? [
 		{ value: 'all', label: t('All'), title: t('All spots with their latest capture; pick other captures in the list') },
@@ -428,10 +465,12 @@ const spotRows = computed(() => (tour.value?.spots ?? []).map((spot, index) => {
 	return {
 		name: spot.name,
 		date: displayDate(shown.date),
+		markers: markerCount(spot),
 		state: spotState(index),
 		capturesLabel: t('{count} captures of {name}', { count: spot.captures.length, name: spot.name }),
 		captures: sorted.map((capture, i) => ({
 			value: capture.file,
+			markers: markersOf(capture).length,
 			label: i === 0 ? t('{date} (latest)', { date: displayDate(capture.date) }) : displayDate(capture.date),
 			checked: (editing.value ? currentCapture.value : shown) === capture,
 		})),
