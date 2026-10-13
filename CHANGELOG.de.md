@@ -3,7 +3,7 @@
 Alle wichtigen Änderungen dieser App stehen in dieser Datei.
 Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
-## [Unreleased]
+## 0.6.0 – 2026-10-13
 
 ### Hinzugefügt
 - **Editor:** *Neue Bilder* und *Neue Fotos* zeigen unter jeder Vorschau die Aufnahmezeit
