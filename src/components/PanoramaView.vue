@@ -110,11 +110,12 @@ onMounted(() => {
 		keyboard: false,
 		defaultZoomLvl: 0,
 		withCredentials: true,
-		loadingTxt: t('Loading …'),
+		// the viewer writes these with innerHTML
+		loadingTxt: escapeHtml(t('Loading …')),
 		lang: {
-			loadError: t('The image could not be loaded.'),
-			twoFingers: t('Use two fingers to move'),
-			ctrlZoom: t('Hold Ctrl and scroll to zoom'),
+			loadError: escapeHtml(t('The image could not be loaded.')),
+			twoFingers: escapeHtml(t('Use two fingers to move')),
+			ctrlZoom: escapeHtml(t('Hold Ctrl and scroll to zoom')),
 		},
 	})
 	viewer.addEventListener('position-updated', ({ position }) => emit('heading', toDeg(position.yaw)))

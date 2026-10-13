@@ -5,20 +5,22 @@
  * later. See the COPYING file.
  *
  * Translations. Vue escapes interpolated text itself and the rest of the app
- * only sets textContent, so placeholders must not be escaped a second time
- * (that would show "&quot;").
+ * only sets textContent, so placeholders are neither escaped (that would show
+ * "&quot;") nor sanitized (that would show "&amp;", drop "<…>" and parse HTML on
+ * every call). The few texts that go into innerHTML (the panorama viewer's own
+ * texts and tooltips) go through escapeHtml() from markers.js.
  */
 import { getCanonicalLocale, n as translatePlural, t as translate } from '@nextcloud/l10n'
 
 import { APP_ID } from './constants.js'
 
 export function t(text, vars) {
-	return translate(APP_ID, text, vars, undefined, { escape: false })
+	return translate(APP_ID, text, vars, undefined, { escape: false, sanitize: false })
 }
 
 /** Plural with the count as {count}: n(singular, plural, count). */
 export function n(singular, plural, count, vars = {}) {
-	return translatePlural(APP_ID, singular, plural, count, { count, ...vars }, { escape: false })
+	return translatePlural(APP_ID, singular, plural, count, { count, ...vars }, { escape: false, sanitize: false })
 }
 
 /** Localised date, e.g. "18.04.2024" or "18.04.2024, 20:07". */
