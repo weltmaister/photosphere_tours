@@ -852,6 +852,10 @@ function selectImage(path) {
  * now lies in that direction. The cone turns there, the picture stays still.
  */
 async function setDirection(target) {
+	// the panorama shows a picked image, not the spot's capture: its view says nothing about the spot
+	if (previewing.value) {
+		return
+	}
 	const spot = currentSpot.value
 	const capture = currentCapture.value
 	const before = capture.yaw
@@ -943,6 +947,11 @@ async function placeSelected(task) {
  * otherwise turns the selected spot's view direction towards it.
  */
 async function onPlanPlace(point) {
+	// an image is still being placed (its date is read): a second click would
+	// otherwise turn the previous spot with the preview's view
+	if (placing.value) {
+		return
+	}
 	if (!selectedImage.value) {
 		if (currentSpot.value) {
 			setDirection(point)
@@ -1002,6 +1011,9 @@ function acceptAllSuggestions() {
 }
 
 async function onPlanSelect(index) {
+	if (placing.value) {
+		return
+	}
 	const spot = tour.value.spots[index]
 	if (selectedImage.value) {
 		const capture = await placeSelected((file, date) => {
