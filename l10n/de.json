@@ -72,6 +72,7 @@
 		"This file holds the walkthrough: spots, view directions and visits. Deleting or renaming it removes the walkthrough – the images stay.": "Diese Datei enthält den Rundgang: Standorte, Blickrichtungen und Begehungen. Wird sie gelöscht oder umbenannt, ist der Rundgang weg – die Bilder bleiben erhalten.",
 		"Stored in \"360-Rundgang.json\" – please do not delete or rename that file.": "Gespeichert in „360-Rundgang.json“ – diese Datei bitte nicht löschen oder umbenennen.",
 		"Width of the side bar": "Breite der Seitenleiste",
+		"Height of the floor plan": "Höhe des Grundrisses",
 		"360° panorama: {name}, {date}. Use the arrow keys to look around.": "360°-Panorama: {name}, {date}. Mit den Pfeiltasten umsehen.",
 		"Pick an image under \"New images\" and click on the floor plan.": "Wähl unter „Neue Bilder“ ein Bild und klick in den Grundriss.",
 		"This folder has no walkthrough yet.": "In diesem Ordner gibt es noch keinen Rundgang.",

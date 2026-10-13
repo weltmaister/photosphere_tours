@@ -42,6 +42,7 @@
 			<!-- viewer, desktop: side bar with floor plan and spot list -->
 			<ViewerSidebar v-if="!editing && !mobile && sidebarOpen"
 				v-model:width="sidebarWidth"
+				v-model:plan-height="sidebarPlanHeight"
 				:plan="planProps"
 				:rows="viewerRows"
 				:list-title="listTitle"
@@ -239,7 +240,7 @@ const etag = ref(null)
 const planSize = ref({ w: 1, h: 1 })
 const planUrl = ref('')
 
-const { mobile, sidebarOpen, sidebarWidth, sheetOpen, sheetTab, editorColumn } = useLayout()
+const { mobile, sidebarOpen, sidebarWidth, sidebarPlanHeight, sheetOpen, sheetTab, editorColumn } = useLayout()
 
 const editing = ref(false)
 const dirty = ref(false)
