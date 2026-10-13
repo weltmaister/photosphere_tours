@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+	MAX_MARKER_TEXT,
 	TourError,
 	addCapture,
 	addSpot,
@@ -276,5 +277,56 @@ describe('hasCameraName', () => {
 	it('is false when the file is already named after its spot', () => {
 		expect(hasCameraName(spot('Meeting room', '2023-07-24_1500_Meeting room.jpg'))).toBe(false)
 		expect(hasCameraName(spot('Zimmer 2', '001_2024-04-18_2007_Zimmer 2.jpg'))).toBe(false)
+	})
+})
+
+const withMarkers = (markers, extra = {}) => ({
+	version: 1, title: 'T', plan: 'p.png', ...extra,
+	spots: [{ name: 'A', x: 0.5, y: 0.5, captures: [{ file: 'a.jpg', date: '2024-08-14T16:02', yaw: 0, markers }] }],
+})
+
+describe('markers', () => {
+	it('keeps placed and unplaced markers, normalised', () => {
+		const tour = parseTour(withMarkers([
+			{ yaw: 370, pitch: -12, text: 'Water damage', file: '2D-Bilder/x.jpg' },
+			{ file: '2D-Bilder/y.jpg' },
+		]))
+		expect(tour.spots[0].captures[0].markers).toEqual([
+			{ yaw: 10, pitch: -12, text: 'Water damage', file: '2D-Bilder/x.jpg' },
+			{ file: '2D-Bilder/y.jpg' },
+		])
+	})
+
+	it('omits an empty list', () => {
+		const tour = parseTour(withMarkers([]))
+		expect('markers' in tour.spots[0].captures[0]).toBe(false)
+	})
+
+	it('rejects half a place, nothing to show, paths outside, long texts', () => {
+		expect(() => parseTour(withMarkers([{ yaw: 3, text: 'x' }]))).toThrow(/yaw.*pitch/)
+		expect(() => parseTour(withMarkers([{ yaw: 3, pitch: 2 }]))).toThrow(/text or a photo/)
+		expect(() => parseTour(withMarkers([{ file: '../x.jpg' }]))).toThrow(/inside the tour folder/)
+		expect(() => parseTour(withMarkers([{ text: 'x'.repeat(MAX_MARKER_TEXT + 1) }]))).toThrow(/2000/)
+		expect(() => parseTour(withMarkers([{ yaw: 3, pitch: 95, text: 'x' }]))).toThrow(/pitch/)
+	})
+
+	it('round-trips through serializeTour with stable key order', () => {
+		const json = serializeTour(withMarkers([{ file: 'f.jpg', text: 't', pitch: 1, yaw: 2 }]))
+		expect(json).toContain('"yaw": 2,\n\t\t\t\t\t\t\t"pitch": 1,\n\t\t\t\t\t\t\t"text": "t",\n\t\t\t\t\t\t\t"file": "f.jpg"')
+	})
+})
+
+describe('location', () => {
+	it('keeps a valid location, rounded to 5 decimals', () => {
+		const tour = parseTour(withMarkers([], { location: { lat: 52.5015612, lon: 13.3634721 } }))
+		expect(tour.location).toEqual({ lat: 52.50156, lon: 13.36347 })
+	})
+
+	it('rejects coordinates out of range', () => {
+		expect(() => parseTour(withMarkers([], { location: { lat: 95, lon: 0 } }))).toThrow(/location/)
+	})
+
+	it('has no location key when absent', () => {
+		expect('location' in parseTour(withMarkers([]))).toBe(false)
 	})
 })

@@ -8,17 +8,20 @@
  *
  * A tour is one file `360-Rundgang.json` in a folder of panoramas:
  *
- *   { version: 1, title, plan, spots: [{ name, x, y, captures: [{ file, date, yaw }] }] }
+ *   { version: 1, title, plan, location?, spots: [{ name, x, y, captures: [{ file, date, yaw, markers? }] }] }
  *
  * `plan` and `file` are relative to that folder, `x`/`y` are normalised plan
  * coordinates (0–1, origin top left), `date` is local time `YYYY-MM-DDTHH:MM`.
  * `yaw` is the raw panorama yaw in degrees that looks towards the top of the
  * plan. The viewer turns each panorama by that amount, so view yaw 0 always
  * means "up on the plan" and the view direction survives switching captures.
+ * Optional: `location` is `{ lat, lon }` of the building, `markers` on a capture
+ * are `{ yaw, pitch, text?, file? }` in the panorama, placed or not.
  */
 
 export { TOUR_FILENAME } from './constants.js'
 export const TOUR_VERSION = 1
+export const MAX_MARKER_TEXT = 2000
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/
 const IMAGE_RE = /\.jpe?g$/i
@@ -36,11 +39,51 @@ const toRad = (d) => d * Math.PI / 180
 const toDeg = (r) => r * 180 / Math.PI
 const normDeg = (d) => ((d % 360) + 360) % 360
 
+const round5 = (v) => Math.round(v * 1e5) / 1e5
+
 function isInsideFolder(path) {
 	return typeof path === 'string'
 		&& path !== ''
 		&& !path.startsWith('/')
 		&& !path.split('/').includes('..')
+}
+
+function parseMarker(m, where, problems) {
+	const out = {}
+	const hasYaw = m?.yaw !== undefined
+	const hasPitch = m?.pitch !== undefined
+	if (hasYaw !== hasPitch) {
+		problems.push(`${where}: "yaw" and "pitch" go together`)
+	} else if (hasYaw) {
+		if (typeof m.yaw !== 'number' || !Number.isFinite(m.yaw)) {
+			problems.push(`${where}: "yaw" must be a number`)
+		}
+		if (typeof m.pitch !== 'number' || !(m.pitch >= -90 && m.pitch <= 90)) {
+			problems.push(`${where}: "pitch" must be a number between -90 and 90`)
+		}
+		out.yaw = normDeg(Number(m.yaw) || 0)
+		out.pitch = Number(m.pitch) || 0
+	}
+	if (m?.text !== undefined) {
+		if (typeof m.text !== 'string') {
+			problems.push(`${where}: "text" must be text`)
+		} else if (m.text.length > MAX_MARKER_TEXT) {
+			problems.push(`${where}: "text" is longer than ${MAX_MARKER_TEXT} characters`)
+		} else if (m.text.trim() !== '') {
+			out.text = m.text
+		}
+	}
+	if (m?.file !== undefined) {
+		if (!isInsideFolder(m.file)) {
+			problems.push(`${where}: "file" must be a path inside the tour folder`)
+		} else {
+			out.file = m.file
+		}
+	}
+	if (out.text === undefined && out.file === undefined) {
+		problems.push(`${where}: needs a text or a photo`)
+	}
+	return out
 }
 
 /**
@@ -101,10 +144,30 @@ export function parseTour(input) {
 				if (typeof yaw !== 'number' || !Number.isFinite(yaw)) {
 					problems.push(`${where}, capture ${j + 1}: "yaw" must be a number`)
 				}
-				return { file: c?.file, date: c?.date, yaw: typeof yaw === 'number' ? normDeg(yaw) : 0 }
+				if (c?.markers !== undefined && !Array.isArray(c.markers)) {
+					problems.push(`${where}, capture ${j + 1}: "markers" must be a list`)
+				}
+				const markers = Array.isArray(c?.markers)
+					? c.markers.map((m, k) => parseMarker(m, `${where}, capture ${j + 1}, marker ${k + 1}`, problems))
+					: []
+				const capture = { file: c?.file, date: c?.date, yaw: typeof yaw === 'number' ? normDeg(yaw) : 0 }
+				if (markers.length > 0) {
+					capture.markers = markers
+				}
+				return capture
 			}),
 		}
 	})
+
+	let location
+	if (data.location !== undefined) {
+		const { lat, lon } = data.location ?? {}
+		if (typeof lat !== 'number' || typeof lon !== 'number' || !(lat >= -90 && lat <= 90) || !(lon >= -180 && lon <= 180)) {
+			problems.push('"location" must be { "lat": -90…90, "lon": -180…180 }')
+		} else {
+			location = { lat: round5(lat), lon: round5(lon) }
+		}
+	}
 
 	if (problems.length > 0) {
 		throw new TourError(problems)
@@ -113,6 +176,7 @@ export function parseTour(input) {
 		version: TOUR_VERSION,
 		title: typeof data.title === 'string' ? data.title : '',
 		plan: data.plan,
+		...(location ? { location } : {}),
 		spots,
 	}
 }
