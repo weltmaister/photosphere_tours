@@ -9,20 +9,20 @@
 -->
 <template>
 	<aside ref="side" class="pt-side" :aria-label="t('Floor plan and spots')">
-		<h3 class="pt-section">
+		<h3 ref="planHeading" class="pt-section">
 			{{ t('Floor plan') }}
 		</h3>
-		<div class="pt-side__plan" :style="{ height: `${planHeight}px` }">
+		<div class="pt-side__plan" :style="{ height: `${shownHeight}px` }">
 			<FloorPlan v-bind="plan" @select="$emit('select', $event)" />
 			<ResizeHandle class="pt-side__rows"
 				orientation="horizontal"
-				:model-value="planHeight"
+				:model-value="shownHeight"
 				:min="PLAN_HEIGHT_MIN"
 				:max="maxPlanHeight"
 				:label="t('Height of the floor plan')"
 				@update:model-value="$emit('update:planHeight', $event)" />
 		</div>
-		<h3 class="pt-section">
+		<h3 ref="listHeading" class="pt-section">
 			{{ listTitle }}
 		</h3>
 		<SpotList class="pt-side__list"
@@ -41,14 +41,14 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import FloorPlan from './FloorPlan.vue'
 import ResizeHandle from './ResizeHandle.vue'
 import SpotList from './SpotList.vue'
 import { PLAN_HEIGHT_MIN, SIDEBAR_MAX, SIDEBAR_MIN } from '../composables/useLayout.js'
 import { t } from '../l10n.js'
 
-defineProps({
+const props = defineProps({
 	/** props for FloorPlan: src, size, spots, heading */
 	plan: { type: Object, required: true },
 	rows: { type: Array, required: true },
@@ -61,19 +61,32 @@ defineProps({
 })
 defineEmits(['select', 'rename', 'pick-capture', 'update:width', 'update:planHeight'])
 
-// room the list keeps at least (with its heading)
+// px the list's own scroll area keeps at least (its heading comes on top)
 const LIST_MIN = 160
 
 const side = ref(null)
+const planHeading = ref(null)
+const listHeading = ref(null)
 // until the side bar is measured, the stored height is not capped
 const maxPlanHeight = ref(2000)
 let observer = null
 
+// the stored height may not fit this window (saved on a taller one, window shrunk):
+// show it clamped, the stored value only changes by the user's own resizing
+const shownHeight = computed(() => Math.min(Math.max(props.planHeight, PLAN_HEIGHT_MIN), maxPlanHeight.value))
+
+function measure() {
+	const headings = planHeading.value.offsetHeight + listHeading.value.offsetHeight
+	maxPlanHeight.value = Math.max(PLAN_HEIGHT_MIN, side.value.clientHeight - headings - LIST_MIN)
+}
+
 onMounted(() => {
-	observer = new ResizeObserver(([entry]) => {
-		maxPlanHeight.value = Math.max(PLAN_HEIGHT_MIN, entry.contentRect.height - LIST_MIN)
-	})
-	observer.observe(side.value)
+	observer = new ResizeObserver(measure)
+	// the headings change with the list title (wrapping) and the side bar width
+	for (const el of [side.value, planHeading.value, listHeading.value]) {
+		observer.observe(el)
+	}
+	measure()
 })
 
 onBeforeUnmount(() => observer?.disconnect())
