@@ -393,6 +393,11 @@ export function formatDate(date) {
 	return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}T${p(date.getHours())}:${p(date.getMinutes())}`
 }
 
+/** Link to the walkthrough's location on openstreetmap.org, building in the middle. */
+export function osmUrl({ lat, lon }) {
+	return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=18/${lat}/${lon}`
+}
+
 export function serializeTour(tour) {
 	return JSON.stringify(parseTour(tour), null, '\t') + '\n'
 }

@@ -8,6 +8,7 @@ OC.L10N.register(
 		"The walkthrough could not be created: {error}": "Der Rundgang konnte nicht angelegt werden: {error}",
 		"Edit": "Bearbeiten",
 		"Place and move spots, set view directions": "Standorte platzieren, verschieben und Blickrichtung festlegen",
+		"Open in OpenStreetMap": "In OpenStreetMap öffnen",
 		"Show or hide floor plan and spots": "Grundriss und Standorte ein- oder ausblenden",
 		"Close walkthrough (Esc)": "Rundgang schließen (Esc)",
 		"Edit walkthrough": "Rundgang bearbeiten",

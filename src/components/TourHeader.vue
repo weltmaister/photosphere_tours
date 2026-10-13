@@ -52,6 +52,17 @@
 			</NcButton>
 		</template>
 		<template v-else>
+			<NcButton v-if="mode === 'view' && mapUrl"
+				variant="tertiary"
+				:href="mapUrl"
+				target="_blank"
+				rel="noopener noreferrer"
+				:aria-label="t('Open in OpenStreetMap')"
+				:title="t('Open in OpenStreetMap')">
+				<template #icon>
+					<NcIconSvgWrapper :path="mdiMapOutline" />
+				</template>
+			</NcButton>
 			<NcButton v-if="mode === 'view' && canEdit"
 				:variant="mobile ? 'tertiary' : 'primary'"
 				:aria-label="mobile ? t('Edit') : undefined"
@@ -77,7 +88,7 @@
 </template>
 
 <script setup>
-import { mdiCheck, mdiClose, mdiDockLeft, mdiPencil } from '@mdi/js'
+import { mdiCheck, mdiClose, mdiDockLeft, mdiMapOutline, mdiPencil } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
@@ -94,6 +105,8 @@ defineProps({
 	sidebarOpen: { type: Boolean, default: false },
 	dirty: { type: Boolean, default: false },
 	saving: { type: Boolean, default: false },
+	/** link to the location on openstreetmap.org, when the walkthrough has one */
+	mapUrl: { type: String, default: null },
 })
 defineEmits(['toggle-sidebar', 'edit', 'stop-editing', 'save', 'close'])
 </script>

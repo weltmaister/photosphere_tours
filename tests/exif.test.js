@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { exifDate } from '../src/exif.js'
+import { exifDate, exifGps } from '../src/exif.js'
+import { osmUrl } from '../src/tour.js'
 
 /**
  * Minimal JPEG: SOI + APP1 "Exif" with IFD0 -> ExifIFD -> DateTimeOriginal,
@@ -64,5 +65,51 @@ describe('exifDate', () => {
 		expect(exifDate(new Uint8Array([0xff, 0xd8, 0xff, 0xd9]).buffer)).toBeNull()
 		expect(exifDate(new Uint8Array([1, 2, 3]).buffer)).toBeNull()
 		expect(exifDate(jpegWithExif({ original: '0000:00:00 00:00:00' }))).toBeNull()
+	})
+})
+
+// minimal JPEG: SOI, APP1 "Exif\0\0", big-endian TIFF, IFD0 with GPS pointer (0x8825),
+// GPS IFD: N, 52/1 30/1 5.6/1 ; E, 13/1 21/1 48.5/1
+function jpegWithGps() {
+	const b = []
+	const u16 = (v) => b.push((v >> 8) & 255, v & 255)
+	const tiff = []
+	// build TIFF separately then wrap; offsets relative to TIFF start
+	const t16 = (v) => tiff.push((v >> 8) & 255, v & 255)
+	const t32 = (v) => tiff.push((v >>> 24) & 255, (v >> 16) & 255, (v >> 8) & 255, v & 255)
+	tiff.push(0x4d, 0x4d); t16(42); t32(8) // "MM", IFD0 at 8
+	t16(1); t16(0x8825); t16(4); t32(1); t32(26); t32(0) // IFD0: GPS pointer -> 26
+	// GPS IFD at 26: 4 entries
+	t16(4)
+	t16(1); t16(2); t32(2); tiff.push(0x4e, 0, 0, 0) // LatRef "N"
+	t16(2); t16(5); t32(3); t32(80) // Lat -> 80
+	t16(3); t16(2); t32(2); tiff.push(0x45, 0, 0, 0) // LonRef "E"
+	t16(4); t16(5); t32(3); t32(104) // Lon -> 104
+	t32(0)
+	while (tiff.length < 80) tiff.push(0)
+	for (const [n, d] of [[52, 1], [30, 1], [56, 10], [13, 1], [21, 1], [485, 10]]) { t32(n); t32(d) }
+	u16(0xffd8); u16(0xffe1); u16(2 + 6 + tiff.length)
+	b.push(0x45, 0x78, 0x69, 0x66, 0, 0, ...tiff)
+	u16(0xffda)
+	return new Uint8Array(b).buffer
+}
+
+describe('exifGps', () => {
+	it('reads latitude and longitude in degrees', () => {
+		const gps = exifGps(jpegWithGps())
+		expect(gps.lat).toBeCloseTo(52 + 30 / 60 + 5.6 / 3600, 5)
+		expect(gps.lon).toBeCloseTo(13 + 21 / 60 + 48.5 / 3600, 5)
+	})
+
+	it('gives null without GPS', () => {
+		expect(exifGps(new Uint8Array([0xff, 0xd8, 0xff, 0xda]).buffer)).toBeNull()
+		expect(exifGps(jpegWithExif({ original: '2025:06:25 11:11:30' }))).toBeNull()
+	})
+})
+
+describe('osmUrl', () => {
+	it('centres the building at zoom 18', () => {
+		expect(osmUrl({ lat: 52.50156, lon: 13.36347 }))
+			.toBe('https://www.openstreetmap.org/?mlat=52.50156&mlon=13.36347#map=18/52.50156/13.36347')
 	})
 })

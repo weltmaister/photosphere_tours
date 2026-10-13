@@ -18,6 +18,7 @@
 			:sidebar-open="sidebarOpen"
 			:dirty="dirty"
 			:saving="saving"
+			:map-url="tour?.location ? osmUrl(tour.location) : null"
 			@toggle-sidebar="sidebarOpen = !sidebarOpen"
 			@edit="startEditing"
 			@stop-editing="stopEditing()"
@@ -243,7 +244,7 @@ import { EDITOR_MAX, EDITOR_MIN, EDITOR_PLAN_MIN, PANORAMA_HEIGHT_MIN, stored, u
 import { useMarkerEditing } from '../composables/useMarkerEditing.js'
 import { Cancelled, choosePlan } from '../create.js'
 import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readText, urlFor, writeText } from '../dav.js'
-import { exifDate } from '../exif.js'
+import { exifDate, exifGps } from '../exif.js'
 import { classifyFolder, newerPlan, pngNameFor } from '../folder.js'
 import { displayDate, errorText, n, t } from '../l10n.js'
 import { isPlaced, markerCount, markersOf, withoutEmptyMarkers } from '../markers.js'
@@ -261,6 +262,7 @@ import {
 	capturesNewestFirst,
 	firstCapture,
 	hasCameraName,
+	osmUrl,
 	parseTour,
 	resolvePath,
 	serializeTour,
@@ -807,16 +809,22 @@ async function reload() {
 	return true
 }
 
-/** When an image was taken (see captureDate); EXIF is read from its first 64 KB. */
-async function imageDate(path) {
+/**
+ * When an image was taken (see captureDate) and where (GPS); both come from
+ * the same read of its first 64 KB.
+ */
+async function imageInfo(path) {
 	let exif = null
+	let gps = null
 	try {
-		exif = exifDate(await readStart(fileUrl(path)))
+		const start = await readStart(fileUrl(path))
+		exif = exifDate(start)
+		gps = exifGps(start)
 	} catch {
 		// no range support or no EXIF: file name or file time then
 	}
 	const image = images.value.find(i => i.path === path)
-	return captureDate({ exif, file: path, mtime: image?.mtime ?? new Date() })
+	return { date: captureDate({ exif, file: path, mtime: image?.mtime ?? new Date() }), gps }
 }
 
 function selectImage(path) {
@@ -904,7 +912,13 @@ async function placeSelected(task) {
 	placing.value = file
 	pending.add(file)
 	try {
-		return await task(file, await imageDate(file))
+		const { date, gps } = await imageInfo(file)
+		const result = await task(file, date)
+		// the first image with GPS tells where the building is (saved with the next save)
+		if (gps && !tour.value.location) {
+			tour.value.location = gps
+		}
+		return result
 	} finally {
 		pending.delete(file)
 		placing.value = null
