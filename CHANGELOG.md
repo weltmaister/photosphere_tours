@@ -12,11 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   The button *Photos at this spot (n)* does the same, also for markers without a place
   and with keyboard or screen reader. The spot list marks captures that have markers.
   Stored per capture as `markers` in `360-Rundgang.json`; existing files stay valid.
-- **Editor:** a *Markers* section: *Place marker* and *Move in the panorama* (click
-  the place), text, *Choose photo* (a photo from elsewhere is copied into `2D-Bilder/`,
-  never overwritten), *Remove photo*, *Remove marker* with *Undo* instead of a question
-  (image files are never deleted), and *New photos* from `2D-Bilder/`. Placing is by
-  mouse or touch; on share pages *Choose photo* is hidden.
+- **Editor:** a *Markers* section: *Place marker* (click the place), placed markers
+  are moved by dragging their icon in the panorama (mouse, pen or one finger), text,
+  *Choose photo* (a photo from elsewhere is copied into `2D-Bilder/`, never
+  overwritten), *Remove photo*, *Remove marker* with *Undo* instead of a question
+  (image files are never deleted), and *New photos* from `2D-Bilder/`. Placing and
+  moving are by mouse or touch; on share pages *Choose photo* is hidden.
 - **Resizable dividers:** between floor plan and spot list in the viewer side bar and
   between panorama and editing panel in the editor, by dragging or arrow keys. The
   sizes are remembered per browser.

@@ -75,12 +75,16 @@ describe('placing', () => {
 		expect(list()).toEqual([{ text: 'x' }])
 	})
 
-	it('moves a marker and undoes it, also when the list changed in between', () => {
-		const { editor, list, note } = setup([{ yaw: 1, pitch: 2, text: 'a' }, { yaw: 3, pitch: 4, text: 'b' }])
-		editor.move(1)
-		expect(editor.markerPlacing.value).toBe('move:1')
-		editor.pick({ yaw: 30, pitch: 40 })
+	it('moves a dragged marker and undoes it, also when the list changed in between', () => {
+		const { editor, list, note, calls } = setup([{ yaw: 1, pitch: 2, text: 'a' }, { yaw: 3, pitch: 4, text: 'b' }])
+		const moved = editor.drop(1, { yaw: 30, pitch: 40 })
+		expect(moved).toBeTruthy()
 		expect(list()[1]).toEqual({ yaw: 30, pitch: 40, text: 'b' })
+		expect(editor.openedMarker.value).toBe(1)
+		expect(editor.markerPlacing.value).toBe(null)
+		expect(calls.changed).toBe(1)
+		expect(calls.beforePlace).toBe(0)
+		expect(note.value).toMatchObject({ text: 'Marker moved – not saved yet', action: 'Undo' })
 		const undo = note.value.onAction
 		editor.remove(0) // "a" goes, so "b" moves to index 0 before the move is undone
 		note.value.onAction = null
@@ -88,11 +92,32 @@ describe('placing', () => {
 		expect(list()).toEqual([{ yaw: 3, pitch: 4, text: 'b' }])
 	})
 
+	it('ignores a drop on a marker that is gone or has no place', () => {
+		const { editor, list, calls } = setup([{ text: 'a' }])
+		expect(editor.drop(0, { yaw: 1, pitch: 2 })).toBe(null)
+		expect(editor.drop(5, { yaw: 1, pitch: 2 })).toBe(null)
+		expect(list()).toEqual([{ text: 'a' }])
+		expect(calls.changed).toBe(0)
+	})
+
+	it('a drop keeps the place mode of a new marker', () => {
+		const { editor, list } = setup([{ yaw: 1, pitch: 2, text: 'a' }])
+		editor.placeNew()
+		editor.drop(0, { yaw: 10, pitch: 20 })
+		expect(editor.markerPlacing.value).toBe('new')
+		editor.pick({ yaw: 5, pitch: 6 })
+		expect(list()).toEqual([{ yaw: 10, pitch: 20, text: 'a' }, { yaw: 5, pitch: 6, text: '' }])
+	})
+
 	it('placing a marker that had no place, then undoing, leaves it without a place', () => {
-		const { editor, list, note } = setup([{ file: '2D-Bilder/a.jpg' }])
-		editor.move(0)
+		const { editor, list, note, calls } = setup([{ file: '2D-Bilder/a.jpg' }])
+		editor.place(0)
+		expect(editor.markerPlacing.value).toBe('place:0')
+		expect(calls.beforePlace).toBe(1)
 		editor.pick({ yaw: 5, pitch: 6 })
 		expect(list()[0]).toEqual({ file: '2D-Bilder/a.jpg', yaw: 5, pitch: 6 })
+		expect(editor.markerPlacing.value).toBe(null)
+		expect(note.value.text).toBe('Marker placed – not saved yet')
 		note.value.onAction()
 		expect(list()[0]).toEqual({ file: '2D-Bilder/a.jpg' })
 	})

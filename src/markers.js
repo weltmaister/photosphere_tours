@@ -23,6 +23,24 @@ export function fromTexture({ textureX, textureY }, { width, height }) {
 	return { yaw: one(yaw), pitch: one((0.5 - textureY / height) * 180) }
 }
 
+/**
+ * The viewer's texture coordinates count from the loaded part of the image, which
+ * is cropped when the image is not a full sphere: `size` is the full image
+ * { width, height } with the offset { offsetX, offsetY } of that part.
+ */
+export function toViewerTexture(place, size) {
+	const { textureX, textureY } = toTexture(place, size)
+	return { textureX: textureX - size.offsetX, textureY: textureY - size.offsetY }
+}
+
+/** Raw place of a point given in the viewer's texture coordinates; null outside the image. */
+export function fromViewerTexture({ textureX, textureY }, size) {
+	if (typeof textureX !== 'number' || typeof textureY !== 'number') {
+		return null
+	}
+	return fromTexture({ textureX: textureX + size.offsetX, textureY: textureY + size.offsetY }, size)
+}
+
 /** for text that goes into innerHTML (the viewer writes tooltips that way) */
 export function escapeHtml(text) {
 	return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])

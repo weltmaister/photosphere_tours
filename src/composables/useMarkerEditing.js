@@ -4,9 +4,9 @@
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the COPYING file.
  *
- * Editing the markers of the shown capture: placing and moving them in the
- * panorama, texts, photos, removing with "Undo", and the photos of the photo
- * folder that no marker uses yet.
+ * Editing the markers of the shown capture: placing them in the panorama by
+ * click, moving placed ones (dragged in the panorama), texts, photos, removing
+ * with "Undo", and the photos of the photo folder that no marker uses yet.
  *
  * Markers are told apart by object identity, never by their index: an index in
  * a closure (undo) or in the place mode would point at another marker as soon
@@ -50,18 +50,18 @@ const indexOfMarker = (list, marker) => list.findIndex(m => toRaw(m) === marker)
 export function useMarkerEditing({ tour, capture, editing, previewing, folder, folderUrl, setStatus, clearStatus, changed, beforePlace, canChoosePhoto = true }) {
 	const list = computed(() => markersOf(capture.value))
 
-	/** null, 'new' or the (raw) marker that is moved */
+	/** null, 'new' or the (raw) marker without a place that is being placed */
 	const target = shallowRef(null)
 	/** the (raw) marker whose editor is open in the section */
 	const opened = shallowRef(null)
 
-	/** what the section shows: null, 'new' or 'move:<index>' */
+	/** what the section shows: null, 'new' or 'place:<index>' */
 	const markerPlacing = computed(() => {
 		if (target.value === 'new') {
 			return 'new'
 		}
 		const index = target.value ? indexOfMarker(list.value, target.value) : -1
-		return index >= 0 ? `move:${index}` : null
+		return index >= 0 ? `place:${index}` : null
 	})
 	const openedIndex = computed(() => opened.value ? indexOfMarker(list.value, opened.value) : -1)
 
@@ -112,7 +112,8 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 		target.value = 'new'
 	}
 
-	function move(index) {
+	/** Place mode for a marker that has no place yet ("Place in the panorama"). */
+	function place(index) {
 		const marker = list.value[index]
 		if (marker) {
 			beforePlace()
@@ -125,9 +126,34 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 	}
 
 	/**
+	 * Give a marker of the list a new place, with "Undo" (by identity: the list may change before it is used).
+	 *
+	 * @param {object} what the raw marker
+	 * @param {{ yaw: number, pitch: number }} place
+	 */
+	function relocate(what, { yaw, pitch }) {
+		const marker = reactive(what)
+		const before = isPlaced(what) ? { yaw: what.yaw, pitch: what.pitch } : null
+		Object.assign(marker, { yaw, pitch })
+		opened.value = what
+		changed()
+		setStatus('success', before ? t('Marker moved – not saved yet') : t('Marker placed – not saved yet'), t('Undo'), () => {
+			if (before) {
+				Object.assign(marker, before)
+			} else {
+				delete marker.yaw
+				delete marker.pitch
+			}
+			changed()
+			clearStatus()
+		})
+		return what
+	}
+
+	/**
 	 * A click in the panorama while placing.
 	 *
-	 * @return {object|null} the marker that was placed or moved
+	 * @return {object|null} the marker that was placed
 	 */
 	function pick({ yaw, pitch }) {
 		const current = capture.value
@@ -158,22 +184,17 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 		if (indexOfMarker(markers, what) < 0) {
 			return null
 		}
-		const marker = reactive(what)
-		const before = isPlaced(what) ? { yaw: what.yaw, pitch: what.pitch } : null
-		Object.assign(marker, { yaw, pitch })
-		opened.value = what
-		changed()
-		setStatus('success', t('Marker moved – not saved yet'), t('Undo'), () => {
-			if (before) {
-				Object.assign(marker, before)
-			} else {
-				delete marker.yaw
-				delete marker.pitch
-			}
-			changed()
-			clearStatus()
-		})
-		return what
+		return relocate(what, { yaw, pitch })
+	}
+
+	/**
+	 * A placed marker dragged to a new place in the panorama (index in the list at the drop).
+	 *
+	 * @return {object|null} the marker that was moved
+	 */
+	function drop(index, place) {
+		const marker = list.value[index]
+		return marker && isPlaced(marker) ? relocate(toRaw(marker), place) : null
 	}
 
 	function setText(index, text) {
@@ -299,9 +320,10 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 		loadPhotos,
 		open,
 		placeNew,
-		move,
+		place,
 		cancelPlace,
 		pick,
+		drop,
 		setText,
 		remove,
 		removePhoto,

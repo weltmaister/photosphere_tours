@@ -80,6 +80,7 @@ import { mdiFitToScreenOutline, mdiMinus, mdiPlus } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
+import { movedBeyond } from '../gesture.js'
 import { t } from '../l10n.js'
 
 const props = defineProps({
@@ -99,7 +100,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['select', 'move', 'place'])
 
-const CLICK_TOLERANCE = 5
 // zoom buttons: small over the plan, but a full touch target on touch screens
 const controlSize = window.matchMedia?.('(pointer: coarse)').matches ? 'large' : 'small'
 const root = ref(null)
@@ -222,7 +222,7 @@ function onPointerMove(e) {
 	}
 	const dx = e.clientX - gesture.start.x
 	const dy = e.clientY - gesture.start.y
-	gesture.moved ||= Math.hypot(dx, dy) > CLICK_TOLERANCE
+	gesture.moved ||= movedBeyond(gesture.start, { x: e.clientX, y: e.clientY })
 	if (!gesture.moved) {
 		return
 	}

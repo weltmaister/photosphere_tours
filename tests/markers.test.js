@@ -1,6 +1,6 @@
 // tests/markers.test.js
 import { describe, expect, it } from 'vitest'
-import { PHOTO_FOLDER, escapeHtml, fromTexture, isFilled, isPlaced, markerCount, markerTitle, removeEmptyMarkers, toTexture, unusedPhotos, withoutEmptyMarkers } from '../src/markers.js'
+import { PHOTO_FOLDER, escapeHtml, fromTexture, fromViewerTexture, isFilled, isPlaced, markerCount, markerTitle, removeEmptyMarkers, toTexture, toViewerTexture, unusedPhotos, withoutEmptyMarkers } from '../src/markers.js'
 import { serializeTour } from '../src/tour.js'
 
 const size = { width: 8000, height: 4000 }
@@ -17,6 +17,28 @@ describe('texture coordinates', () => {
 		for (const p of [{ yaw: 12.5, pitch: -3.5 }, { yaw: 359.9, pitch: 80 }, { yaw: 180, pitch: 0 }]) {
 			expect(fromTexture(toTexture(p, size), size)).toEqual(p)
 		}
+	})
+})
+
+describe('viewer texture coordinates (loaded part of a cropped image)', () => {
+	const full = { width: 8000, height: 4000, offsetX: 0, offsetY: 0 }
+	const cropped = { width: 8000, height: 4000, offsetX: 0, offsetY: 1000 }
+	it('equals the texture position without cropping', () => {
+		expect(toViewerTexture({ yaw: 90, pitch: 45 }, full)).toEqual({ textureX: 6000, textureY: 1000 })
+		expect(fromViewerTexture({ textureX: 6000, textureY: 1000 }, full)).toEqual({ yaw: 90, pitch: 45 })
+	})
+	it('counts from the loaded part of a cropped image', () => {
+		expect(toViewerTexture({ yaw: 0, pitch: 0 }, cropped)).toEqual({ textureX: 4000, textureY: 1000 })
+		expect(fromViewerTexture({ textureX: 4000, textureY: 1000 }, cropped)).toEqual({ yaw: 0, pitch: 0 })
+	})
+	it('round-trips and rounds to 0.1°', () => {
+		const p = { yaw: 123.4, pitch: -12.3 }
+		expect(fromViewerTexture(toViewerTexture(p, cropped), cropped)).toEqual(p)
+		expect(fromViewerTexture({ textureX: 4001, textureY: 2000 }, full)).toEqual({ yaw: 0, pitch: 0 })
+	})
+	it('gives null for a point outside the image (the viewer leaves the coordinates out)', () => {
+		expect(fromViewerTexture({ textureX: undefined, textureY: undefined }, full)).toBe(null)
+		expect(fromViewerTexture({}, full)).toBe(null)
 	})
 })
 

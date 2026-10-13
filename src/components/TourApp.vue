@@ -73,7 +73,9 @@
 				:label="panoramaLabel"
 				:markers="shownMarkers"
 				:placing="editing && !!markerPlacing && !previewing"
+				:editable="editing"
 				@marker-click="onMarkerClick"
+				@marker-move="dropMarker"
 				@pick="onMarkerPick"
 				@heading="heading = $event" />
 			<!-- editor, desktop: divider on the panorama's lower edge (zero-height anchor in the panorama cell) -->
@@ -143,7 +145,7 @@
 								:can-choose-photo="!shared"
 								@open="onMarkerListOpen"
 								@place-new="placeMarker"
-								@move="moveMarker"
+								@place="placeExistingMarker"
 								@cancel-place="cancelMarkerPlace"
 								@edit-text="editMarkerText"
 								@choose-photo="chooseMarkerPhoto"
@@ -662,9 +664,10 @@ const {
 	loadPhotos: loadMarkerPhotos,
 	open: openMarkerEditor,
 	placeNew: placeMarker,
-	move: moveMarker,
+	place: placeExistingMarker,
 	cancelPlace: cancelMarkerPlace,
 	pick: pickMarkerPlace,
+	drop: dropMarker,
 	setText: editMarkerText,
 	remove: removeMarker,
 	removePhoto: removeMarkerPhoto,

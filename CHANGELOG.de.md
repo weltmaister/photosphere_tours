@@ -13,11 +13,12 @@ Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   Markierungen ohne Stelle und mit Tastatur oder Screenreader. Die Standortliste kennzeichnet
   Aufnahmen mit Markierungen. Gespeichert als `markers` je Aufnahme in `360-Rundgang.json`;
   bestehende Dateien bleiben gültig.
-- **Editor:** ein Abschnitt *Markierungen*: *Markierung setzen* und *Im Panorama verschieben*
-  (auf die Stelle klicken), Text, *Foto wählen* (ein Foto von anderswo wird nach `2D-Bilder/`
+- **Editor:** ein Abschnitt *Markierungen*: *Markierung setzen* (auf die Stelle klicken),
+  gesetzte Markierungen werden verschoben, indem man ihr Symbol im Panorama zieht (Maus,
+  Stift oder ein Finger), Text, *Foto wählen* (ein Foto von anderswo wird nach `2D-Bilder/`
   kopiert, nie überschrieben), *Foto entfernen*, *Markierung entfernen* mit *Rückgängig*
   statt Rückfrage (Bilddateien werden nie gelöscht) und *Neue Fotos* aus `2D-Bilder/`.
-  Gesetzt wird mit Maus oder Touch; auf Freigabeseiten fehlt *Foto wählen*.
+  Gesetzt und verschoben wird mit Maus oder Touch; auf Freigabeseiten fehlt *Foto wählen*.
 - **Verschiebbare Trennlinien:** zwischen Grundriss und Standortliste in der Seitenleiste
   des Viewers und zwischen Panorama und Bearbeitungsfläche im Editor, per Ziehen oder
   Pfeiltasten. Die Größen merkt sich der Browser.

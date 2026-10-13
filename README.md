@@ -161,10 +161,11 @@ share links.
 - **Markers** (editor): the *Markers* section of the selected capture lists its markers
   with thumbnail, first line and *Placed* or *No place*; a click opens one for editing
   (text, *Choose photo* / *Other photo*, *Remove photo*, *Remove marker*).
-  *Place marker* creates a marker where you click next; Esc cancels. *Move in the
-  panorama* (or *Place in the panorama* for a marker without a place) works the same:
-  click the new place – no dragging. Placing works with mouse or touch only; photos can
-  also be added without the mouse. *Remove marker* has no confirmation: *Undo* in the
+  *Place marker* creates a marker where you click next; Esc cancels. *Place in the
+  panorama* does the same for a marker without a place. A placed marker is moved by
+  dragging its icon in the panorama (a short click opens it in the list, *Undo* in the
+  note takes the move back). Placing and moving work with mouse or touch only; photos
+  can also be added without the mouse. *Remove marker* has no confirmation: *Undo* in the
   note brings it back, and the image file is never deleted. A marker without text and
   photo is not saved. Photos live in the subfolder `2D-Bilder/` next to
   `360-Rundgang.json`; *New photos* lists those no marker uses yet, *Add to this

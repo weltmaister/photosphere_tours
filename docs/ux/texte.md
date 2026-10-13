@@ -156,14 +156,15 @@ Abschnitt „Markierungen ({count})“ unter dem Standort, für die gewählte Au
 | Datei | Datei: {file} | = | File: {file} |
 | Hinweis ohne Text und Foto | Eine Markierung ohne Text und Foto wird nicht gespeichert. | = | A marker without text or photo is not saved. |
 | Foto | Foto wählen / Anderes Foto / Foto entfernen | = | Choose photo / Other photo / Remove photo |
-| Ort | Im Panorama verschieben / Im Panorama setzen | = | Move in the panorama / Place in the panorama |
+| Ort (Markierung ohne Ort) | Im Panorama setzen | = | Place in the panorama |
+| Hinweis, gesetzte Markierung | Symbol im Panorama ziehen, um die Markierung zu verschieben. | = | Drag the icon in the panorama to move the marker. |
 | Entfernen | Markierung entfernen | = | Remove marker |
 | Abschnitt neue Fotos | Neue Fotos ({count}) | = | New photos ({count}) |
 | Leer | Kopier Fotos in den Ordner „{folder}“, dann erscheinen sie hier. | Kopieren Sie Fotos in den Ordner „{folder}“, dann erscheinen sie hier. | Copy photos into the folder {folder} and they will show up here. |
 | Einleitung | Fotos aus dem Ordner „{folder}“, die noch keine Markierung nutzt. | = | Photos in the folder {folder} that no marker uses yet. |
 | Foto zuordnen | Zu dieser Aufnahme hinzufügen | = | Add to this capture |
-| Gesetzt | Markierung gesetzt – noch nicht gespeichert [Rückgängig] | = | Marker placed – not saved yet [Undo] |
-| Verschoben | Markierung verschoben – noch nicht gespeichert [Rückgängig] | = | Marker moved – not saved yet [Undo] |
+| Gesetzt (neu oder „Im Panorama setzen“) | Markierung gesetzt – noch nicht gespeichert [Rückgängig] | = | Marker placed – not saved yet [Undo] |
+| Verschoben (Symbol gezogen) | Markierung verschoben – noch nicht gespeichert [Rückgängig] | = | Marker moved – not saved yet [Undo] |
 | Entfernt | Markierung entfernt – noch nicht gespeichert [Rückgängig] | = | Marker removed – not saved yet [Undo] |
 | Foto entfernt, nichts übrig | Eine Markierung braucht einen Text oder ein Foto. | = | A marker needs a text or a photo. |
 | Auswahl fehlgeschlagen | Das Foto konnte nicht gewählt werden: {error} | = | The photo could not be chosen: {error} |

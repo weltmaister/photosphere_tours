@@ -19,7 +19,7 @@
 			<li v-for="(marker, i) in markers"
 				:key="i"
 				class="pt-markers__item"
-				:class="{ 'pt-markers__item--open': opened === i, 'pt-markers__item--moving': placing === `move:${i}` }">
+				:class="{ 'pt-markers__item--open': opened === i, 'pt-markers__item--placing': placing === `place:${i}` }">
 				<button type="button"
 					class="pt-markers__row"
 					:aria-expanded="opened === i ? 'true' : 'false'"
@@ -52,6 +52,9 @@
 					<p v-else-if="(marker.text ?? '').trim() === ''" class="pt-markers__hint">
 						{{ t('A marker without text or photo is not saved.') }}
 					</p>
+					<p v-if="isPlaced(marker)" class="pt-markers__hint">
+						{{ t('Drag the icon in the panorama to move the marker.') }}
+					</p>
 					<div class="pt-markers__actions">
 						<NcButton v-if="canChoosePhoto" variant="secondary" @click="$emit('choose-photo', i)">
 							{{ marker.file ? t('Other photo') : t('Choose photo') }}
@@ -59,8 +62,8 @@
 						<NcButton v-if="marker.file" variant="secondary" @click="$emit('remove-photo', i)">
 							{{ t('Remove photo') }}
 						</NcButton>
-						<NcButton variant="secondary" @click="$emit('move', i)">
-							{{ isPlaced(marker) ? t('Move in the panorama') : t('Place in the panorama') }}
+						<NcButton v-if="!isPlaced(marker)" variant="secondary" @click="$emit('place', i)">
+							{{ t('Place in the panorama') }}
 						</NcButton>
 					</div>
 					<NcButton variant="tertiary" class="pt-markers__remove" @click="$emit('remove', i)">
@@ -134,7 +137,7 @@ const props = defineProps({
 	markers: { type: Array, required: true },
 	/** photos of the photo folder no marker uses: 'folder/name.jpg', relative to the walkthrough folder */
 	photos: { type: Array, default: () => [] },
-	/** place mode: null, 'new' or 'move:<index>' */
+	/** place mode: null, 'new' or 'place:<index>' (a marker without a place) */
 	placing: { type: String, default: null },
 	/** index of the marker whose editor is open, -1 for none */
 	opened: { type: Number, default: -1 },
@@ -143,7 +146,7 @@ const props = defineProps({
 	/** relative path in the walkthrough folder -> URL of a small image (a preview where there is one) */
 	thumbFor: { type: Function, required: true },
 })
-defineEmits(['place-new', 'move', 'cancel-place', 'edit-text', 'choose-photo', 'remove-photo', 'remove', 'add-photo', 'open'])
+defineEmits(['place-new', 'place', 'cancel-place', 'edit-text', 'choose-photo', 'remove-photo', 'remove', 'add-photo', 'open'])
 
 const root = ref(null)
 /** photos that could not be loaded get an icon instead */
@@ -206,7 +209,7 @@ defineExpose({
 }
 
 /* the marker whose place is being chosen */
-.pt-markers__item--moving {
+.pt-markers__item--placing {
 	border-color: var(--color-primary-element);
 }
 
