@@ -14,7 +14,7 @@
  * moment of a click; they are turned into the marker object right away.
  */
 import { computed, reactive, ref, shallowRef, toRaw, watch } from 'vue'
-import { FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs'
+import { FilePickerClosed, FilePickerType, getFilePickerBuilder } from '@nextcloud/dialogs'
 
 import { copyPhotoIntoFolder } from '../create.js'
 import { listFolder } from '../dav.js'
@@ -44,9 +44,10 @@ const indexOfMarker = (list, marker) => list.findIndex(m => toRaw(m) === marker)
  * @param {Function} context.setStatus
  * @param {Function} context.clearStatus
  * @param {Function} context.changed
- * @param {Function} context.beforePlace called when the place mode starts (the editor drops a picked image)
+ * @param {boolean} [context.canChoosePhoto] false on share pages: no file picker without a login
+ * @param {Function} context.beforePlacecalled when the place mode starts (the editor drops a picked image)
  */
-export function useMarkerEditing({ tour, capture, editing, previewing, folder, folderUrl, setStatus, clearStatus, changed, beforePlace }) {
+export function useMarkerEditing({ tour, capture, editing, previewing, folder, folderUrl, setStatus, clearStatus, changed, beforePlace, canChoosePhoto = true }) {
 	const list = computed(() => markersOf(capture.value))
 
 	/** null, 'new' or the (raw) marker that is moved */
@@ -226,13 +227,17 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 		const dir = folder.path.replace(/\/$/, '')
 		let absolute
 		try {
-			absolute = await getFilePickerBuilder(t('Choose a photo'))
+			absolute = await getFilePickerBuilder(t('Choose photo'))
 				.setMimeTypeFilter(PHOTO_MIMES)
 				.setType(FilePickerType.Choose)
 				.startAt(photoNames.value.length > 0 ? `${dir}/${PHOTO_FOLDER}` : folder.path)
 				.build()
 				.pick()
-		} catch {
+		} catch (e) {
+			// closing the picker is no error, anything else is shown
+			if (!(e instanceof FilePickerClosed)) {
+				setStatus('error', t('The photo could not be chosen: {error}', { error: errorText(e) }))
+			}
 			return null
 		}
 		const prefix = `${dir}/${PHOTO_FOLDER}/`
@@ -254,7 +259,7 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 	async function choosePhoto(index) {
 		const markers = list.value
 		const marker = markers[index] && toRaw(markers[index])
-		if (!marker || choosing) {
+		if (!marker || choosing || !canChoosePhoto) {
 			return
 		}
 		choosing = true

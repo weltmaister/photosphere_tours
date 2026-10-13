@@ -53,7 +53,7 @@
 						{{ t('A marker without text or photo is not saved.') }}
 					</p>
 					<div class="pt-markers__actions">
-						<NcButton variant="secondary" @click="$emit('choose-photo', i)">
+						<NcButton v-if="canChoosePhoto" variant="secondary" @click="$emit('choose-photo', i)">
 							{{ marker.file ? t('Other photo') : t('Choose photo') }}
 						</NcButton>
 						<NcButton v-if="marker.file" variant="secondary" @click="$emit('remove-photo', i)">
@@ -138,6 +138,8 @@ const props = defineProps({
 	placing: { type: String, default: null },
 	/** index of the marker whose editor is open, -1 for none */
 	opened: { type: Number, default: -1 },
+	/** false on share pages: the file picker needs a login */
+	canChoosePhoto: { type: Boolean, default: true },
 	/** relative path in the walkthrough folder -> URL */
 	urlFor: { type: Function, required: true },
 })

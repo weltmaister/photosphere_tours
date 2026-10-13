@@ -10,17 +10,19 @@ vi.mock('@nextcloud/dialogs', () => {
 		startAt: vi.fn(() => builder),
 		build: () => ({ pick: picker.pick }),
 	}
-	return { FilePickerType: { Choose: 1 }, getFilePickerBuilder: () => builder }
+	class FilePickerClosed extends Error {}
+	return { FilePickerClosed, FilePickerType: { Choose: 1 }, getFilePickerBuilder: () => builder }
 })
 vi.mock('../src/create.js', () => ({ copyPhotoIntoFolder: vi.fn(async () => '2D-Bilder/copy.jpg') }))
 vi.mock('../src/dav.js', () => ({ listFolder: vi.fn(async () => []) }))
 vi.mock('../src/l10n.js', () => ({ t: (text) => text, errorText: (e) => e.message }))
 
 const { useMarkerEditing } = await import('../src/composables/useMarkerEditing.js')
+const { FilePickerClosed } = await import('@nextcloud/dialogs')
 const { copyPhotoIntoFolder } = await import('../src/create.js')
 const { listFolder } = await import('../src/dav.js')
 
-function setup(markers) {
+function setup(markers, options = {}) {
 	const tour = ref({
 		spots: [{ name: 'A', captures: [{ file: 'a.jpg', date: '2024-08-14T16:02', ...(markers ? { markers } : {}) }] }],
 	})
@@ -40,6 +42,7 @@ function setup(markers) {
 		clearStatus: () => { note.value = null },
 		changed: () => { calls.changed++ },
 		beforePlace: () => { calls.beforePlace++ },
+		...options,
 	})
 	return { tour, capture, editing, previewing, note, calls, editor, list: () => tour.value.spots[0].captures[0].markers }
 }
@@ -207,16 +210,42 @@ describe('photos', () => {
 		expect(copyPhotoIntoFolder).toHaveBeenCalled()
 	})
 
-	it('changes nothing when the picker is cancelled or the copy fails', async () => {
+	it('stays silent and changes nothing when the picker is closed', async () => {
 		const { editor, list, note, calls } = setup([{ text: 'x' }])
-		picker.pick.mockRejectedValueOnce(new Error('cancelled'))
+		picker.pick.mockRejectedValueOnce(new FilePickerClosed('FilePicker: No nodes selected'))
 		await editor.choosePhoto(0)
+		expect(list()[0]).toEqual({ text: 'x' })
+		expect(note.value).toBe(null)
+		expect(calls.changed).toBe(0)
+		expect(copyPhotoIntoFolder).not.toHaveBeenCalled()
+	})
+
+	it('shows any other picker error and changes nothing', async () => {
+		const { editor, list, note, calls } = setup([{ text: 'x' }])
+		picker.pick.mockRejectedValueOnce(new Error('Request failed'))
+		await editor.choosePhoto(0)
+		expect(list()[0]).toEqual({ text: 'x' })
+		expect(note.value).toMatchObject({ type: 'error', text: 'The photo could not be chosen: {error}' })
+		expect(calls.changed).toBe(0)
+		expect(copyPhotoIntoFolder).not.toHaveBeenCalled()
+	})
+
+	it('shows a failed copy and changes nothing', async () => {
+		const { editor, list, note, calls } = setup([{ text: 'x' }])
 		picker.pick.mockResolvedValueOnce('/Fotos/p.jpg')
 		copyPhotoIntoFolder.mockRejectedValueOnce(new Error('no space'))
 		await editor.choosePhoto(0)
 		expect(list()[0]).toEqual({ text: 'x' })
-		expect(note.value.type).toBe('error')
+		expect(note.value).toMatchObject({ type: 'error', text: 'The photo could not be copied into the folder {folder}: {error}' })
 		expect(calls.changed).toBe(0)
+	})
+
+	it('never opens the picker on a share page', async () => {
+		const { editor, list } = setup([{ text: 'x' }], { canChoosePhoto: false })
+		picker.pick.mockResolvedValueOnce('/Projekt/EG/2D-Bilder/p.jpg')
+		await editor.choosePhoto(0)
+		expect(picker.pick).not.toHaveBeenCalled()
+		expect(list()[0]).toEqual({ text: 'x' })
 	})
 
 	it('leaves a marker alone that was removed while its photo was copied', async () => {

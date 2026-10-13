@@ -139,6 +139,7 @@
 								:placing="markerPlacing"
 								:opened="openedMarker"
 								:url-for="fileUrl"
+								:can-choose-photo="!shared"
 								@open="openMarkerEditor"
 								@place-new="placeMarker"
 								@move="moveMarker"
@@ -674,6 +675,7 @@ const {
 	setStatus,
 	clearStatus: () => { status.value = null },
 	changed,
+	canChoosePhoto: !shared,
 	// a picked image would hide the capture's markers and the place to click
 	beforePlace: () => { selectedImage.value = null },
 })
