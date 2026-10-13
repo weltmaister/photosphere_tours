@@ -35,6 +35,10 @@ jobs:
       - name: Set up npm ${{ steps.versions.outputs.npmVersion }}
         run: npm i -g npm@"${{ steps.versions.outputs.npmVersion }}"
       
+      # a broken bundle must not reach the release or the app store
+      - name: Install dependencies and run tests
+        run: cd ${{ env.APP_NAME }} && npm ci && npm test
+
       - name: Run build
         run: cd ${{ env.APP_NAME }} && make appstore
 
