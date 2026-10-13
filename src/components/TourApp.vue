@@ -71,6 +71,16 @@
 				:correction="correction"
 				:label="panoramaLabel"
 				@heading="heading = $event" />
+			<!-- editor, desktop: divider on the panorama's lower edge (zero-height anchor in the panorama cell) -->
+			<div v-if="editing && !mobile" class="pt-pano-rows">
+				<ResizeHandle :model-value="editorPanoramaShown"
+					class="pt-pano-rows__handle"
+					orientation="horizontal"
+					:min="PANORAMA_HEIGHT_MIN"
+					:max="editorPanoramaMax"
+					:label="t('Height of the panorama')"
+					@update:model-value="editorPanoramaHeight = $event" />
+			</div>
 			<!-- no spot yet: explain instead of an endless loading circle -->
 			<div v-if="!panoramaUrl" class="pt-pano-area pt-pano-empty">
 				<NcEmptyContent :name="t('No spots yet')" :description="emptyText">
@@ -191,7 +201,7 @@ import SpotForm from './SpotForm.vue'
 import TabBar from './TabBar.vue'
 import TourHeader from './TourHeader.vue'
 import ViewerSidebar from './ViewerSidebar.vue'
-import { EDITOR_MAX, EDITOR_MIN, EDITOR_PLAN_MIN, stored, useLayout } from '../composables/useLayout.js'
+import { EDITOR_MAX, EDITOR_MIN, EDITOR_PLAN_MIN, PANORAMA_HEIGHT_MIN, stored, useLayout } from '../composables/useLayout.js'
 import { Cancelled, choosePlan } from '../create.js'
 import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readText, urlFor, writeText } from '../dav.js'
 import { exifDate } from '../exif.js'
@@ -240,7 +250,7 @@ const etag = ref(null)
 const planSize = ref({ w: 1, h: 1 })
 const planUrl = ref('')
 
-const { mobile, sidebarOpen, sidebarWidth, sidebarPlanHeight, sheetOpen, sheetTab, editorColumn } = useLayout()
+const { mobile, sidebarOpen, sidebarWidth, sidebarPlanHeight, sheetOpen, sheetTab, editorColumn, editorPanoramaHeight } = useLayout()
 
 const editing = ref(false)
 const dirty = ref(false)
@@ -319,16 +329,27 @@ const bodyStyle = computed(() => {
 		return {}
 	}
 	if (editing.value) {
-		return { '--pt-editor-column': `${editorColumn.value}px` }
+		return {
+			'--pt-editor-column': `${editorColumn.value}px`,
+			'--pt-editor-pano': `${editorPanoramaShown.value}px`,
+		}
 	}
 	return sidebarOpen.value ? { gridTemplateColumns: `${sidebarWidth.value}px minmax(0, 1fr)` } : {}
 })
 
 // the editor's right column may grow until the floor plan beside it gets too small
 const viewportWidth = ref(window.innerWidth)
-const onResize = () => { viewportWidth.value = window.innerWidth }
+const viewportHeight = ref(window.innerHeight)
+const onResize = () => {
+	viewportWidth.value = window.innerWidth
+	viewportHeight.value = window.innerHeight
+}
 window.addEventListener('resize', onResize)
 const editorMax = computed(() => Math.max(EDITOR_MIN, Math.min(EDITOR_MAX, viewportWidth.value - EDITOR_PLAN_MIN)))
+// the panorama may grow until the editing panel below it gets too small; the stored height
+// is only changed by the user, a small window just shows less of it
+const editorPanoramaMax = computed(() => Math.max(PANORAMA_HEIGHT_MIN, viewportHeight.value - 280))
+const editorPanoramaShown = computed(() => Math.min(Math.max(editorPanoramaHeight.value, PANORAMA_HEIGHT_MIN), editorPanoramaMax.value))
 
 // a phone turned to landscape gets the desktop editor, which has no plan tab
 watch(mobile, (isMobile) => {
@@ -1125,6 +1146,23 @@ onBeforeUnmount(() => {
 
 .pt-pano-area {
 	grid-area: pano;
+}
+
+.pt-pano-rows {
+	position: relative;
+	grid-area: pano;
+	align-self: end;
+	height: 0;
+}
+
+.pt-pano-rows__handle {
+	bottom: -4px;
+}
+
+@media (pointer: coarse) {
+	.pt-pano-rows__handle {
+		bottom: -12px;
+	}
 }
 
 .pt-pano-empty {
