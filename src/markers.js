@@ -23,6 +23,11 @@ export function fromTexture({ textureX, textureY }, { width, height }) {
 	return { yaw: one(yaw), pitch: one((0.5 - textureY / height) * 180) }
 }
 
+/** for text that goes into innerHTML (the viewer writes tooltips that way) */
+export function escapeHtml(text) {
+	return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+}
+
 export const markersOf = (capture) => capture?.markers ?? []
 export const isPlaced = (marker) => typeof marker.yaw === 'number' && typeof marker.pitch === 'number'
 

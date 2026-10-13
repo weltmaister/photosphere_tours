@@ -1,6 +1,6 @@
 // tests/markers.test.js
 import { describe, expect, it } from 'vitest'
-import { PHOTO_FOLDER, fromTexture, isPlaced, markerCount, markerTitle, toTexture, unusedPhotos } from '../src/markers.js'
+import { PHOTO_FOLDER, escapeHtml, fromTexture, isPlaced, markerCount, markerTitle, toTexture, unusedPhotos } from '../src/markers.js'
 
 const size = { width: 8000, height: 4000 }
 
@@ -33,5 +33,21 @@ describe('marker helpers', () => {
 		const tour = { spots: [{ captures: [{ markers: [{ file: '2D-Bilder/a.jpg' }] }] }] }
 		expect(unusedPhotos(tour, ['2D-Bilder/a.jpg', '2D-Bilder/b.JPG', '2D-Bilder/n.txt', 'pano.jpg', '2D-Bilder/sub/c.jpg']))
 			.toEqual(['2D-Bilder/b.JPG'])
+	})
+})
+
+describe('escapeHtml', () => {
+	it('escapes all five special characters', () => {
+		expect(escapeHtml(`&<>"'`)).toBe('&amp;&lt;&gt;&quot;&#39;')
+	})
+	it('neutralises markup', () => {
+		expect(escapeHtml('<img src=x onerror="alert(1)">')).toBe('&lt;img src=x onerror=&quot;alert(1)&quot;&gt;')
+	})
+	it('escapes the ampersand only once', () => {
+		expect(escapeHtml('a & <b>')).toBe('a &amp; &lt;b&gt;')
+	})
+	it('leaves plain text unchanged', () => {
+		expect(escapeHtml('Küche, Wand 3 – links')).toBe('Küche, Wand 3 – links')
+		expect(escapeHtml('')).toBe('')
 	})
 })

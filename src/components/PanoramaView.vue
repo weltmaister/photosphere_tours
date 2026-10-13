@@ -31,7 +31,7 @@ import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin'
 import '@photo-sphere-viewer/markers-plugin/index.css'
 import { mdiCameraOutline, mdiCommentTextOutline } from '@mdi/js'
 import { t } from '../l10n.js'
-import { fromTexture, isPlaced, markerTitle, toTexture } from '../markers.js'
+import { escapeHtml, fromTexture, isPlaced, markerTitle, toTexture } from '../markers.js'
 
 const props = defineProps({
 	url: { type: String, default: null },
@@ -83,7 +83,8 @@ function showMarkers() {
 				className: 'pt-marker',
 				size: { width: 36, height: 36 },
 				anchor: 'center center',
-				tooltip: { content: markerTitle(m), position: 'top center' },
+				// the viewer writes tooltips with innerHTML and the text comes from the JSON file
+				tooltip: { content: escapeHtml(markerTitle(m)), position: 'top center' },
 			}
 		}))
 }
