@@ -49,9 +49,16 @@ const emit = defineEmits(['heading', 'marker-click', 'pick'])
 const el = ref(null)
 let viewer = null
 let observer = null
-// true while the viewer shows the image (and correction) the markers belong to;
-// false from the start of a load until it is applied (a fade applies it at its end)
+// Rule: the markers on screen always belong to the image that is shown.
+// A new image removes them as soon as it starts loading (`unapply`); they are
+// set again from `props.markers` once that image is shown (a fade shows it only
+// at its end), and `showMarkers` does nothing in between.
 let applied = false
+
+function unapply() {
+	applied = false
+	viewer?.getPlugin(MarkersPlugin)?.clearMarkers()
+}
 
 const toDeg = (r) => ((r * 180 / Math.PI) % 360 + 360) % 360
 
@@ -115,9 +122,7 @@ onMounted(() => {
 			emit('marker-click', Number(marker.id))
 		}
 	})
-	viewer.addEventListener('panorama-load', () => {
-		applied = false
-	})
+	viewer.addEventListener('panorama-load', unapply)
 	// without a fade the image is already shown here, with a fade it is not yet
 	viewer.addEventListener('panorama-loaded', ({ data }) => {
 		if (viewer.state.textureData === data) {
@@ -186,7 +191,7 @@ watch(() => [props.url, props.correction?.pan], ([url], [previousUrl]) => {
 		showMarkers()
 		return
 	}
-	applied = false
+	unapply()
 	viewer.setPanorama(url, {
 		sphereCorrection: props.correction ?? undefined,
 		position: viewer.getPosition(),
@@ -240,7 +245,6 @@ defineExpose({
 }
 
 .pt-pano :deep(.pt-marker) {
-	display: flex;
 	align-items: center;
 	justify-content: center;
 	border: 2px solid var(--color-primary-element-text);
@@ -249,5 +253,10 @@ defineExpose({
 	color: var(--color-primary-element-text);
 	box-shadow: 0 0 6px var(--color-box-shadow);
 	cursor: pointer;
+}
+
+/* the plugin hides markers outside the view with display: none; only the visible state may be flex */
+.pt-pano :deep(.pt-marker.psv-marker--visible) {
+	display: flex;
 }
 </style>
