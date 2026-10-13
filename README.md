@@ -30,10 +30,10 @@ captures let you pick one.
 
 ![An earlier visit: the same room in October 2022](screenshots/visits.jpg)
 
-### Add notes and photos with markers
+### Add text and photos with markers
 
 A **marker** is a short text and/or a photo that belongs to a capture – a defect, a
-detail, a note for the next visit. Place it at a spot in the panorama, where it shows
+detail, a remark for the next visit. Place it at a spot in the panorama, where it shows
 as an icon you click to see the photo large, or leave it without a place: those photos
 are one click away as *Photos at this spot*.
 
@@ -106,21 +106,23 @@ in the panorama as icons (camera with a photo, speech bubble without).
 - `yaw` (degrees) is the raw panorama direction that looks towards the top of the
   plan – per capture, since the camera is turned differently for every shot. It is set
   in the editor: pick the spot and its capture, then click on the plan beside it.
-- `markers` (optional, per capture): a text and/or a photo. Files without it stay valid
-  and older versions ignore it.
-  - `yaw` (0–360) and `pitch` (−90–90) are the place in the panorama in degrees, **raw
-    panorama coordinates** like the image itself, not the view aligned to the plan, so
-    correcting a capture's view direction never moves its markers. Both are given or
+- `markers` (optional, per capture): a text and/or a photo. Files without it stay valid.
+  Older versions of the app rebuild the file from the fields they know, so saving with
+  an older version drops `markers` and `location`.
+  - `yaw` (any number, normalised to 0–360) and `pitch` (−90–90) are the place in the
+    panorama in degrees, **raw panorama coordinates** like the image itself, not the
+    view aligned to the plan, so correcting a capture's view direction never moves its markers. Both are given or
     both are left out (a marker without a place).
   - `text` is plain text, up to 2000 characters, newlines allowed; the first line is
     the title. `file` is a photo, relative to the folder of the JSON file like every
     other path, by convention in the subfolder `2D-Bilder/`.
-  - A marker needs a `text` or a `file`. A file with an invalid marker does not open;
-    the message names spot, capture and marker.
+  - A marker needs a `text` or a `file`. As with other format errors, an invalid marker
+    keeps the walkthrough from opening; the message names spot, capture and marker.
 - `location` (optional): where the building is, WGS84 with 5 decimals (about 1 m). It
   belongs to the walkthrough, not to a spot. It is set from the GPS position of the
   first image placed in a walkthrough that has none; values outside the valid range
-  and exactly 0/0 are ignored. There is no input field for it.
+  and exactly 0/0 are ignored. There is no input field for it. An invalid `location`
+  keeps the walkthrough from opening.
 
 There is no database and no server-side code beyond loading the script: the file
 syncs with the desktop client, moves with its folder and works through public

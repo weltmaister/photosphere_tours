@@ -39,7 +39,7 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   names; undone when the save fails), `src/bar.js` + `FolderBar.vue` (hint bar)
 - `src/components/TourApp.vue` – state, loading, editing, saving and the CSS grid. One
   `PanoramaView` for all layouts. Parts: `TourHeader`, `ViewerSidebar` (plan + list,
-  resizable), `PhoneSheet`, `TabBar` (ARIA tabs), `NoteBar` (note + action), `SpotForm`,
+  resizable), `ResizeHandle` (column and row dividers), `PhoneSheet`, `TabBar` (ARIA tabs), `NoteBar` (note + action), `SpotForm`,
   `NewImages`, `SpotList`, `SiteVisits`, `FloorPlan` (zoom, pan, pinch, pin drag, arrow
   keys); `src/composables/useLayout.js` (phone query, stored settings, divider sizes)
 - Markers (text and/or photo per capture, `capture.markers`, optionally placed in the panorama):
@@ -52,7 +52,7 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   `MarkerButton.vue` – "Photos at this spot" button (footer, phone sheet)
 - Spots are objects in a reactive tour: keep per-spot state in a `reactive(Map)` keyed by
   the spot or in a `Set` of `toRaw(spot)` – never by index, never mix raw and proxy.
-- `src/tour.js`, `folder.js`, `exif.js`, `rooms.js`, `rename.js` – pure logic, unit-tested
+- `src/tour.js`, `folder.js`, `exif.js`, `rooms.js`, `rename.js`, `markers.js` – pure logic, unit-tested
   (`tests/`)
 - `tools/l10n-build.mjs` (`l10n/de_DE.json` formal → de/de_DE) and `tools/l10n-check.mjs`
 - `tools/demo/` – CC0 demo data for the store screenshots (`screenshots/`, ≤ 2 MiB each)
