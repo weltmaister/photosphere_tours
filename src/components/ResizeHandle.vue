@@ -4,47 +4,62 @@
   This file is licensed under the Affero General Public License version 3 or
   later. See the COPYING file.
 
-  Drag handle on the edge between two columns; also works with the arrow keys.
-  The parent places it (position: absolute) on the edge it resizes.
+  Drag handle on the edge between two columns (vertical) or two rows (horizontal);
+  also works with the arrow keys. The parent places it (position: absolute) on the
+  edge it resizes.
 -->
 <template>
 	<div class="pt-resize"
+		:class="`pt-resize--${orientation}`"
 		role="separator"
 		tabindex="0"
-		aria-orientation="vertical"
+		:aria-orientation="orientation"
 		:aria-label="label"
 		:aria-valuenow="modelValue"
 		:aria-valuemin="min"
 		:aria-valuemax="max"
-		:title="t('Drag or use the arrow keys to change the width')"
+		:title="orientation === 'vertical'
+			? t('Drag or use the arrow keys to change the width')
+			: t('Drag or use the arrow keys to change the height')"
 		@pointerdown="start"
-		@keydown.left.prevent="set(modelValue - STEP * direction)"
-		@keydown.right.prevent="set(modelValue + STEP * direction)" />
+		@keydown="onKey" />
 </template>
 
 <script setup>
 import { t } from '../l10n.js'
 
 const props = defineProps({
-	/** width in px of the column this handle resizes */
+	/** px of the column (vertical) or row (horizontal) this handle resizes */
 	modelValue: { type: Number, required: true },
 	min: { type: Number, required: true },
 	max: { type: Number, required: true },
-	/** 1: dragging to the right widens the column (it is left of the handle), -1: narrows it */
+	/** 1: dragging right/down grows the part before the handle, -1: shrinks it */
 	direction: { type: Number, default: 1 },
+	/** 'vertical': divider between columns (width); 'horizontal': between rows (height) */
+	orientation: { type: String, default: 'vertical' },
 	label: { type: String, required: true },
 })
 const emit = defineEmits(['update:modelValue'])
 
 const STEP = 16
+const KEYS = { vertical: ['ArrowLeft', 'ArrowRight'], horizontal: ['ArrowUp', 'ArrowDown'] }
 
-const set = (width) => emit('update:modelValue', Math.round(Math.min(props.max, Math.max(props.min, width))))
+const set = (size) => emit('update:modelValue', Math.round(Math.min(props.max, Math.max(props.min, size))))
+
+function onKey(e) {
+	const [less, more] = KEYS[props.orientation]
+	if (e.key === less || e.key === more) {
+		e.preventDefault()
+		set(props.modelValue + (e.key === more ? STEP : -STEP) * props.direction)
+	}
+}
 
 function start(e) {
-	const from = { x: e.clientX, width: props.modelValue }
+	const axis = props.orientation === 'vertical' ? 'clientX' : 'clientY'
+	const from = { at: e[axis], size: props.modelValue }
 	const target = e.currentTarget
 	target.setPointerCapture(e.pointerId)
-	const move = (ev) => set(from.width + (ev.clientX - from.x) * props.direction)
+	const move = (ev) => set(from.size + (ev[axis] - from.at) * props.direction)
 	const end = () => {
 		target.removeEventListener('pointermove', move)
 		target.removeEventListener('pointerup', end)
@@ -59,24 +74,45 @@ function start(e) {
 <style scoped>
 .pt-resize {
 	position: absolute;
-	top: 0;
 	z-index: 3;
+	touch-action: none;
+}
+
+.pt-resize--vertical {
+	top: 0;
 	width: 8px;
 	height: 100%;
 	cursor: col-resize;
-	touch-action: none;
 }
 
 /* easier to hit with a finger on tablets */
 @media (pointer: coarse) {
-	.pt-resize {
+	.pt-resize--vertical {
 		width: 24px;
 	}
 }
 
-.pt-resize:hover,
-.pt-resize:active {
+.pt-resize--vertical:hover,
+.pt-resize--vertical:active {
 	background: linear-gradient(var(--color-primary-element), var(--color-primary-element)) center / 2px 100% no-repeat;
+}
+
+.pt-resize--horizontal {
+	left: 0;
+	width: 100%;
+	height: 8px;
+	cursor: row-resize;
+}
+
+@media (pointer: coarse) {
+	.pt-resize--horizontal {
+		height: 24px;
+	}
+}
+
+.pt-resize--horizontal:hover,
+.pt-resize--horizontal:active {
+	background: linear-gradient(var(--color-primary-element), var(--color-primary-element)) center / 100% 2px no-repeat;
 }
 
 .pt-resize:focus-visible {

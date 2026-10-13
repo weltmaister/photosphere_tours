@@ -127,6 +127,7 @@
 		"All spots with their latest capture; pick other captures in the list": "Alle Standorte mit ihrer neuesten Aufnahme; weitere Aufnahmen in der Liste wählen",
 		"Only the spots captured on {date}": "Nur die Standorte, die am {date} aufgenommen wurden",
 		"Drag or use the arrow keys to change the width": "Ziehen oder Pfeiltasten benutzen, um die Breite zu ändern",
+		"Drag or use the arrow keys to change the height": "Ziehen oder Pfeiltasten benutzen, um die Höhe zu ändern",
 		"{name} – drag or move with the arrow keys": "{name} – ziehen oder mit den Pfeiltasten verschieben",
 		"Spots on {date} ({count})": "Standorte am {date} ({count})",
 		"_{count} spot captured on {date}_::_{count} spots captured on {date}_": [

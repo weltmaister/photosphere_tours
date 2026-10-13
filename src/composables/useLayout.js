@@ -7,6 +7,7 @@
  * Phone or desktop, and the layout settings a user keeps between walkthroughs.
  */
 import { onBeforeUnmount, ref, watch } from 'vue'
+import { clampSize } from './clamp.js'
 
 export const SIDEBAR_MIN = 240
 export const SIDEBAR_MAX = 560
@@ -15,6 +16,9 @@ export const SIDEBAR_MAX = 560
 export const EDITOR_MIN = 360
 export const EDITOR_MAX = 960
 export const EDITOR_PLAN_MIN = 320
+// heights of the rows: the floor plan above the spot list, the panorama above the editing panel
+export const PLAN_HEIGHT_MIN = 120
+export const PANORAMA_HEIGHT_MIN = 160
 
 /** A setting kept in this browser; private windows simply do not keep it. */
 export function stored(key, fallback) {
@@ -45,16 +49,24 @@ export function useLayout() {
 	onBeforeUnmount(() => phoneQuery.removeEventListener('change', onPhoneChange))
 
 	const sidebarWidth = stored('sidebarWidth', 320)
-	sidebarWidth.value = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, Number(sidebarWidth.value) || 320))
+	sidebarWidth.value = clampSize(sidebarWidth.value, SIDEBAR_MIN, SIDEBAR_MAX, 320)
 
 	const editorColumn = stored('editorColumn', 520)
-	editorColumn.value = Math.min(EDITOR_MAX, Math.max(EDITOR_MIN, Number(editorColumn.value) || 520))
+	editorColumn.value = clampSize(editorColumn.value, EDITOR_MIN, EDITOR_MAX, 520)
+
+	const sidebarPlanHeight = stored('sidebarPlanHeight', 260)
+	sidebarPlanHeight.value = clampSize(sidebarPlanHeight.value, PLAN_HEIGHT_MIN, 2000, 260)
+
+	const editorPanoramaHeight = stored('editorPanoramaHeight', 292)
+	editorPanoramaHeight.value = clampSize(editorPanoramaHeight.value, PANORAMA_HEIGHT_MIN, 2000, 292)
 
 	return {
 		mobile,
 		editorColumn,
+		editorPanoramaHeight,
 		sidebarOpen: stored('sidebarOpen', true),
 		sidebarWidth,
+		sidebarPlanHeight,
 		sheetOpen: ref(false),
 		sheetTab: ref('plan'),
 	}
