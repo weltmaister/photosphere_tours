@@ -18,7 +18,7 @@
 			:sidebar-open="sidebarOpen"
 			:dirty="dirty"
 			:saving="saving"
-			:map-url="tour?.location ? osmUrl(tour.location) : null"
+			:map-url="tour?.location && !shared ? osmUrl(tour.location) : null"
 			@toggle-sidebar="sidebarOpen = !sidebarOpen"
 			@edit="startEditing"
 			@stop-editing="stopEditing()"

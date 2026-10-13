@@ -24,7 +24,7 @@ Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - **Ort:** ein Rundgang kann einen `location` (Breite, Länge) haben. Er wird aus der
   GPS-Position des ersten Bildes übernommen, das in einen Rundgang ohne Ort gesetzt wird;
   die Kopfleiste bietet dann *In OpenStreetMap öffnen* (neuer Tab, keine Karte eingebettet,
-  keine Anfragen der App selbst).
+  keine Anfragen der App selbst; nicht auf Freigabeseiten).
 
 ### Geändert
 - Beim Speichern bleiben Felder in `360-Rundgang.json` erhalten, die die App nicht kennt

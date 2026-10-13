@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Location:** a walkthrough can have a `location` (latitude, longitude). It is taken
   from the GPS position of the first image placed in a walkthrough without one; the
   header then offers *Open in OpenStreetMap* (new tab, no map embedded, no requests
-  from the app itself).
+  from the app itself; not on share pages).
 
 ### Changed
 - Saving keeps fields of `360-Rundgang.json` that the app does not know (from a newer

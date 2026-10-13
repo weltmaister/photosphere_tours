@@ -50,7 +50,7 @@ Regeln:
 | Tooltip Bearbeiten | Standorte platzieren, verschieben und Blickrichtung festlegen | = | Place and move spots, set view directions |
 | Tooltip Grundriss | Grundriss ein- oder ausblenden | = | Show or hide floor plan |
 | Tooltip Schließen | Rundgang schließen (Esc) | = | Close walkthrough (Esc) |
-| Button und Tooltip Karte (nur mit bekanntem Ort) | In OpenStreetMap öffnen | = | Open in OpenStreetMap |
+| Button und Tooltip Karte (nur mit bekanntem Ort, nicht auf Freigabeseiten) | In OpenStreetMap öffnen | = | Open in OpenStreetMap |
 
 ### Fußleiste: Zeitachse (neu)
 

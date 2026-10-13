@@ -178,8 +178,8 @@ share links.
   marker icon in the spot list shows that the shown capture has markers. A visit shows
   the markers of that day's capture.
 - **Location:** with a known location the header has *Open in OpenStreetMap*, which
-  opens openstreetmap.org in a new tab. No map is embedded and the app itself makes no
-  external requests.
+  opens openstreetmap.org in a new tab; share pages do not show it (the `location` stays
+  in the file). No map is embedded and the app itself makes no external requests.
 - **Dividers:** the borders between floor plan and spot list (side bar) and between
   panorama and panel (editor) are dragged with the mouse or moved with the arrow keys,
   like the column border. The sizes are remembered per browser. On phones the tabs stay.
