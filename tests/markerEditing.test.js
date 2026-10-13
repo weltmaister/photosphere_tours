@@ -179,6 +179,18 @@ describe('photos', () => {
 		expect(editor.photos.value).toEqual(['2D-Bilder/c2.png', '2D-Bilder/c10.png'])
 	})
 
+	it('keeps the file ids of the photo folder for previews', async () => {
+		const { editor } = setup([{ file: '2D-Bilder/a.jpg' }])
+		listFolder.mockResolvedValueOnce([
+			{ name: 'a.jpg', isFolder: false, fileid: '12' },
+			{ name: 'b.jpg', isFolder: false, fileid: null },
+		])
+		await editor.loadPhotos()
+		expect(editor.fileidOf('2D-Bilder/a.jpg')).toBe('12')
+		expect(editor.fileidOf('2D-Bilder/b.jpg')).toBeNull()
+		expect(editor.fileidOf('elsewhere/a.jpg')).toBeNull()
+	})
+
 	it('reports a failing list and keeps the old one', async () => {
 		const { editor, note } = setup()
 		listFolder.mockRejectedValueOnce(new Error('boom'))

@@ -139,7 +139,7 @@
 								:photos="markerPhotos"
 								:placing="markerPlacing"
 								:opened="openedMarker"
-								:url-for="fileUrl"
+								:thumb-for="markerThumb"
 								:can-choose-photo="!shared"
 								@open="onMarkerListOpen"
 								@place-new="placeMarker"
@@ -219,6 +219,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, toRaw, watch } from 'vue'
 import { showConfirmation } from '@nextcloud/dialogs'
+import { generateUrl } from '@nextcloud/router'
 import { Permission } from '@nextcloud/files'
 import { mdiAlertCircleOutline, mdiFullscreen, mdiMapMarkerPlusOutline, mdiMinus, mdiPlus } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
@@ -657,6 +658,7 @@ const {
 	markerPlacing,
 	openedMarker,
 	photos: markerPhotos,
+	fileidOf: markerPhotoId,
 	loadPhotos: loadMarkerPhotos,
 	open: openMarkerEditor,
 	placeNew: placeMarker,
@@ -682,6 +684,13 @@ const {
 	// a picked image would hide the capture's markers and the place to click
 	beforePlace: () => { selectedImage.value = null },
 })
+
+// small images in the marker list: the server's preview instead of a phone photo of several MB;
+// share pages have no preview without a login, photos outside the photo folder no file id
+function markerThumb(path) {
+	const id = shared ? null : markerPhotoId(path)
+	return id ? generateUrl('/core/preview?fileId={id}&x=80&y=80&a=1', { id }) : fileUrl(path)
+}
 
 async function onMarkerPick(place) {
 	const marker = pickMarkerPlace(place)

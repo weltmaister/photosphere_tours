@@ -27,7 +27,7 @@
 					@click="$emit('open', opened === i ? -1 : i)">
 					<img v-if="marker.file && !broken.has(marker.file)"
 						class="pt-markers__thumb"
-						:src="urlFor(marker.file)"
+						:src="thumbFor(marker.file)"
 						alt=""
 						loading="lazy"
 						@error="broken.add(marker.file)">
@@ -102,7 +102,7 @@
 			<li v-for="photo in photos" :key="photo" class="pt-markers__photo">
 				<img v-if="!broken.has(photo)"
 					class="pt-markers__thumb"
-					:src="urlFor(photo)"
+					:src="thumbFor(photo)"
 					alt=""
 					loading="lazy"
 					@error="broken.add(photo)">
@@ -140,8 +140,8 @@ const props = defineProps({
 	opened: { type: Number, default: -1 },
 	/** false on share pages: the file picker needs a login */
 	canChoosePhoto: { type: Boolean, default: true },
-	/** relative path in the walkthrough folder -> URL */
-	urlFor: { type: Function, required: true },
+	/** relative path in the walkthrough folder -> URL of a small image (a preview where there is one) */
+	thumbFor: { type: Function, required: true },
 })
 defineEmits(['place-new', 'move', 'cancel-place', 'edit-text', 'choose-photo', 'remove-photo', 'remove', 'add-photo', 'open'])
 

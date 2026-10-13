@@ -76,20 +76,24 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 
 	// ---- photos of the photo folder ----
 
-	/** file names inside the photo folder */
-	const photoNames = ref([])
+	/** files inside the photo folder: { name, fileid } */
+	const photoEntries = ref([])
+	const photoNames = computed(() => photoEntries.value.map(e => e.name))
 	const photos = computed(() => tour.value
 		? unusedPhotos(tour.value, photoNames.value.map(name => `${PHOTO_FOLDER}/${name}`))
 		: [])
+	const photoIds = computed(() => new Map(photoEntries.value.map(e => [`${PHOTO_FOLDER}/${e.name}`, e.fileid])))
+	/** the file id of a photo in the photo folder (for a preview), else null */
+	const fileidOf = (path) => photoIds.value.get(path) ?? null
 
 	/** A missing photo folder is an empty list; a failing request is reported and keeps the old list. */
 	async function loadPhotos() {
 		try {
 			const entries = await listFolder(`${folderUrl}/${PHOTO_FOLDER}`)
-			photoNames.value = entries
+			photoEntries.value = entries
 				.filter(e => !e.isFolder)
-				.map(e => e.name)
-				.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+				.map(e => ({ name: e.name, fileid: e.fileid ?? null }))
+				.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
 		} catch (e) {
 			setStatus('error', t('The photos in the folder {folder} could not be loaded: {error}', { folder: PHOTO_FOLDER, error: errorText(e) }))
 		}
@@ -291,6 +295,7 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 		markerPlacing,
 		openedMarker: openedIndex,
 		photos,
+		fileidOf,
 		loadPhotos,
 		open,
 		placeNew,
