@@ -70,6 +70,7 @@
 				:url="panoramaUrl"
 				:correction="correction"
 				:label="panoramaLabel"
+				:markers="currentCapture?.markers ?? []"
 				@heading="heading = $event" />
 			<!-- editor, desktop: divider on the panorama's lower edge (zero-height anchor in the panorama cell) -->
 			<div v-if="editing && !mobile" class="pt-pano-rows">

@@ -26,7 +26,8 @@
     "@nextcloud/l10n": "^3.4.1",
     "@nextcloud/router": "^3.2.0",
     "@nextcloud/vue": "^9.13.1",
-    "@photo-sphere-viewer/core": "^5.15.1",
+    "@photo-sphere-viewer/core": "5.15.1",
+    "@photo-sphere-viewer/markers-plugin": "5.15.1",
     "pdfjs-dist": "^6.4.299",
     "vue": "^3.5.43"
   },
