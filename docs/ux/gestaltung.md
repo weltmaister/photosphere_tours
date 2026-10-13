@@ -100,7 +100,7 @@ Die Größen gelten pro Browser. Passt eine gespeicherte Höhe nicht ins Fenster
 
 ## Markierungen
 
-- **Symbol im Panorama:** Kamera (`mdiCameraOutline`) bei Markierungen mit Foto, Sprechblase (`mdiCommentTextOutline`) ohne. Ein runder Knopf in `--color-primary-element` mit `--color-primary-element-text`, 36 px, mit 2 px Rand in `--color-primary-element-text`; der Tooltip zeigt die erste Textzeile (als Text, nie als HTML). Das Panorama bleibt die einzige Fläche mit festen Farben.
+- **Symbol im Panorama:** Kamera (`mdiCameraOutline`) bei Markierungen mit Foto, Sprechblase (`mdiCommentTextOutline`) ohne. Ein runder Knopf in `--color-primary-element` mit `--color-primary-element-text`, 36 px, mit 2 px Rand in `--color-primary-element-text`; der Tooltip zeigt die erste Textzeile (als Text, nie als HTML). Die Symbole nehmen nur Theme-Farben; feste Farben haben nur Grundriss und Panorama (siehe unten).
 - **Symbol in Liste und Aufnahmenauswahl:** `mdiMapMarkerOutline`, 16 px, `--color-text-maxcontrast`, Tooltip „{count} Markierungen“. Die Fußleisten-Schaltfläche (`tertiary`) nimmt `mdiImageMultipleOutline`, wenn es Fotos ohne Stelle gibt, sonst `mdiMapMarkerOutline`.
 - **Dialog:** `NcDialog` groß; das Foto gefüllt bis 70 % der Fensterhöhe, darunter der Text mit Zeilenumbrüchen. „Zurück / Weiter“ nur bei mehreren Markierungen. Fehlt das Foto, steht dort „Foto nicht gefunden“.
 - **Editor-Abschnitt:** Listeneintrag mit Vorschaubild (40 px) oder Symbol, erste Zeile und „gesetzt / ohne Ort“; geöffnet mit Rahmen `--color-border-maxcontrast`, die Markierung, deren Ort gerade gewählt wird, mit `--color-primary-element`.

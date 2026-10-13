@@ -16,7 +16,10 @@
  * plan. The viewer turns each panorama by that amount, so view yaw 0 always
  * means "up on the plan" and the view direction survives switching captures.
  * Optional: `location` is `{ lat, lon }` of the building, `markers` on a capture
- * are `{ yaw, pitch, text?, file? }` in the panorama, placed or not.
+ * are `{ yaw?, pitch?, text?, file? }`: `yaw` and `pitch` (raw panorama degrees)
+ * go together and place the marker in the panorama, or are both left out; a
+ * marker needs a `text` or a `file` (a photo, relative like every path).
+ * Keys this version does not know are kept on every level when saving.
  */
 
 export { TOUR_FILENAME } from './constants.js'
