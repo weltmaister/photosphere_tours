@@ -71,7 +71,9 @@
 				:correction="correction"
 				:label="panoramaLabel"
 				:markers="shownMarkers"
-				@marker-click="openMarker"
+				:placing="editing && !!markerPlacing && !previewing"
+				@marker-click="onMarkerClick"
+				@pick="onMarkerPick"
 				@heading="heading = $event" />
 			<!-- editor, desktop: divider on the panorama's lower edge (zero-height anchor in the panorama cell) -->
 			<div v-if="editing && !mobile" class="pt-pano-rows">
@@ -129,6 +131,23 @@
 								@accept-suggestion="acceptSuggestion(currentSpot)"
 								@set-date="setDate"
 								@remove="removeCurrent" />
+						</section>
+						<section v-if="currentCapture" class="pt-panel__section">
+							<MarkerSection ref="markerSection"
+								:markers="editedMarkers"
+								:photos="markerPhotos"
+								:placing="markerPlacing"
+								:opened="openedMarker"
+								:url-for="fileUrl"
+								@open="openMarkerEditor"
+								@place-new="placeMarker"
+								@move="moveMarker"
+								@cancel-place="cancelMarkerPlace"
+								@edit-text="editMarkerText"
+								@choose-photo="chooseMarkerPhoto"
+								@remove-photo="removeMarkerPhoto"
+								@remove="removeMarker"
+								@add-photo="addMarkerPhoto" />
 						</section>
 						<section class="pt-panel__section">
 							<NewImages :images="unplacedImages"
@@ -208,6 +227,7 @@ import NcLoadingIcon from '@nextcloud/vue/components/NcLoadingIcon'
 import FloorPlan from './FloorPlan.vue'
 import MarkerButton from './MarkerButton.vue'
 import MarkerDialog from './MarkerDialog.vue'
+import MarkerSection from './MarkerSection.vue'
 import NewImages from './NewImages.vue'
 import NoteBar from './NoteBar.vue'
 import PanoramaView from './PanoramaView.vue'
@@ -219,12 +239,13 @@ import TabBar from './TabBar.vue'
 import TourHeader from './TourHeader.vue'
 import ViewerSidebar from './ViewerSidebar.vue'
 import { EDITOR_MAX, EDITOR_MIN, EDITOR_PLAN_MIN, PANORAMA_HEIGHT_MIN, stored, useLayout } from '../composables/useLayout.js'
+import { useMarkerEditing } from '../composables/useMarkerEditing.js'
 import { Cancelled, choosePlan } from '../create.js'
 import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readText, urlFor, writeText } from '../dav.js'
 import { exifDate } from '../exif.js'
 import { classifyFolder, newerPlan, pngNameFor } from '../folder.js'
 import { displayDate, errorText, n, t } from '../l10n.js'
-import { isPlaced, markerCount, markersOf } from '../markers.js'
+import { isPlaced, markerCount, markersOf, withoutEmptyMarkers } from '../markers.js'
 import { renameSpotFiles, undoMoves } from '../rename.js'
 import { roomLabels, suggestName } from '../rooms.js'
 import {
@@ -624,9 +645,63 @@ const folder = {
 }
 let folderEntries = []
 
+// ---- markers -------------------------------------------------------------
+
+const editedMarkers = computed(() => markersOf(currentCapture.value))
+const markerSection = ref(null)
+const {
+	markerPlacing,
+	openedMarker,
+	photos: markerPhotos,
+	loadPhotos: loadMarkerPhotos,
+	open: openMarkerEditor,
+	placeNew: placeMarker,
+	move: moveMarker,
+	cancelPlace: cancelMarkerPlace,
+	pick: pickMarkerPlace,
+	setText: editMarkerText,
+	remove: removeMarker,
+	removePhoto: removeMarkerPhoto,
+	choosePhoto: chooseMarkerPhoto,
+	addPhoto: addMarkerPhoto,
+} = useMarkerEditing({
+	tour,
+	capture: currentCapture,
+	editing,
+	previewing,
+	folder,
+	folderUrl,
+	setStatus,
+	clearStatus: () => { status.value = null },
+	changed,
+	// a picked image would hide the capture's markers and the place to click
+	beforePlace: () => { selectedImage.value = null },
+})
+
+async function onMarkerPick(place) {
+	const marker = pickMarkerPlace(place)
+	if (marker && !marker.file && !marker.text) {
+		// a marker without text yet: ready to type
+		editorTab.value = 'edit'
+		await nextTick()
+		markerSection.value?.focusText()
+	}
+}
+
+// in the editor a marker in the panorama opens its editor in the panel; the viewer opens the photo
+function onMarkerClick(index) {
+	if (!editing.value) {
+		openMarker(index)
+		return
+	}
+	editorTab.value = 'edit'
+	openMarkerEditor(index)
+}
+
 // Only the folder itself: subfolders often hold copies (compressed versions)
 async function loadImages() {
 	try {
+		loadMarkerPhotos()
 		folderEntries = await listFolder(folderUrl)
 		const panoramas = new Set(classifyFolder(folderEntries).panoramas)
 		images.value = folderEntries
@@ -1027,7 +1102,7 @@ async function saveNow() {
 			;({ moves, failed } = await renameSpotFiles(tour.value.spots, renamed, moveRelative))
 			followMoves(moves)
 		}
-		etag.value = await writeText(props.node.encodedSource, serializeTour(tour.value), etag.value ?? undefined)
+		etag.value = await writeText(props.node.encodedSource, serializeTour(withoutEmptyMarkers(tour.value)), etag.value ?? undefined)
 		renamedSpots.clear()
 		if (moves.length > 0 && editing.value) {
 			// "New images" must not list the old names
@@ -1093,7 +1168,9 @@ function onKeyDown(e) {
 		return
 	}
 	e.preventDefault()
-	if (selectedImage.value) {
+	if (markerPlacing.value) {
+		cancelMarkerPlace()
+	} else if (selectedImage.value) {
 		selectedImage.value = null
 	} else if (editing.value) {
 		stopEditing()

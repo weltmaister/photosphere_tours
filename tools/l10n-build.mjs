@@ -26,6 +26,8 @@ const informal = {
 	'You are not allowed to do this here': 'Dafür fehlt dir hier die Berechtigung',
 	'Does the view cone point the wrong way? Turn the image towards something distinctive – a door, a window, a corner – and click on that place in the floor plan. The cone turns there.': 'Zeigt der Blickkegel in die falsche Richtung? Dreh das Bild zu etwas Markantem – Tür, Fenster, Ecke – und klick im Grundriss auf diese Stelle. Der Kegel dreht sich dorthin.',
 	'There are no 360° images in this folder. Put the images and a floor plan into one folder first.': 'In diesem Ordner liegen keine 360°-Bilder. Leg zuerst die Bilder und einen Grundriss in einen Ordner.',
+	'Click in the panorama – Esc cancels.': 'Klick ins Panorama – Esc bricht ab.',
+	'Copy photos into the folder {folder} and they will show up here.': 'Kopier Fotos in den Ordner „{folder}“, dann erscheinen sie hier.',
 }
 for (const key of Object.keys(informal)) {
 	if (!(key in formal.translations)) {

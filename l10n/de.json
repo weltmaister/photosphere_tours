@@ -148,7 +148,33 @@
 		"_{count} marker_::_{count} markers_": [
 			"{count} Markierung",
 			"{count} Markierungen"
-		]
+		],
+		"Markers ({count})": "Markierungen ({count})",
+		"New marker": "Neue Markierung",
+		"Placed": "gesetzt",
+		"No place": "ohne Ort",
+		"Text": "Text",
+		"A marker without text or photo is not saved.": "Eine Markierung ohne Text und Foto wird nicht gespeichert.",
+		"Other photo": "Anderes Foto",
+		"Choose photo": "Foto wählen",
+		"Remove photo": "Foto entfernen",
+		"Move in the panorama": "Im Panorama verschieben",
+		"Place in the panorama": "Im Panorama setzen",
+		"Remove marker": "Markierung entfernen",
+		"Click in the panorama – Esc cancels.": "Klick ins Panorama – Esc bricht ab.",
+		"Cancel": "Abbrechen",
+		"Place marker": "Markierung setzen",
+		"New photos ({count})": "Neue Fotos ({count})",
+		"Copy photos into the folder {folder} and they will show up here.": "Kopier Fotos in den Ordner „{folder}“, dann erscheinen sie hier.",
+		"Photos in the folder {folder} that no marker uses yet.": "Fotos aus dem Ordner „{folder}“, die noch keine Markierung nutzt.",
+		"Add to this capture": "Zu dieser Aufnahme hinzufügen",
+		"The photos in the folder {folder} could not be loaded: {error}": "Die Fotos aus dem Ordner „{folder}“ konnten nicht geladen werden: {error}",
+		"Marker placed – not saved yet": "Markierung gesetzt – noch nicht gespeichert",
+		"Marker moved – not saved yet": "Markierung verschoben – noch nicht gespeichert",
+		"Marker removed – not saved yet": "Markierung entfernt – noch nicht gespeichert",
+		"A marker needs a text or a photo.": "Eine Markierung braucht einen Text oder ein Foto.",
+		"Choose a photo": "Foto wählen",
+		"The photo could not be copied into the folder {folder}: {error}": "Das Foto konnte nicht in den Ordner „{folder}“ kopiert werden: {error}"
 	},
 	"pluralForm": "nplurals=2; plural=(n != 1);"
 }

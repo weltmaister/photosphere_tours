@@ -83,6 +83,7 @@ function showMarkers() {
 		.filter(([m]) => isPlaced(m))
 		.map(([m, i]) => {
 			const { textureX, textureY } = toTexture(m, size)
+			const title = markerTitle(m)
 			return {
 				id: String(i),
 				position: { textureX: textureX - size.offsetX, textureY: textureY - size.offsetY },
@@ -90,8 +91,9 @@ function showMarkers() {
 				className: 'pt-marker',
 				size: { width: 36, height: 36 },
 				anchor: 'center center',
-				// the viewer writes tooltips with innerHTML and the text comes from the JSON file
-				tooltip: { content: escapeHtml(markerTitle(m)), position: 'top center' },
+				// the viewer writes tooltips with innerHTML and the text comes from the JSON file;
+				// a marker still being filled in has no title and so no (empty) tooltip
+				...(title ? { tooltip: { content: escapeHtml(title), position: 'top center' } } : {}),
 			}
 		}))
 }

@@ -1,6 +1,7 @@
 // tests/markers.test.js
 import { describe, expect, it } from 'vitest'
-import { PHOTO_FOLDER, escapeHtml, fromTexture, isPlaced, markerCount, markerTitle, toTexture, unusedPhotos } from '../src/markers.js'
+import { PHOTO_FOLDER, escapeHtml, fromTexture, isPlaced, markerCount, markerTitle, toTexture, unusedPhotos, withoutEmptyMarkers } from '../src/markers.js'
+import { serializeTour } from '../src/tour.js'
 
 const size = { width: 8000, height: 4000 }
 
@@ -33,6 +34,56 @@ describe('marker helpers', () => {
 		const tour = { spots: [{ captures: [{ markers: [{ file: '2D-Bilder/a.jpg' }] }] }] }
 		expect(unusedPhotos(tour, ['2D-Bilder/a.jpg', '2D-Bilder/b.JPG', '2D-Bilder/n.txt', 'pano.jpg', '2D-Bilder/sub/c.jpg']))
 			.toEqual(['2D-Bilder/b.JPG'])
+	})
+})
+
+describe('withoutEmptyMarkers', () => {
+	const tourWith = (markers, extra = {}) => ({
+		version: 1,
+		title: 'EG',
+		plan: 'plan.png',
+		spots: [{ name: 'A', x: 0.1, y: 0.2, captures: [{ file: 'a.jpg', date: '2024-08-14T16:02', yaw: 0, ...(markers ? { markers } : {}), ...extra }] }],
+	})
+	const markersOfFirst = (tour) => tour.spots[0].captures[0].markers
+
+	it('drops markers with neither text nor photo, keeps the others in order', () => {
+		const tour = tourWith([
+			{ yaw: 1, pitch: 2, text: '' },
+			{ yaw: 3, pitch: 4, text: 'Crack' },
+			{ text: '  \n ' },
+			{ file: '2D-Bilder/a.jpg' },
+			{ yaw: 5, pitch: 6, text: '', file: '2D-Bilder/b.jpg' },
+		])
+		expect(markersOfFirst(withoutEmptyMarkers(tour))).toEqual([
+			{ yaw: 3, pitch: 4, text: 'Crack' },
+			{ file: '2D-Bilder/a.jpg' },
+			{ yaw: 5, pitch: 6, text: '', file: '2D-Bilder/b.jpg' },
+		])
+	})
+
+	it('removes the key when nothing is left', () => {
+		const saved = withoutEmptyMarkers(tourWith([{ yaw: 1, pitch: 2, text: '' }]))
+		expect('markers' in saved.spots[0].captures[0]).toBe(false)
+		expect('markers' in withoutEmptyMarkers(tourWith([])).spots[0].captures[0]).toBe(false)
+	})
+
+	it('does not change the tour it is given', () => {
+		const tour = tourWith([{ yaw: 1, pitch: 2, text: '' }, { text: 'x' }])
+		withoutEmptyMarkers(tour)
+		expect(markersOfFirst(tour)).toEqual([{ yaw: 1, pitch: 2, text: '' }, { text: 'x' }])
+	})
+
+	it('leaves everything else as it is', () => {
+		const tour = { ...tourWith(null), location: { lat: 52.5, lon: 13.4 } }
+		expect(withoutEmptyMarkers(tour)).toEqual(tour)
+	})
+
+	it('can be saved although the editor holds an empty marker; unchanged tours serialise as before', () => {
+		const empty = tourWith([{ yaw: 1, pitch: 2, text: '' }])
+		expect(() => serializeTour(empty)).toThrow(/text or a photo/)
+		expect(serializeTour(withoutEmptyMarkers(empty))).toBe(serializeTour(tourWith(null)))
+		const plain = tourWith(null)
+		expect(serializeTour(withoutEmptyMarkers(plain))).toBe(serializeTour(plain))
 	})
 })
 

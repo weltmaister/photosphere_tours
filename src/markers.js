@@ -45,3 +45,27 @@ export function unusedPhotos(tour, names) {
 	const prefix = `${PHOTO_FOLDER}/`
 	return names.filter(n => n.startsWith(prefix) && !n.slice(prefix.length).includes('/') && PHOTO_RE.test(n) && !used.has(n))
 }
+
+/**
+ * The tour as it is saved: markers that have neither a text nor a photo (placed
+ * in the panorama but never filled) are left out, and a capture without markers
+ * has no `markers` key. The tour itself is not changed, so the editor keeps
+ * showing the marker that is still being filled in.
+ */
+export function withoutEmptyMarkers(tour) {
+	const filled = (m) => !!m.file || (m.text ?? '').trim() !== ''
+	return {
+		...tour,
+		spots: tour.spots.map(spot => ({
+			...spot,
+			captures: spot.captures.map((capture) => {
+				if (!capture.markers) {
+					return capture
+				}
+				const { markers, ...rest } = capture
+				const kept = markers.filter(filled)
+				return kept.length > 0 ? { ...rest, markers: kept } : rest
+			}),
+		})),
+	}
+}
