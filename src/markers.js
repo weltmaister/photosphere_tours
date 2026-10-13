@@ -46,6 +46,9 @@ export function unusedPhotos(tour, names) {
 	return names.filter(n => n.startsWith(prefix) && !n.slice(prefix.length).includes('/') && PHOTO_RE.test(n) && !used.has(n))
 }
 
+/** A marker with a text or a photo; one only placed in the panorama is not saved. */
+export const isFilled = (marker) => !!marker.file || (marker.text ?? '').trim() !== ''
+
 /**
  * The tour as it is saved: markers that have neither a text nor a photo (placed
  * in the panorama but never filled) are left out, and a capture without markers
@@ -53,7 +56,6 @@ export function unusedPhotos(tour, names) {
  * showing the marker that is still being filled in.
  */
 export function withoutEmptyMarkers(tour) {
-	const filled = (m) => !!m.file || (m.text ?? '').trim() !== ''
 	return {
 		...tour,
 		spots: tour.spots.map(spot => ({
@@ -63,9 +65,32 @@ export function withoutEmptyMarkers(tour) {
 					return capture
 				}
 				const { markers, ...rest } = capture
-				const kept = markers.filter(filled)
+				const kept = markers.filter(isFilled)
 				return kept.length > 0 ? { ...rest, markers: kept } : rest
 			}),
 		})),
 	}
+}
+
+/**
+ * The same, in the tour itself: once the editor is left (or the tour saved) the
+ * viewer must not show what the file does not have. The lists stay, even when
+ * empty – an "Undo" in the editor still holds them – and save as no key.
+ *
+ * @return {number} how many markers were removed
+ */
+export function removeEmptyMarkers(tour) {
+	let removed = 0
+	for (const spot of tour.spots) {
+		for (const capture of spot.captures) {
+			const markers = capture.markers ?? []
+			for (let i = markers.length - 1; i >= 0; i--) {
+				if (!isFilled(markers[i])) {
+					markers.splice(i, 1)
+					removed++
+				}
+			}
+		}
+	}
+	return removed
 }

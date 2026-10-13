@@ -1,6 +1,6 @@
 // tests/markers.test.js
 import { describe, expect, it } from 'vitest'
-import { PHOTO_FOLDER, escapeHtml, fromTexture, isPlaced, markerCount, markerTitle, toTexture, unusedPhotos, withoutEmptyMarkers } from '../src/markers.js'
+import { PHOTO_FOLDER, escapeHtml, fromTexture, isFilled, isPlaced, markerCount, markerTitle, removeEmptyMarkers, toTexture, unusedPhotos, withoutEmptyMarkers } from '../src/markers.js'
 import { serializeTour } from '../src/tour.js'
 
 const size = { width: 8000, height: 4000 }
@@ -84,6 +84,52 @@ describe('withoutEmptyMarkers', () => {
 		expect(serializeTour(withoutEmptyMarkers(empty))).toBe(serializeTour(tourWith(null)))
 		const plain = tourWith(null)
 		expect(serializeTour(withoutEmptyMarkers(plain))).toBe(serializeTour(plain))
+	})
+})
+
+describe('removeEmptyMarkers', () => {
+	const tourWith = (...captures) => ({
+		version: 1,
+		title: 'EG',
+		plan: 'plan.png',
+		spots: [{ name: 'A', x: 0.1, y: 0.2, captures: captures.map((markers, i) => ({ file: `${i}.jpg`, date: '2024-08-14T16:02', yaw: 0, ...(markers ? { markers } : {}) })) }],
+	})
+
+	it('knows filled markers', () => {
+		expect(isFilled({ text: 'x' })).toBe(true)
+		expect(isFilled({ file: 'a.jpg' })).toBe(true)
+		expect(isFilled({ yaw: 1, pitch: 2, text: ' \n' })).toBe(false)
+		expect(isFilled({ yaw: 1, pitch: 2 })).toBe(false)
+	})
+
+	it('removes unfilled markers from the tour itself and keeps the lists and the other markers', () => {
+		const keep = { yaw: 3, pitch: 4, text: 'Crack' }
+		const photo = { file: '2D-Bilder/a.jpg' }
+		const tour = tourWith([{ yaw: 1, pitch: 2, text: '' }, keep, { text: ' ' }, photo], null, [{ yaw: 5, pitch: 6, text: '' }])
+		const lists = tour.spots[0].captures.map(c => c.markers)
+		expect(removeEmptyMarkers(tour)).toBe(3)
+		const captures = tour.spots[0].captures
+		expect(captures[0].markers).toBe(lists[0])
+		expect(captures[0].markers).toEqual([keep, photo])
+		expect(captures[0].markers[0]).toBe(keep)
+		expect('markers' in captures[1]).toBe(false)
+		// the (now empty) list stays: an "Undo" in the editor still holds it
+		expect(captures[2].markers).toBe(lists[2])
+		expect(captures[2].markers).toEqual([])
+	})
+
+	it('leaves the same tour withoutEmptyMarkers saves', () => {
+		const tour = tourWith([{ yaw: 1, pitch: 2, text: '' }, { text: 'x' }], [{ yaw: 1, pitch: 2 }])
+		const saved = serializeTour(withoutEmptyMarkers(tour))
+		removeEmptyMarkers(tour)
+		expect(serializeTour(tour)).toBe(saved)
+	})
+
+	it('changes nothing when every marker is filled', () => {
+		const tour = tourWith([{ text: 'x' }], null)
+		const before = JSON.stringify(tour)
+		expect(removeEmptyMarkers(tour)).toBe(0)
+		expect(JSON.stringify(tour)).toBe(before)
 	})
 })
 

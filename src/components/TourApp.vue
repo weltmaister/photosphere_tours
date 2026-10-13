@@ -247,7 +247,7 @@ import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readTe
 import { exifDate, exifGps } from '../exif.js'
 import { classifyFolder, newerPlan, pngNameFor } from '../folder.js'
 import { displayDate, errorText, n, t } from '../l10n.js'
-import { isPlaced, markerCount, markersOf, withoutEmptyMarkers } from '../markers.js'
+import { isPlaced, markerCount, markersOf, removeEmptyMarkers, withoutEmptyMarkers } from '../markers.js'
 import { renameSpotFiles, undoMoves } from '../rename.js'
 import { roomLabels, suggestName } from '../rooms.js'
 import {
@@ -780,6 +780,10 @@ async function stopEditing({ closing = false } = {}) {
 			ready.value = false
 		}
 	}
+	// a marker placed but never filled is not in the file: the viewer must not show it
+	if (tour.value) {
+		removeEmptyMarkers(tour.value)
+	}
 	editing.value = false
 	selectedImage.value = null
 	status.value = null
@@ -1126,6 +1130,8 @@ async function saveNow() {
 		}
 		if (revision === startedAt) {
 			dirty.value = false
+			// what was saved is what stays: markers without text or photo were left out
+			removeEmptyMarkers(tour.value)
 		}
 		if (failed.length > 0) {
 			setStatus('warning', n('Saved. {count} image file could not be renamed and keeps its name.', 'Saved. {count} image files could not be renamed and keep their names.', failed.length))
