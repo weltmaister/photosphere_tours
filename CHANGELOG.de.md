@@ -26,6 +26,10 @@ Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   die Kopfleiste bietet dann *In OpenStreetMap öffnen* (neuer Tab, keine Karte eingebettet,
   keine Anfragen der App selbst).
 
+### Geändert
+- Beim Speichern bleiben Felder in `360-Rundgang.json` erhalten, die die App nicht kennt
+  (aus einer neueren Version oder einem anderen Werkzeug), auf jeder Ebene.
+
 ## 0.5.0 – 2026-10-12
 
 ### Geändert

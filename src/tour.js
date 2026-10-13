@@ -41,6 +41,24 @@ const normDeg = (d) => ((d % 360) + 360) % 360
 
 const round5 = (v) => Math.round(v * 1e5) / 1e5
 
+const TOUR_KEYS = ['version', 'title', 'plan', 'location', 'spots']
+const SPOT_KEYS = ['name', 'x', 'y', 'captures']
+const CAPTURE_KEYS = ['file', 'date', 'yaw', 'markers']
+const MARKER_KEYS = ['yaw', 'pitch', 'text', 'file']
+const LOCATION_KEYS = ['lat', 'lon']
+
+/**
+ * The keys of an object this version does not know, in their order. They are
+ * written back unchanged after the known ones, so saving keeps what a newer
+ * version or another tool added. Spread, not assigned: "__proto__" stays data.
+ */
+function unknownKeys(value, known) {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) {
+		return {}
+	}
+	return Object.fromEntries(Object.entries(value).filter(([key]) => !known.includes(key)))
+}
+
 function isInsideFolder(path) {
 	return typeof path === 'string'
 		&& path !== ''
@@ -83,12 +101,13 @@ function parseMarker(m, where, problems) {
 	if (out.text === undefined && out.file === undefined) {
 		problems.push(`${where}: needs a text or a photo`)
 	}
-	return out
+	return { ...out, ...unknownKeys(m, MARKER_KEYS) }
 }
 
 /**
  * Validate and normalise tour data. Collects all problems before throwing so
- * a broken file can be fixed in one go.
+ * a broken file can be fixed in one go. Known keys come first in the documented
+ * order; keys this version does not know are kept after them.
  *
  * @param {string|object} input file content or parsed JSON
  * @return {object} the normalised tour
@@ -150,12 +169,15 @@ export function parseTour(input) {
 				const markers = Array.isArray(c?.markers)
 					? c.markers.map((m, k) => parseMarker(m, `${where}, capture ${j + 1}, marker ${k + 1}`, problems))
 					: []
-				const capture = { file: c?.file, date: c?.date, yaw: typeof yaw === 'number' ? normDeg(yaw) : 0 }
-				if (markers.length > 0) {
-					capture.markers = markers
+				return {
+					file: c?.file,
+					date: c?.date,
+					yaw: typeof yaw === 'number' ? normDeg(yaw) : 0,
+					...(markers.length > 0 ? { markers } : {}),
+					...unknownKeys(c, CAPTURE_KEYS),
 				}
-				return capture
 			}),
+			...unknownKeys(spot, SPOT_KEYS),
 		}
 	})
 
@@ -165,7 +187,7 @@ export function parseTour(input) {
 		if (typeof lat !== 'number' || typeof lon !== 'number' || !(lat >= -90 && lat <= 90) || !(lon >= -180 && lon <= 180)) {
 			problems.push('"location" must be { "lat": -90…90, "lon": -180…180 }')
 		} else {
-			location = { lat: round5(lat), lon: round5(lon) }
+			location = { lat: round5(lat), lon: round5(lon), ...unknownKeys(data.location, LOCATION_KEYS) }
 		}
 	}
 
@@ -178,6 +200,7 @@ export function parseTour(input) {
 		plan: data.plan,
 		...(location ? { location } : {}),
 		spots,
+		...unknownKeys(data, TOUR_KEYS),
 	}
 }
 

@@ -107,8 +107,9 @@ in the panorama as icons (camera with a photo, speech bubble without).
   plan – per capture, since the camera is turned differently for every shot. It is set
   in the editor: pick the spot and its capture, then click on the plan beside it.
 - `markers` (optional, per capture): a text and/or a photo. Files without it stay valid.
-  Older versions of the app rebuild the file from the fields they know, so saving with
-  an older version drops `markers` and `location`.
+  Fields the app does not know (from a newer version or another tool) are kept when it
+  saves, on every level. Versions up to 0.5 still rebuild the file from the fields they
+  know, so saving with one of them drops `markers`, `location` and any other new field.
   - `yaw` (any number, normalised to 0–360) and `pitch` (−90–90) are the place in the
     panorama in degrees, **raw panorama coordinates** like the image itself, not the
     view aligned to the plan, so correcting a capture's view direction never moves its markers. Both are given or

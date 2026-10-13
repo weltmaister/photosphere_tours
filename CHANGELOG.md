@@ -25,6 +25,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   header then offers *Open in OpenStreetMap* (new tab, no map embedded, no requests
   from the app itself).
 
+### Changed
+- Saving keeps fields of `360-Rundgang.json` that the app does not know (from a newer
+  version or another tool), on every level, instead of dropping them.
+
 ## 0.5.0 – 2026-10-12
 
 ### Changed

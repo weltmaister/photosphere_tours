@@ -330,3 +330,80 @@ describe('location', () => {
 		expect('location' in parseTour(withMarkers([]))).toBe(false)
 	})
 })
+
+describe('unknown fields', () => {
+	const known = () => ({
+		version: 1,
+		title: 'EG',
+		plan: 'plan.png',
+		location: { lat: 52.5, lon: 13.4 },
+		spots: [{
+			name: 'A',
+			x: 0.5,
+			y: 0.5,
+			captures: [{
+				file: 'a.jpg',
+				date: '2024-08-14T16:02',
+				yaw: 10,
+				markers: [{ yaw: 1, pitch: 2, text: 'Crack', file: '2D-Bilder/a.jpg' }, { file: '2D-Bilder/b.jpg' }],
+			}],
+		}],
+	})
+
+	it('keeps unknown keys on every level, after the known ones in their order', () => {
+		const data = {
+			future: { a: 1 },
+			spots: [{
+				note: 'x',
+				captures: [{
+					markers: [{ colour: 'red', text: 'Crack', file: '2D-Bilder/a.jpg', pitch: 2, yaw: 1 }],
+					exposure: 2,
+					yaw: 10,
+					date: '2024-08-14T16:02',
+					file: 'a.jpg',
+				}],
+				y: 0.5,
+				x: 0.5,
+				name: 'A',
+				tags: ['a'],
+			}],
+			location: { alt: 34, lon: 13.4, lat: 52.5 },
+			plan: 'plan.png',
+			title: 'EG',
+			version: 1,
+			other: null,
+		}
+		const tour = parseTour(JSON.parse(serializeTour(data)))
+		expect(Object.keys(tour)).toEqual(['version', 'title', 'plan', 'location', 'spots', 'future', 'other'])
+		expect(tour.future).toEqual({ a: 1 })
+		expect(tour.other).toBeNull()
+		expect(Object.keys(tour.location)).toEqual(['lat', 'lon', 'alt'])
+		const spot = tour.spots[0]
+		expect(Object.keys(spot)).toEqual(['name', 'x', 'y', 'captures', 'note', 'tags'])
+		const capture = spot.captures[0]
+		expect(Object.keys(capture)).toEqual(['file', 'date', 'yaw', 'markers', 'exposure'])
+		expect(Object.keys(capture.markers[0])).toEqual(['yaw', 'pitch', 'text', 'file', 'colour'])
+	})
+
+	it('keeps validating and normalising the known fields', () => {
+		const data = known()
+		data.spots[0].captures[0].yaw = 370
+		data.spots[0].captures[0].extra = 1
+		expect(parseTour(data).spots[0].captures[0]).toMatchObject({ yaw: 10, extra: 1 })
+		data.spots[0].x = 2
+		expect(() => parseTour(data)).toThrow(/"x"/)
+	})
+
+	it('stores an unknown "__proto__" key as data', () => {
+		const tour = parseTour('{"version":1,"plan":"p.png","spots":[],"__proto__":{"polluted":true}}')
+		expect(tour.polluted).toBeUndefined()
+		expect(Object.getPrototypeOf(tour)).toBe(Object.prototype)
+		expect(serializeTour(tour)).toContain('"__proto__": {')
+	})
+
+	it('serialises a file with known fields only byte for byte the same', () => {
+		const text = serializeTour(known())
+		expect(serializeTour(parseTour(text))).toBe(text)
+		expect(serializeTour(JSON.parse(text))).toBe(text)
+	})
+})
