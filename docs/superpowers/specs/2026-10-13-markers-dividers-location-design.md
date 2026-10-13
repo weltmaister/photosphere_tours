@@ -86,7 +86,8 @@ selected capture:
 - **Edit:** text; choose photo (from `2D-Bilder/`, or elsewhere → copied into
   `2D-Bilder/` like floor plans, never overwriting); remove photo; remove marker. Image
   files are never deleted.
-- **Move:** drag the icon in the panorama (markers plugin drag events).
+- **Move:** "Im Panorama verschieben" / "Move in the panorama", then click the new
+  place (the markers plugin has no dragging; click-to-place also works by touch).
 - **Place an unplaced marker:** "Im Panorama setzen" then click in the panorama.
 - **New photos:** images in `2D-Bilder/` that no marker uses are listed (like new
   panoramas) and can be added to the selected capture without a place.
