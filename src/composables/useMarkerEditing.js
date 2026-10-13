@@ -76,13 +76,16 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 
 	// ---- photos of the photo folder ----
 
-	/** files inside the photo folder: { name, fileid } */
+	/** files inside the photo folder: { name, fileid, mtime } */
 	const photoEntries = ref([])
 	const photoNames = computed(() => photoEntries.value.map(e => e.name))
 	const photos = computed(() => tour.value
 		? unusedPhotos(tour.value, photoNames.value.map(name => `${PHOTO_FOLDER}/${name}`))
 		: [])
 	const photoIds = computed(() => new Map(photoEntries.value.map(e => [`${PHOTO_FOLDER}/${e.name}`, e.fileid])))
+	const photoTimes = computed(() => new Map(photoEntries.value.map(e => [`${PHOTO_FOLDER}/${e.name}`, e.mtime])))
+	/** the file time of a photo in the photo folder, else null */
+	const mtimeOf = (path) => photoTimes.value.get(path) ?? null
 	/** the file id of a photo in the photo folder (for a preview), else null */
 	const fileidOf = (path) => photoIds.value.get(path) ?? null
 
@@ -92,7 +95,7 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 			const entries = await listFolder(`${folderUrl}/${PHOTO_FOLDER}`)
 			photoEntries.value = entries
 				.filter(e => !e.isFolder)
-				.map(e => ({ name: e.name, fileid: e.fileid ?? null }))
+				.map(e => ({ name: e.name, fileid: e.fileid ?? null, mtime: e.mtime ?? null }))
 				.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
 		} catch (e) {
 			setStatus('error', t('The photos in the folder {folder} could not be loaded: {error}', { folder: PHOTO_FOLDER, error: errorText(e) }))
@@ -317,6 +320,7 @@ export function useMarkerEditing({ tour, capture, editing, previewing, folder, f
 		openedMarker: openedIndex,
 		photos,
 		fileidOf,
+		mtimeOf,
 		loadPhotos,
 		open,
 		placeNew,

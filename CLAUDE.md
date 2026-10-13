@@ -35,13 +35,14 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
 - `src/app.js` – mounts `TourApp.vue` as full-screen modal dialog (page behind inert)
 - `src/dav.js` (WebDAV), `src/folder.js` (what a folder holds; only the folder itself),
   `src/create.js` (create a walkthrough, choose/convert the plan), `src/pdf.js` (PDF → PNG,
-  room text), `src/exif.js`, `src/rooms.js`, `src/rename.js` (image files follow spot
+  room text), `src/exif.js`, `src/captureTimes.js` (capture time and order of the editor's image lists), `src/rooms.js`, `src/rename.js` (image files follow spot
   names; undone when the save fails), `src/bar.js` + `FolderBar.vue` (hint bar)
 - `src/components/TourApp.vue` – state, loading, editing, saving and the CSS grid. One
   `PanoramaView` for all layouts. Parts: `TourHeader`, `ViewerSidebar` (plan + list,
   resizable), `ResizeHandle` (column and row dividers), `PhoneSheet`, `TabBar` (ARIA tabs), `NoteBar` (note + action), `SpotForm`,
   `NewImages`, `SpotList`, `SiteVisits`, `FloorPlan` (zoom, pan, pinch, pin drag, arrow
-  keys); `src/composables/useLayout.js` (phone query, stored settings, divider sizes)
+  keys); `src/composables/useLayout.js` (phone query, stored settings, divider sizes),
+  `src/composables/useCaptureTimes.js` (EXIF dates in the background, 4 at a time, cached; `CaptureTime.vue` shows one)
 - Markers (text and/or photo per capture, `capture.markers`, optionally placed in the panorama):
   `src/markers.js` – pure helpers (raw yaw/pitch ↔ texture coordinates, titles, counts,
   unused photos in `2D-Bilder/`, saving without empty markers);
@@ -52,7 +53,7 @@ Fork of nextcloud/files_photospheres, stripped to walkthroughs; runs next to it.
   `MarkerButton.vue` – "Photos at this spot" button (footer, phone sheet)
 - Spots are objects in a reactive tour: keep per-spot state in a `reactive(Map)` keyed by
   the spot or in a `Set` of `toRaw(spot)` – never by index, never mix raw and proxy.
-- `src/tour.js`, `folder.js`, `exif.js`, `rooms.js`, `rename.js`, `markers.js` – pure logic, unit-tested
+- `src/tour.js`, `folder.js`, `exif.js`, `captureTimes.js`, `rooms.js`, `rename.js`, `markers.js` – pure logic, unit-tested
   (`tests/`)
 - `tools/l10n-build.mjs` (`l10n/de_DE.json` formal → de/de_DE) and `tools/l10n-check.mjs`
 - `tools/demo/` – CC0 demo data for the store screenshots (`screenshots/`, ≤ 2 MiB each)

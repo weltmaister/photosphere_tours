@@ -216,6 +216,19 @@ describe('photos', () => {
 		expect(editor.fileidOf('elsewhere/a.jpg')).toBeNull()
 	})
 
+	it('keeps the file times of the photo folder for the capture time', async () => {
+		const { editor } = setup()
+		const mtime = new Date(2023, 6, 24, 13, 17)
+		listFolder.mockResolvedValueOnce([
+			{ name: 'a.jpg', isFolder: false, mtime },
+			{ name: 'b.jpg', isFolder: false, mtime: null },
+		])
+		await editor.loadPhotos()
+		expect(editor.mtimeOf('2D-Bilder/a.jpg')).toBe(mtime)
+		expect(editor.mtimeOf('2D-Bilder/b.jpg')).toBeNull()
+		expect(editor.mtimeOf('elsewhere/a.jpg')).toBeNull()
+	})
+
 	it('reports a failing list and keeps the old one', async () => {
 		const { editor, note } = setup()
 		listFolder.mockRejectedValueOnce(new Error('boom'))

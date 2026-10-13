@@ -5,7 +5,7 @@
   later. See the COPYING file.
 
   Part of the editing panel: the floor plan file, room name proposals and the
-  images of the folder that belong to no spot yet (pick one, then click on the
+  images of the folder that belong to no spot yet, oldest first (pick one, then click on the
   floor plan).
 -->
 <template>
@@ -68,6 +68,7 @@
 							loading="lazy">
 						<span v-else class="pt-new__thumb" aria-hidden="true" />
 						<span class="pt-new__name">{{ image.path }}</span>
+						<CaptureTime :date="image.date" :estimated="image.estimated" />
 					</button>
 				</li>
 			</ul>
@@ -81,10 +82,11 @@ import { mdiFloorPlan, mdiFormatListChecks } from '@mdi/js'
 import NcButton from '@nextcloud/vue/components/NcButton'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 
+import CaptureTime from './CaptureTime.vue'
 import { n, t } from '../l10n.js'
 
 defineProps({
-	/** [{ path, fileid }] */
+	/** [{ path, fileid, date, estimated }], oldest first (src/captureTimes.js) */
 	images: { type: Array, required: true },
 	selected: { type: String, default: null },
 	plan: { type: String, required: true },

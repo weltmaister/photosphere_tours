@@ -186,6 +186,8 @@ Das Entfernen einer Markierung fragt nicht nach, sondern bietet „Rückgängig�
 | Leer: Text | Kopier neue 360°-Bilder in diesen Ordner, dann erscheinen sie hier. | Kopieren Sie …, dann erscheinen sie hier. | Copy new 360° images into this folder and they will show up here. |
 | Grundriss leer | Noch keine Standorte. Wähl unter „Neue Bilder“ ein Bild und klick in den Grundriss. | … Wählen Sie … und klicken Sie … | No spots yet. Pick an image under "New images" and click on the floor plan. |
 | Liste fehlgeschlagen | Die Bilder dieses Ordners konnten nicht geladen werden: {error} | = | The images in this folder could not be loaded: {error} |
+| Aufnahmezeit unter jeder Vorschau („Neue Bilder“ und „Neue Fotos“), älteste zuerst | {date} (Datum und Uhrzeit, z. B. „24.07.2023, 13:17“) | = | {date} |
+| Aufnahmezeit nur aus der Datei (weder EXIF noch Datum im Dateinamen): „≈“ davor, Tooltip und Vorlesetext | ≈ {date} – Zeit aus der Datei, nicht von der Kamera | = | ≈ {date} – Time from the file, not from the camera |
 
 ### Editor: Speichern und Dialoge
 

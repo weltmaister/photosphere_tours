@@ -138,7 +138,7 @@
 						<section v-if="currentCapture" class="pt-panel__section">
 							<MarkerSection ref="markerSection"
 								:markers="editedMarkers"
-								:photos="markerPhotos"
+								:photos="newPhotos"
 								:placing="markerPlacing"
 								:opened="openedMarker"
 								:thumb-for="markerThumb"
@@ -154,7 +154,7 @@
 								@add-photo="addMarkerPhoto" />
 						</section>
 						<section class="pt-panel__section">
-							<NewImages :images="unplacedImages"
+							<NewImages :images="newImages"
 								:selected="selectedImage"
 								:plan="tour.plan"
 								:previews="!shared"
@@ -219,7 +219,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, toRaw, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, toRaw, watch, watchEffect } from 'vue'
 import { showConfirmation } from '@nextcloud/dialogs'
 import { generateUrl } from '@nextcloud/router'
 import { Permission } from '@nextcloud/files'
@@ -244,7 +244,9 @@ import TabBar from './TabBar.vue'
 import TourHeader from './TourHeader.vue'
 import ViewerSidebar from './ViewerSidebar.vue'
 import { EDITOR_MAX, EDITOR_MIN, EDITOR_PLAN_MIN, PANORAMA_HEIGHT_MIN, stored, useLayout } from '../composables/useLayout.js'
+import { useCaptureTimes } from '../composables/useCaptureTimes.js'
 import { useMarkerEditing } from '../composables/useMarkerEditing.js'
+import { withCaptureTimes } from '../captureTimes.js'
 import { Cancelled, choosePlan } from '../create.js'
 import { ConflictError, getEtag, listFolder, locate, moveFile, readStart, readText, urlFor, writeText } from '../dav.js'
 import { exifDate, exifGps } from '../exif.js'
@@ -661,6 +663,7 @@ const {
 	openedMarker,
 	photos: markerPhotos,
 	fileidOf: markerPhotoId,
+	mtimeOf: markerPhotoTime,
 	loadPhotos: loadMarkerPhotos,
 	open: openMarkerEditor,
 	placeNew: placeMarker,
@@ -694,6 +697,20 @@ function markerThumb(path) {
 	const id = shared ? null : markerPhotoId(path)
 	return id ? generateUrl('/core/preview?fileId={id}&x=80&y=80&a=1', { id }) : fileUrl(path)
 }
+
+// capture time under the images of both lists: file name or file time at once, EXIF dates follow
+// (4 requests at a time, once per file) and re-sort the lists; keys are paths, so a selection stays
+const captureTimes = useCaptureTimes({ read: async (path) => exifDate(await readStart(fileUrl(path))) })
+const newImages = computed(() => withCaptureTimes(unplacedImages.value, captureTimes.exifOf))
+const newPhotos = computed(() => withCaptureTimes(markerPhotos.value.map(path => ({ path, mtime: markerPhotoTime(path) })), captureTimes.exifOf))
+watchEffect(() => {
+	if (editing.value) {
+		captureTimes.load([
+			...unplacedImages.value.map(i => i.path),
+			...(currentCapture.value ? markerPhotos.value : []),
+		])
+	}
+})
 
 async function onMarkerPick(place) {
 	const marker = pickMarkerPlace(place)

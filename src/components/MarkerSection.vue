@@ -102,18 +102,21 @@
 				: t('Photos in the folder {folder} that no marker uses yet.', { folder: PHOTO_FOLDER }) }}
 		</p>
 		<ul v-if="photos.length > 0" class="pt-markers__list">
-			<li v-for="photo in photos" :key="photo" class="pt-markers__photo">
-				<img v-if="!broken.has(photo)"
+			<li v-for="photo in photos" :key="photo.path" class="pt-markers__photo">
+				<img v-if="!broken.has(photo.path)"
 					class="pt-markers__thumb"
-					:src="thumbFor(photo)"
+					:src="thumbFor(photo.path)"
 					alt=""
 					loading="lazy"
-					@error="broken.add(photo)">
+					@error="broken.add(photo.path)">
 				<span v-else class="pt-markers__thumb pt-markers__thumb--icon" aria-hidden="true">
 					<NcIconSvgWrapper :path="mdiCameraOutline" :size="20" />
 				</span>
-				<span class="pt-markers__name">{{ photo.split('/').pop() }}</span>
-				<NcButton variant="secondary" size="small" @click="$emit('add-photo', photo)">
+				<span class="pt-markers__text">
+					<span class="pt-markers__name">{{ photo.path.split('/').pop() }}</span>
+					<CaptureTime :date="photo.date" :estimated="photo.estimated" />
+				</span>
+				<NcButton variant="secondary" size="small" @click="$emit('add-photo', photo.path)">
 					{{ t('Add to this capture') }}
 				</NcButton>
 			</li>
@@ -128,6 +131,7 @@ import NcButton from '@nextcloud/vue/components/NcButton'
 import NcIconSvgWrapper from '@nextcloud/vue/components/NcIconSvgWrapper'
 import NcTextArea from '@nextcloud/vue/components/NcTextArea'
 
+import CaptureTime from './CaptureTime.vue'
 import { t } from '../l10n.js'
 import { PHOTO_FOLDER, isPlaced, markerTitle } from '../markers.js'
 import { MAX_MARKER_TEXT } from '../tour.js'
@@ -135,7 +139,7 @@ import { MAX_MARKER_TEXT } from '../tour.js'
 const props = defineProps({
 	/** markers of the capture: { yaw?, pitch?, text?, file? } */
 	markers: { type: Array, required: true },
-	/** photos of the photo folder no marker uses: 'folder/name.jpg', relative to the walkthrough folder */
+	/** photos of the photo folder no marker uses, oldest first: { path: 'folder/name.jpg' (relative to the walkthrough folder), date, estimated } */
 	photos: { type: Array, default: () => [] },
 	/** place mode: null, 'new' or 'place:<index>' (a marker without a place) */
 	placing: { type: String, default: null },
@@ -299,8 +303,14 @@ defineExpose({
 	padding: var(--default-grid-baseline);
 }
 
-.pt-markers__name {
+.pt-markers__text {
+	display: flex;
 	flex: 1 1 8ch;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.pt-markers__name {
 	min-width: 0;
 	font-size: var(--font-size-small);
 	word-break: break-all;

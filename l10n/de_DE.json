@@ -168,6 +168,7 @@
 		"New photos ({count})": "Neue Fotos ({count})",
 		"Copy photos into the folder {folder} and they will show up here.": "Kopieren Sie Fotos in den Ordner „{folder}“, dann erscheinen sie hier.",
 		"Photos in the folder {folder} that no marker uses yet.": "Fotos aus dem Ordner „{folder}“, die noch keine Markierung nutzt.",
+		"Time from the file, not from the camera": "Zeit aus der Datei, nicht von der Kamera",
 		"Add to this capture": "Zu dieser Aufnahme hinzufügen",
 		"The photos in the folder {folder} could not be loaded: {error}": "Die Fotos aus dem Ordner „{folder}“ konnten nicht geladen werden: {error}",
 		"Marker placed – not saved yet": "Markierung gesetzt – noch nicht gespeichert",

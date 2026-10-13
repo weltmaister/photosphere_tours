@@ -6,6 +6,12 @@ Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt
+- **Editor:** *Neue Bilder* und *Neue Fotos* zeigen unter jeder Vorschau die Aufnahmezeit
+  und stehen mit dem ältesten zuerst, so lassen sich Bilder in der Reihenfolge des
+  Rundgangs dem Grundriss zuordnen. Die Zeit stammt aus den EXIF-Daten, sonst aus einem
+  Datum im Dateinamen, sonst aus der Datei (mit „≈“ markiert). Die Listen erscheinen sofort;
+  die EXIF-Daten werden im Hintergrund gelesen, vier Anfragen gleichzeitig, danach
+  sortieren sich die Listen neu; ein gewähltes Bild bleibt gewählt.
 - **Markierungen:** ein Text und/oder ein Foto je Aufnahme, auf Wunsch an einer Stelle
   im Panorama. Gesetzte Markierungen erscheinen als Symbole (Kamera mit Foto, Sprechblase
   ohne); ein Klick öffnet das Foto groß mit dem Text und blättert durch alle Markierungen

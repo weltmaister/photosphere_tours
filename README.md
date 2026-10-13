@@ -147,7 +147,11 @@ share links.
   the plan, dragging pans, a short click on a spot selects it.
   *New images* lists images of the folder that belong to no spot yet; a picked image
   shows in the panorama at once – click on the plan for a new spot, or on a spot to
-  add it as another capture. With
+  add it as another capture. *New images* and *New photos* show the capture time under
+  each preview, oldest first, so the images can be matched to the floor plan by the order
+  of the walk-through. The time comes from the image's EXIF data, else from a date in the
+  file name, else from the file (marked "≈"); the lists appear at once and re-sort as the
+  EXIF dates are read in the background. With
   a PDF plan, the room name of the nearest room stamp is offered: *Use it* puts it into
   the name field, where it can still be corrected; *Use all suggestions* does it for
   every spot that still has the camera's file name. Nothing is renamed before that.

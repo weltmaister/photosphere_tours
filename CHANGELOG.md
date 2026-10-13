@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Editor:** *New images* and *New photos* show the capture time under each preview and
+  list the oldest first, so images can be matched to the floor plan by the order of the
+  walk-through. The time is the EXIF date, else a date in the file name, else the file
+  time (marked "≈"). The lists appear at once; EXIF dates are read in the background,
+  four requests at a time, and the lists re-sort; a selected image stays selected.
 - **Markers:** a text and/or a photo per capture, optionally placed in the panorama.
   Placed markers show as icons (camera with a photo, speech bubble without); a click
   opens the photo large with the text and pages through all markers of the capture.
