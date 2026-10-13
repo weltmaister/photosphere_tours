@@ -148,10 +148,6 @@ OC.L10N.register(
 		"_{count} marker_::_{count} markers_": [
 			"{count} Markierung",
 			"{count} Markierungen"
-		],
-		"_Markers here ({count})_::_Markers here ({count})_": [
-			"Markierungen hier ({count})",
-			"Markierungen hier ({count})"
 		]
 	},
 	"nplurals=2; plural=(n != 1);");

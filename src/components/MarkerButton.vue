@@ -11,9 +11,7 @@
   sheet.
 -->
 <template>
-	<NcButton variant="tertiary"
-		:aria-label="n('Markers here ({count})', 'Markers here ({count})', count)"
-		@click="$emit('open')">
+	<NcButton variant="tertiary" @click="$emit('open')">
 		<template #icon>
 			<NcIconSvgWrapper :path="unplaced > 0 ? mdiImageMultipleOutline : mdiMapMarkerOutline" />
 		</template>
