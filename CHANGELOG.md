@@ -3,6 +3,12 @@
 All notable changes to this app are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Fixed
+- **Viewer:** with many visits the window no longer grows wider than the screen; the
+  visit dates scroll sideways and the header buttons stay visible.
+
 ## 0.6.0 – 2026-10-13
 
 ### Added

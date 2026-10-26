@@ -1278,6 +1278,8 @@ onBeforeUnmount(() => {
 	--pt-phone-pano: 200px;
 
 	display: grid;
+	/* minmax(0, …): the column must not grow to the visit chips' width, they scroll */
+	grid-template-columns: minmax(0, 1fr);
 	grid-template-rows: auto minmax(0, 1fr) auto;
 	width: 100%;
 	height: 100%;
@@ -1436,6 +1438,7 @@ onBeforeUnmount(() => {
 
 .pt-footer__tools {
 	display: flex;
+	flex-shrink: 0;
 	gap: var(--default-grid-baseline);
 	margin-inline-start: auto;
 }

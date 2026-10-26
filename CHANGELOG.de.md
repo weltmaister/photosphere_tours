@@ -3,6 +3,12 @@
 Alle wichtigen Änderungen dieser App stehen in dieser Datei.
 Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
+## Unveröffentlicht
+
+### Behoben
+- **Ansicht:** Bei vielen Begehungen wird das Fenster nicht mehr breiter als der
+  Bildschirm; die Begehungstermine scrollen seitlich, die Knöpfe oben bleiben sichtbar.
+
 ## 0.6.0 – 2026-10-13
 
 ### Hinzugefügt
