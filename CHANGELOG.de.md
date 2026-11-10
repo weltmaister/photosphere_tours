@@ -3,7 +3,11 @@
 Alle wichtigen Änderungen dieser App stehen in dieser Datei.
 Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
-## Unveröffentlicht
+## 0.6.1 – 2026-11-10
+
+### Geändert
+- **Nextcloud 35:** getestet und unterstützt; die App lässt sich auf Nextcloud 33 bis 40
+  aktivieren. Keine eigene PHP-Obergrenze mehr (die setzt Nextcloud).
 
 ### Behoben
 - **Ansicht:** Bei vielen Begehungen wird das Fenster nicht mehr breiter als der

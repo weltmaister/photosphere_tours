@@ -57,7 +57,7 @@ folder and is versioned like any other file. Removing a spot never deletes an im
 Install **Photosphere Tours** from the
 [Nextcloud App Store](https://apps.nextcloud.com/apps/photosphere_tours) under
 *Apps → Multimedia*, or build the tarball with `make appstore` and unpack it into
-`custom_apps/`. Requires Nextcloud 33 or 34 and a browser with WebGL 2. Languages:
+`custom_apps/`. Requires Nextcloud 33 to 40 (tested with 33, 34 and 35) and a browser with WebGL 2. Languages:
 English, German.
 
 Fork of [files_photospheres](https://github.com/nextcloud/files_photospheres) by
@@ -205,7 +205,7 @@ npm run build     # webpack → js/
 make appstore     # build/artifacts/appstore/photosphere_tours.tar.gz
 ```
 
-Supported: Nextcloud 33 and 34, desktop and phone. Needs a browser with WebGL 2.
+Supported: Nextcloud 33 to 40, tested with 33, 34 and 35; desktop and phone. Needs a browser with WebGL 2.
 
 ## Screenshots and demo data
 
