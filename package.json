@@ -39,6 +39,11 @@
     "webpack": "^5.111.1",
     "webpack-cli": "^7.2.3"
   },
+  "overrides": {
+    "webdav": {
+      "minimatch": "^11.0.1"
+    }
+  },
   "engines": {
     "node": "^24.0.0",
     "npm": "^11.0.0"
