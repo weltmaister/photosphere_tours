@@ -3,6 +3,18 @@
 Alle wichtigen Änderungen dieser App stehen in dieser Datei.
 Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
+## 0.6.2 – 2026-11-11
+
+### Sicherheit
+- **Abhängigkeiten:** DOMPurify (bereinigt Texte in den Nextcloud-Komponenten) auf
+  3.4.17 aktualisiert; damit sind eine kritische und eine schwere Lücke geschlossen.
+  Auch Build- und Testwerkzeuge sind aktualisiert; `npm audit` meldet keine bekannten
+  Schwachstellen.
+
+### Geändert
+- **Abhängigkeiten:** aktuelle Minor-Versionen der Nextcloud-Bibliotheken, von Vue und
+  pdf.js (6.5). Weiterhin Nextcloud 33 bis 40, getestet mit 35.
+
 ## 0.6.1 – 2026-11-10
 
 ### Geändert

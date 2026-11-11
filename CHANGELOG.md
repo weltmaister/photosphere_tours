@@ -3,6 +3,17 @@
 All notable changes to this app are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.2 – 2026-11-11
+
+### Security
+- **Dependencies:** updated DOMPurify (used by the Nextcloud components for rendering
+  text) to 3.4.17, which closes a critical and a high-severity sanitizer bypass. Build
+  and test tools updated as well; `npm audit` reports no known vulnerabilities.
+
+### Changed
+- **Dependencies:** current minor versions of the Nextcloud libraries, Vue and pdf.js
+  (6.5). Still Nextcloud 33 to 40, tested with 35.
+
 ## 0.6.1 – 2026-11-10
 
 ### Changed
